@@ -29,6 +29,7 @@ The available tags are:
 * language tag, such as *#italian*, *#french*, etc
 * kindle unlimited tag **#KU**
 
+The tags are automatically added based on the url provided.
 
 ## Build instructions
 
