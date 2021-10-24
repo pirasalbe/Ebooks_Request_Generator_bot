@@ -1,0 +1,3 @@
+export enum SiteResolver {
+  AMAZON,
+}
