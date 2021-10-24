@@ -31,6 +31,13 @@ export class BotService {
    * Enable requests handlers
    */
   private initializeHandlers(): void {
+    this.bot.start((ctx) => {
+      ctx.reply(this.helpMessage());
+    });
+    this.bot.help((ctx) => {
+      ctx.reply(this.helpMessage());
+    });
+
     this.bot.on('text', (ctx) => {
       try {
         this.resolverService
@@ -47,5 +54,9 @@ export class BotService {
         ctx.reply('There was an error handling your request');
       }
     });
+  }
+
+  private helpMessage(): string {
+    return 'Send an Amazon link to get the request from it.';
   }
 }
