@@ -4,6 +4,7 @@ import { AbstractResolver } from '../abstract-resolver';
 
 export class AmazonResolverService extends AbstractResolver {
   private static readonly TITLE_ID = '#productTitle';
+  private static readonly AUTHOR_ID = '.contributorNameID';
   private static readonly KINDLE_FORMAT_ID = '#productSubtitle';
   private static readonly KINDLE_UNLIMITED_ID = '.a-icon-kindle-unlimited';
   private static readonly DETAILS_ID = '#detailBullets_feature_div';
@@ -17,6 +18,10 @@ export class AmazonResolverService extends AbstractResolver {
       AmazonResolverService.TITLE_ID
     );
 
+    const author: HTMLElement | null = html.querySelector(
+      AmazonResolverService.AUTHOR_ID
+    );
+
     const kindleFormat: HTMLElement | null = html.querySelector(
       AmazonResolverService.KINDLE_FORMAT_ID
     );
@@ -26,7 +31,7 @@ export class AmazonResolverService extends AbstractResolver {
     );
 
     // parse page only if the elements exists
-    if (title != null && details !== null) {
+    if (title != null && author != null && details !== null) {
       this.checkKindleFormat(kindleFormat);
 
       // tags
@@ -34,9 +39,9 @@ export class AmazonResolverService extends AbstractResolver {
 
       message += '\n';
 
-      message += 'Title: ' + title.textContent.trim();
-      // TODO extract info
-      // console.log(details);
+      message += this.getTextContent('Title', title);
+      message += '\n' + this.getTextContent('Author', author);
+      message += '\n' + this.getDetails('siteLanguage', details);
     }
 
     return message;
@@ -66,5 +71,14 @@ export class AmazonResolverService extends AbstractResolver {
     }
 
     return tags;
+  }
+
+  private getDetails(siteLanguage: string, details: HTMLElement): string {
+    // TODO
+    return '';
+  }
+
+  private getTextContent(key: string, element: HTMLElement): string {
+    return key + ': ' + element.textContent.trim();
   }
 }
