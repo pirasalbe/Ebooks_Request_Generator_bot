@@ -21,10 +21,6 @@ export class BotService {
 
     // start bot
     this.bot.launch();
-
-    // Enable graceful stop
-    process.once('SIGINT', () => this.bot.stop('SIGINT'));
-    process.once('SIGTERM', () => this.bot.stop('SIGTERM'));
   }
 
   /**
