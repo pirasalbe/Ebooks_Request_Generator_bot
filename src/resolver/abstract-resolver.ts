@@ -2,6 +2,7 @@ import * as http from 'http';
 import * as https from 'https';
 import { HTMLElement, parse } from 'node-html-parser';
 
+import { Message } from './message';
 import { Resolver } from './resolver';
 
 export abstract class AbstractResolver implements Resolver {
@@ -19,7 +20,7 @@ export abstract class AbstractResolver implements Resolver {
           })
           .on('end', () => {
             if (pageData !== null) {
-              this.processPage(resolve, reject, pageData as string);
+              this.processPage(resolve, reject, url, pageData as string);
             }
           });
       });
@@ -29,10 +30,15 @@ export abstract class AbstractResolver implements Resolver {
   private processPage(
     resolve: (value: string | PromiseLike<string>) => void,
     reject: (reason?: any) => void,
+    url: string,
     data: string
   ): void {
     try {
-      resolve(this.extractMessage(this.parseHTML(data as string)));
+      const message: Message = this.extractMessage(
+        this.parseHTML(data as string)
+      );
+      message.setUrl(url);
+      resolve(message.toString());
     } catch (error) {
       reject(error);
     }
@@ -47,5 +53,5 @@ export abstract class AbstractResolver implements Resolver {
    * @param html HTML received from the URL
    * @returns Message
    */
-  abstract extractMessage(html: HTMLElement): string;
+  abstract extractMessage(html: HTMLElement): Message;
 }

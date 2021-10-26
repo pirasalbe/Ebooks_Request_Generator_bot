@@ -1,6 +1,7 @@
 import { HTMLElement } from 'node-html-parser';
 
 import { AbstractResolver } from '../abstract-resolver';
+import { Message } from './../message';
 
 export class AmazonResolverService extends AbstractResolver {
   private static readonly SITE_LANGUAGE_ID = '.nav-logo-locale';
@@ -12,8 +13,8 @@ export class AmazonResolverService extends AbstractResolver {
 
   private static readonly KINDLE = 'kindle';
 
-  extractMessage(html: HTMLElement): string {
-    let message = 'Error parsing page';
+  extractMessage(html: HTMLElement): Message {
+    let message: Message = new Message();
 
     const siteLanguage: HTMLElement | null = html.querySelector(
       AmazonResolverService.SITE_LANGUAGE_ID
@@ -45,14 +46,13 @@ export class AmazonResolverService extends AbstractResolver {
       this.checkKindleFormat(kindleFormat);
 
       // tags
-      message = this.getTags(html);
+      this.addTags(message, html);
 
-      message += '\n';
-
-      message += this.getKeyContent('Title', title);
-      message += '\n' + this.getKeyContent('Author', author);
-      message +=
-        '\n' + this.getDetails(this.getTextContent(siteLanguage), details);
+      message.setTitle(this.getTextContent(title));
+      message.setAuthor(this.getTextContent(author));
+      this.setDetails(message, this.getTextContent(siteLanguage), details);
+    } else {
+      throw 'Error parsing page';
     }
 
     return message;
@@ -70,28 +70,24 @@ export class AmazonResolverService extends AbstractResolver {
     }
   }
 
-  private getTags(html: HTMLElement): string {
-    let tags = '#request';
-
+  private addTags(message: Message, html: HTMLElement): void {
     const kindleUnlimited: HTMLElement | null = html.querySelector(
       AmazonResolverService.KINDLE_UNLIMITED_ID
     );
 
     if (kindleUnlimited != null) {
-      tags += ' #KU';
+      message.addTag('KU');
     }
-
-    return tags;
   }
 
-  private getDetails(siteLanguage: string, details: HTMLElement): string {
+  private setDetails(
+    message: Message,
+    siteLanguage: string,
+    details: HTMLElement
+  ): string {
     console.log(siteLanguage);
     // TODO
     return '';
-  }
-
-  private getKeyContent(key: string, element: HTMLElement): string {
-    return key + ': ' + this.getTextContent(element);
   }
 
   private getTextContent(element: HTMLElement): string {
