@@ -5,6 +5,7 @@ import { AbstractResolver } from '../abstract-resolver';
 export class AmazonResolverService extends AbstractResolver {
   private static readonly TITLE_ID = '#productTitle';
   private static readonly KINDLE_FORMAT_ID = '#productSubtitle';
+  private static readonly KINDLE_UNLIMITED_ID = '.a-icon-kindle-unlimited';
   private static readonly DETAILS_ID = '#detailBullets_feature_div';
 
   private static readonly KINDLE = 'kindle';
@@ -28,9 +29,14 @@ export class AmazonResolverService extends AbstractResolver {
     if (title != null && details !== null) {
       this.checkKindleFormat(kindleFormat);
 
-      message = 'Title: ' + title.textContent.trim();
+      // tags
+      message = this.getTags(html);
+
+      message += '\n';
+
+      message += 'Title: ' + title.textContent.trim();
       // TODO extract info
-      console.log(details);
+      // console.log(details);
     }
 
     return message;
@@ -46,5 +52,19 @@ export class AmazonResolverService extends AbstractResolver {
     ) {
       throw 'The product is not a kindle book';
     }
+  }
+
+  private getTags(html: HTMLElement): string {
+    let tags = '#request';
+
+    const kindleUnlimited: HTMLElement | null = html.querySelector(
+      AmazonResolverService.KINDLE_UNLIMITED_ID
+    );
+
+    if (kindleUnlimited != null) {
+      tags += ' #KU';
+    }
+
+    return tags;
   }
 }
