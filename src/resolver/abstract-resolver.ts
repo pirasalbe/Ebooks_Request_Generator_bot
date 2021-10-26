@@ -19,11 +19,23 @@ export abstract class AbstractResolver implements Resolver {
           })
           .on('end', () => {
             if (pageData !== null) {
-              resolve(this.extractMessage(this.parseHTML(pageData as string)));
+              this.processPage(resolve, reject, pageData as string);
             }
           });
       });
     });
+  }
+
+  private processPage(
+    resolve: (value: string | PromiseLike<string>) => void,
+    reject: (reason?: any) => void,
+    data: string
+  ): void {
+    try {
+      resolve(this.extractMessage(this.parseHTML(data as string)));
+    } catch (error) {
+      reject(error);
+    }
   }
 
   private parseHTML(data: string): HTMLElement {
