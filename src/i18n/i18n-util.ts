@@ -2,10 +2,26 @@ import { LanguageStrings } from './language-strings';
 
 export class I18nUtil {
   private static languages: Record<string, LanguageStrings> = {
-    '.us': new LanguageStrings('language', 'publisher'),
-    '.uk.co': new LanguageStrings('language', 'publisher'),
-    '.it': new LanguageStrings('lingua', 'editore'),
-    '.de': new LanguageStrings('sprache', 'herausgeber'),
+    '.us': new LanguageStrings('language', 'publisher', {
+      english: 'english',
+      italian: 'italian',
+      german: 'german',
+    }),
+    '.uk.co': new LanguageStrings('language', 'publisher', {
+      english: 'english',
+      italian: 'italian',
+      german: 'german',
+    }),
+    '.it': new LanguageStrings('lingua', 'editore', {
+      english: 'inglese',
+      italian: 'italiano',
+      german: 'tedesco',
+    }),
+    '.de': new LanguageStrings('sprache', 'herausgeber', {
+      english: 'englisch',
+      italian: 'italienisch',
+      german: 'deutsch',
+    }),
   };
 
   /**

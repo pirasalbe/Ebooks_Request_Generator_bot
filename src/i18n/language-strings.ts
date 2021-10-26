@@ -1,3 +1,5 @@
+import { Languages } from './languages';
+
 export class LanguageStrings {
   private static readonly LANGUAGE_KEY = 'language';
   private static readonly PUBLISHER_KEY = 'publisher';
@@ -17,7 +19,7 @@ export class LanguageStrings {
    */
   private reverseStrings: Record<string, string>;
 
-  constructor(language: string, publisher: string) {
+  constructor(language: string, publisher: string, languages: Languages) {
     this.strings = {};
     this.strings[LanguageStrings.LANGUAGE_KEY] = language;
     this.strings[LanguageStrings.PUBLISHER_KEY] = publisher;
@@ -25,6 +27,12 @@ export class LanguageStrings {
     this.reverseStrings = {};
     this.reverseStrings[language] = LanguageStrings.LANGUAGE_KEY;
     this.reverseStrings[publisher] = LanguageStrings.PUBLISHER_KEY;
+
+    for (const languageKey of Object.keys(languages)) {
+      const value: string = (languages as any)[languageKey];
+      this.strings[languageKey] = value;
+      this.reverseStrings[value] = languageKey;
+    }
   }
 
   getKey(translation: string): string {

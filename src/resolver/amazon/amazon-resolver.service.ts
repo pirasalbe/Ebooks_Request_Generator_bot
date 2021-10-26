@@ -84,10 +84,28 @@ export class AmazonResolverService extends AbstractResolver {
     message: Message,
     siteLanguage: string,
     details: HTMLElement
-  ): string {
-    console.log(siteLanguage);
-    // TODO
-    return '';
+  ): void {
+    const ul: HTMLElement[] = details.getElementsByTagName('ul');
+
+    if (ul.length == 1) {
+      const li: HTMLElement[] = details.getElementsByTagName('li');
+
+      for (const element of li) {
+        // TODO
+        /*
+        <li><span class="a-list-item">
+          <span class="a-text-bold">Publisher
+          &rlm;
+          :
+          &lrm;
+          </span>
+          <span>Penguin (16 Sept. 2021)</span>
+          </span></li>
+        */
+      }
+    } else {
+      throw 'Error parsing page';
+    }
   }
 
   private getTextContent(element: HTMLElement): string {
