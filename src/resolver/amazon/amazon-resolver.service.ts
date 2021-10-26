@@ -3,6 +3,7 @@ import { HTMLElement } from 'node-html-parser';
 import { AbstractResolver } from '../abstract-resolver';
 
 export class AmazonResolverService extends AbstractResolver {
+  private static readonly SITE_LANGUAGE_ID = '.nav-logo-locale';
   private static readonly TITLE_ID = '#productTitle';
   private static readonly AUTHOR_ID = '.contributorNameID';
   private static readonly KINDLE_FORMAT_ID = '#productSubtitle';
@@ -13,6 +14,10 @@ export class AmazonResolverService extends AbstractResolver {
 
   extractMessage(html: HTMLElement): string {
     let message = 'Error parsing page';
+
+    const siteLanguage: HTMLElement | null = html.querySelector(
+      AmazonResolverService.SITE_LANGUAGE_ID
+    );
 
     const title: HTMLElement | null = html.querySelector(
       AmazonResolverService.TITLE_ID
@@ -31,7 +36,12 @@ export class AmazonResolverService extends AbstractResolver {
     );
 
     // parse page only if the elements exists
-    if (title != null && author != null && details !== null) {
+    if (
+      siteLanguage != null &&
+      title != null &&
+      author != null &&
+      details !== null
+    ) {
       this.checkKindleFormat(kindleFormat);
 
       // tags
@@ -39,9 +49,10 @@ export class AmazonResolverService extends AbstractResolver {
 
       message += '\n';
 
-      message += this.getTextContent('Title', title);
-      message += '\n' + this.getTextContent('Author', author);
-      message += '\n' + this.getDetails('siteLanguage', details);
+      message += this.getKeyContent('Title', title);
+      message += '\n' + this.getKeyContent('Author', author);
+      message +=
+        '\n' + this.getDetails(this.getTextContent(siteLanguage), details);
     }
 
     return message;
@@ -74,11 +85,16 @@ export class AmazonResolverService extends AbstractResolver {
   }
 
   private getDetails(siteLanguage: string, details: HTMLElement): string {
+    console.log(siteLanguage);
     // TODO
     return '';
   }
 
-  private getTextContent(key: string, element: HTMLElement): string {
-    return key + ': ' + element.textContent.trim();
+  private getKeyContent(key: string, element: HTMLElement): string {
+    return key + ': ' + this.getTextContent(element);
+  }
+
+  private getTextContent(element: HTMLElement): string {
+    return element.textContent.trim();
   }
 }
