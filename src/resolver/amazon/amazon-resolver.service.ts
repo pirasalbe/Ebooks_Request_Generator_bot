@@ -18,8 +18,7 @@ export class AmazonResolverService extends AbstractResolver {
   private static readonly KINDLE = 'kindle';
 
   extractMessage(html: HTMLElement): Message {
-    const message: Message = new Message();
-
+    // checks
     const kindleFormat: HTMLElement | null = html.querySelector(
       AmazonResolverService.KINDLE_FORMAT_ID
     );
@@ -42,23 +41,22 @@ export class AmazonResolverService extends AbstractResolver {
       AmazonResolverService.DETAILS_ID
     );
 
-    // parse page only if the elements exists
-    if (
-      siteLanguage != null &&
-      title != null &&
-      author != null &&
-      details !== null
-    ) {
-      // main info
-      message.setTitle(HtmlUtil.getTextContent(title));
-      message.setAuthor(HtmlUtil.getTextContent(author));
-      this.setDetails(message, HtmlUtil.getTextContent(siteLanguage), details);
+    this.checkRequiredElements([siteLanguage, title, author, details]);
 
-      // tags
-      this.addTags(message, html);
-    } else {
-      throw 'Error parsing page. Missing required elements.';
-    }
+    // prepare message
+    const message: Message = new Message();
+
+    // main info
+    message.setTitle(HtmlUtil.getTextContent(title as HTMLElement));
+    message.setAuthor(HtmlUtil.getTextContent(author as HTMLElement));
+    this.setDetails(
+      message,
+      HtmlUtil.getTextContent(siteLanguage as HTMLElement),
+      details as HTMLElement
+    );
+
+    // tags
+    this.addTags(message, html);
 
     return message;
   }
@@ -72,6 +70,13 @@ export class AmazonResolverService extends AbstractResolver {
         .includes(AmazonResolverService.KINDLE)
     ) {
       throw 'The product is not a kindle book';
+    }
+  }
+
+  private checkRequiredElements(elements: (HTMLElement | null)[]): void {
+    const indexNullElement = elements.findIndex((e) => e == null);
+    if (indexNullElement >= 0) {
+      throw 'Error parsing page. Missing required elements.';
     }
   }
 
