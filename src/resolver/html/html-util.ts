@@ -6,6 +6,6 @@ export class HtmlUtil {
   }
 
   static getTextContent(element: HTMLElement): string {
-    return element.textContent.trim();
+    return element.rawText.trim();
   }
 }

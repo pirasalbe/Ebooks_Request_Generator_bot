@@ -1,7 +1,9 @@
 import { HTMLElement } from 'node-html-parser';
 
+import { LanguageStrings } from '../../i18n/language-strings';
 import { AbstractResolver } from '../abstract-resolver';
 import { HtmlUtil } from '../html/html-util';
+import { I18nUtil } from './../../i18n/i18n-util';
 import { Entry } from './../html/entry';
 import { Message } from './../message';
 
@@ -47,12 +49,13 @@ export class AmazonResolverService extends AbstractResolver {
     ) {
       this.checkKindleFormat(kindleFormat);
 
-      // tags
-      this.addTags(message, html);
-
+      // main info
       message.setTitle(HtmlUtil.getTextContent(title));
       message.setAuthor(HtmlUtil.getTextContent(author));
       this.setDetails(message, HtmlUtil.getTextContent(siteLanguage), details);
+
+      // tags
+      this.addTags(message, html);
     } else {
       throw 'Error parsing page. Missing required elements.';
     }
@@ -89,10 +92,28 @@ export class AmazonResolverService extends AbstractResolver {
   ): void {
     const li: HTMLElement[] = details.getElementsByTagName('li');
 
-    for (const element of li) {
-      // TODO
+    let laungage = false;
+    let publisher = false;
+
+    for (let i = 0; i < li.length && (!laungage || !publisher); i++) {
+      const element = li[i];
       const entry: Entry<string, string> = this.getDetailElement(element);
-      console.log(entry.toString());
+      const key: string | null = I18nUtil.getKey(siteLanguage, entry.getKey());
+
+      if (key != null) {
+        switch (key) {
+          case LanguageStrings.LANGUAGE_KEY:
+            laungage = true;
+            this.addLanguageTag(message, siteLanguage, entry.getValue());
+            break;
+          case LanguageStrings.PUBLISHER_KEY:
+            publisher = true;
+            message.setPublisher(entry.getValue());
+            break;
+          default:
+            break;
+        }
+      }
     }
   }
 
@@ -133,6 +154,10 @@ export class AmazonResolverService extends AbstractResolver {
   }
 
   private sanitizeKey(key: HTMLElement): string {
-    return HtmlUtil.getTextContent(key).split('\n').join('').replace(':', '');
+    return HtmlUtil.getTextContent(key)
+      .replaceAll('\n', '')
+      .replace('&rlm;', '')
+      .replace('&lrm;', '')
+      .replace(':', '');
   }
 }
