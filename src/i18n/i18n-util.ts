@@ -24,6 +24,10 @@ export class I18nUtil {
     }),
   };
 
+  private constructor() {
+    // util class
+  }
+
   /**
    * Obtain key from a translation
    *
