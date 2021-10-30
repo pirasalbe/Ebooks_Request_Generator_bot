@@ -1,8 +1,8 @@
 import { Languages } from './languages';
 
 export class LanguageStrings {
-  private static readonly LANGUAGE_KEY = 'language';
-  private static readonly PUBLISHER_KEY = 'publisher';
+  public static readonly LANGUAGE_KEY = 'language';
+  public static readonly PUBLISHER_KEY = 'publisher';
 
   private strings: Record<string, string>;
   /**
@@ -35,23 +35,11 @@ export class LanguageStrings {
     }
   }
 
-  getKey(translation: string): string {
-    let key: string | null = this.reverseStrings[translation];
-
-    if (key == null) {
-      throw 'String ' + translation + ' not supported';
-    }
-
-    return key;
+  getKey(translation: string): string | null {
+    return this.reverseStrings[translation];
   }
 
-  getTranslation(key: string): string {
-    let translation: string | null = this.strings[key];
-
-    if (translation == null) {
-      throw 'String ' + key + ' not supported';
-    }
-
-    return translation;
+  getTranslation(key: string): string | null {
+    return this.strings[key];
   }
 }

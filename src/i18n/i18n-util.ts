@@ -1,14 +1,16 @@
 import { LanguageStrings } from './language-strings';
 
 export class I18nUtil {
-  private static languages: Record<string, LanguageStrings> = {
+  public static readonly ENGLISH: string = 'english';
+
+  private static readonly LANGUAGES: Record<string, LanguageStrings> = {
     '.us': new LanguageStrings('language', 'publisher', {
-      english: 'english',
+      english: I18nUtil.ENGLISH,
       italian: 'italian',
       german: 'german',
     }),
     '.uk.co': new LanguageStrings('language', 'publisher', {
-      english: 'english',
+      english: I18nUtil.ENGLISH,
       italian: 'italian',
       german: 'german',
     }),
@@ -35,9 +37,9 @@ export class I18nUtil {
    * @param translation Translation, such as 'Editore' or 'Publisher'
    * @returns Key
    */
-  static getKey(language: string, translation: string): string {
-    const languageStrings: LanguageStrings = this.languages[language];
-    let key: string;
+  static getKey(language: string, translation: string): string | null {
+    const languageStrings: LanguageStrings = I18nUtil.LANGUAGES[language];
+    let key: string | null;
 
     if (languageStrings != null) {
       key = languageStrings.getKey(translation.toLowerCase());
