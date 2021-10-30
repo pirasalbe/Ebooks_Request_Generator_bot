@@ -20,6 +20,12 @@ export class AmazonResolverService extends AbstractResolver {
   extractMessage(html: HTMLElement): Message {
     const message: Message = new Message();
 
+    const kindleFormat: HTMLElement | null = html.querySelector(
+      AmazonResolverService.KINDLE_FORMAT_ID
+    );
+
+    this.checkKindleFormat(kindleFormat);
+
     const siteLanguage: HTMLElement | null = html.querySelector(
       AmazonResolverService.SITE_LANGUAGE_ID
     );
@@ -30,10 +36,6 @@ export class AmazonResolverService extends AbstractResolver {
 
     const author: HTMLElement | null = html.querySelector(
       AmazonResolverService.AUTHOR_ID
-    );
-
-    const kindleFormat: HTMLElement | null = html.querySelector(
-      AmazonResolverService.KINDLE_FORMAT_ID
     );
 
     const details: HTMLElement | null = html.querySelector(
@@ -47,8 +49,6 @@ export class AmazonResolverService extends AbstractResolver {
       author != null &&
       details !== null
     ) {
-      this.checkKindleFormat(kindleFormat);
-
       // main info
       message.setTitle(HtmlUtil.getTextContent(title));
       message.setAuthor(HtmlUtil.getTextContent(author));
