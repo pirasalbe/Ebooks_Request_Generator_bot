@@ -76,6 +76,7 @@ export class AmazonResolverService extends AbstractResolver {
   private checkRequiredElements(elements: (HTMLElement | null)[]): void {
     const indexNullElement = elements.findIndex((e) => e == null);
     if (indexNullElement >= 0) {
+      console.error(indexNullElement);
       throw 'Error parsing page. Missing required elements.';
     }
   }

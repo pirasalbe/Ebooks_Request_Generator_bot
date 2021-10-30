@@ -8,21 +8,43 @@ export class I18nUtil {
       english: I18nUtil.ENGLISH,
       italian: 'italian',
       german: 'german',
+      french: 'french',
+      spanish: 'spanish',
     }),
     '.uk.co': new LanguageStrings('language', 'publisher', {
       english: I18nUtil.ENGLISH,
       italian: 'italian',
       german: 'german',
+      french: 'french',
+      spanish: 'spanish',
     }),
     '.it': new LanguageStrings('lingua', 'editore', {
       english: 'inglese',
       italian: 'italiano',
       german: 'tedesco',
+      french: 'francese',
+      spanish: 'spagnolo',
     }),
     '.de': new LanguageStrings('sprache', 'herausgeber', {
       english: 'englisch',
       italian: 'italienisch',
       german: 'deutsch',
+      french: 'französisch',
+      spanish: 'spanisch',
+    }),
+    '.fr': new LanguageStrings('langue', 'éditeur', {
+      english: 'inglés',
+      italian: 'italien',
+      german: 'allemand',
+      french: 'français',
+      spanish: 'espagnol',
+    }),
+    '.es': new LanguageStrings('idioma', 'editorial', {
+      english: 'inglés',
+      italian: 'italiano',
+      german: 'aleman',
+      french: 'francés',
+      spanish: 'español',
     }),
   };
 
