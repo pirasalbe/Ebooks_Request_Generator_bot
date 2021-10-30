@@ -1,3 +1,6 @@
+# Custom
+*.html
+
 # Logs
 logs
 *.log
