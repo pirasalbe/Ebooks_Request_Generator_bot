@@ -4,21 +4,7 @@ Telegram bot that creates a text message from the link address of an Ebook.
 
 [Open on Telegram.](http://t.me/ebooks_request_generator_bot)
 
-Message example:
-
-```
-#request
-Title: Serpentine
-Author: Philip Pullman
-Publisher: Knopf Books for Young Readers
-Link: https://www.amazon.com/His-Dark-Materials-Philip-Pullman-ebook/dp/B08CL2WJ34/ref=tmm_kin_swatch_0?_encoding=UTF8&qid=1634305599&sr=8-1
-```
-
-## Features
-
-### Extract message from Amazon
-
-Received an Amazon link, it returns a message with the following format.
+## Message format
 
 ```
 #request [tags]
@@ -35,13 +21,46 @@ The available tags are:
 
 The tags are automatically added based on the url provided.
 
-## Build instructions
+---
+
+Example:
+
+```
+#request
+Title: Serpentine
+Author: Philip Pullman
+Publisher: Knopf Books for Young Readers
+Link: https://www.amazon.com/His-Dark-Materials-Philip-Pullman-ebook/dp/B08CL2WJ34/ref=tmm_kin_swatch_0?_encoding=UTF8&qid=1634305599&sr=8-1
+```
+
+# Features
+
+### Extract message from Amazon
+
+Given an Amazon link of a Kindle book, it returns the request message.
+
+**Amazon supported links**:
+
+- amazon.com
+- amazon.co.uk
+- amazon.it
+- amazon.de
+- amazon.es
+
+# Known bugs
+
+- Kindle unlimited detection not working with amazon.com links
+- Author detection not working with amazon.fr link
+
+# Instructions
+
+## Build
 
 ```
 npm run build
 ```
 
-## Deploy instructions
+## Deploy
 
 Start script
 
