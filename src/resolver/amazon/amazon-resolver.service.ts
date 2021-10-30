@@ -1,6 +1,8 @@
 import { HTMLElement } from 'node-html-parser';
 
 import { AbstractResolver } from '../abstract-resolver';
+import { HtmlUtil } from '../html/html-util';
+import { Entry } from './../html/entry';
 import { Message } from './../message';
 
 export class AmazonResolverService extends AbstractResolver {
@@ -9,12 +11,12 @@ export class AmazonResolverService extends AbstractResolver {
   private static readonly AUTHOR_ID = '.contributorNameID';
   private static readonly KINDLE_FORMAT_ID = '#productSubtitle';
   private static readonly KINDLE_UNLIMITED_ID = '.a-icon-kindle-unlimited';
-  private static readonly DETAILS_ID = '#detailBullets_feature_div';
+  private static readonly DETAILS_ID = '.detail-bullet-list';
 
   private static readonly KINDLE = 'kindle';
 
   extractMessage(html: HTMLElement): Message {
-    let message: Message = new Message();
+    const message: Message = new Message();
 
     const siteLanguage: HTMLElement | null = html.querySelector(
       AmazonResolverService.SITE_LANGUAGE_ID
@@ -48,11 +50,11 @@ export class AmazonResolverService extends AbstractResolver {
       // tags
       this.addTags(message, html);
 
-      message.setTitle(this.getTextContent(title));
-      message.setAuthor(this.getTextContent(author));
-      this.setDetails(message, this.getTextContent(siteLanguage), details);
+      message.setTitle(HtmlUtil.getTextContent(title));
+      message.setAuthor(HtmlUtil.getTextContent(author));
+      this.setDetails(message, HtmlUtil.getTextContent(siteLanguage), details);
     } else {
-      throw 'Error parsing page';
+      throw 'Error parsing page. Missing required elements.';
     }
 
     return message;
@@ -85,30 +87,52 @@ export class AmazonResolverService extends AbstractResolver {
     siteLanguage: string,
     details: HTMLElement
   ): void {
-    const ul: HTMLElement[] = details.getElementsByTagName('ul');
+    const li: HTMLElement[] = details.getElementsByTagName('li');
 
-    if (ul.length == 1) {
-      const li: HTMLElement[] = details.getElementsByTagName('li');
-
-      for (const element of li) {
-        // TODO
-        /*
-        <li><span class="a-list-item">
-          <span class="a-text-bold">Publisher
-          &rlm;
-          :
-          &lrm;
-          </span>
-          <span>Penguin (16 Sept. 2021)</span>
-          </span></li>
-        */
-      }
-    } else {
-      throw 'Error parsing page';
+    for (const element of li) {
+      // TODO
+      const entry: Entry<string, string> = this.getDetailElement(element);
+      console.log(entry.toString());
     }
   }
 
-  private getTextContent(element: HTMLElement): string {
-    return element.textContent.trim();
+  /**
+   * Extract detail information from the following html structure
+   *
+   * <li>
+   *    <span class="a-list-item">
+   *       <span class="a-text-bold">Publisher &rlm; : &lrm;</span>
+   *       <span>Penguin (16 Sept. 2021)</span>
+   *    </span>
+   * </li>
+   *
+   * @param li A detail element
+   */
+  private getDetailElement(li: HTMLElement): Entry<string, string> {
+    const parentSpan: HTMLElement | null = li.querySelector('.a-list-item');
+    let entry: Entry<string, string>;
+
+    if (parentSpan != null) {
+      const spans: HTMLElement[] = parentSpan.getElementsByTagName('span');
+
+      // span with info
+      if (spans.length == 2) {
+        const key = this.sanitizeKey(spans[0]);
+        const value = HtmlUtil.getTextContent(spans[1]);
+        entry = new Entry<string, string>(key, value);
+      } else {
+        console.error(parentSpan.childNodes, spans);
+        throw 'Error parsing page. Cannot read product detail information.';
+      }
+    } else {
+      console.error(li.childNodes, parentSpan);
+      throw 'Error parsing page. Cannot read a product detail.';
+    }
+
+    return entry;
+  }
+
+  private sanitizeKey(key: HTMLElement): string {
+    return HtmlUtil.getTextContent(key).split('\n').join('').replace(':', '');
   }
 }
