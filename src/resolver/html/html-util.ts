@@ -5,7 +5,11 @@ export class HtmlUtil {
     // util class
   }
 
-  static getTextContent(element: HTMLElement): string {
+  static getRawText(element: HTMLElement): string {
     return element.rawText.trim();
+  }
+
+  static getTextContent(element: HTMLElement): string {
+    return element.textContent.trim();
   }
 }

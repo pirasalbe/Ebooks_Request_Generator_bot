@@ -51,7 +51,7 @@ export class AmazonResolverService extends AbstractResolver {
     message.setAuthor(HtmlUtil.getTextContent(author as HTMLElement));
     this.setDetails(
       message,
-      HtmlUtil.getTextContent(siteLanguage as HTMLElement),
+      HtmlUtil.getRawText(siteLanguage as HTMLElement),
       details as HTMLElement
     );
 
@@ -159,7 +159,7 @@ export class AmazonResolverService extends AbstractResolver {
   }
 
   private sanitizeKey(key: HTMLElement): string {
-    return HtmlUtil.getTextContent(key)
+    return HtmlUtil.getRawText(key)
       .replaceAll('\n', '')
       .replace('&rlm;', '')
       .replace('&lrm;', '')
