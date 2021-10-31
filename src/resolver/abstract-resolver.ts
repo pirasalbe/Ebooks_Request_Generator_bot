@@ -66,7 +66,7 @@ export abstract class AbstractResolver implements Resolver {
         this.processSuccessfulResponse(url, response)
           .then((message: string) => resolve(message))
           .catch((error) => reject(error));
-      } else if (response.statusCode == 301) {
+      } else if (response.statusCode == 301 || response.statusCode == 302) {
         // redirect
         this.resolve(response.headers.location as string)
           .then((message: string) => resolve(message))
@@ -127,6 +127,17 @@ export abstract class AbstractResolver implements Resolver {
    */
   abstract extractMessage(html: HTMLElement): Message;
 
+  protected checkRequiredElements(
+    elements: NullableHtmlElement[],
+    customMessage = 'Missing required elements.'
+  ): void {
+    const indexNullElement = elements.findIndex((e) => e == null);
+    if (indexNullElement >= 0) {
+      console.error(indexNullElement);
+      throw 'Error parsing page. ' + customMessage;
+    }
+  }
+
   protected addLanguageTag(
     message: Message,
     siteLanguage: string,
@@ -137,16 +148,14 @@ export abstract class AbstractResolver implements Resolver {
       language
     );
     // no need to add english tag
-    if (languageLowerCase != null && languageLowerCase !== I18nUtil.ENGLISH) {
-      message.addTag(languageLowerCase);
+    if (this.isLanguageTagRequired(languageLowerCase)) {
+      message.addTag(languageLowerCase as string);
     }
   }
 
-  protected checkRequiredElements(elements: NullableHtmlElement[]): void {
-    const indexNullElement = elements.findIndex((e) => e == null);
-    if (indexNullElement >= 0) {
-      console.error(indexNullElement);
-      throw 'Error parsing page. Missing required elements.';
-    }
+  protected isLanguageTagRequired(language: string | null | undefined) {
+    return (
+      language != null && language != undefined && language !== I18nUtil.ENGLISH
+    );
   }
 }

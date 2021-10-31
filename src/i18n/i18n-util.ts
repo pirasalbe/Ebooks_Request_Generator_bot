@@ -69,6 +69,14 @@ export class I18nUtil {
     }),
   };
 
+  private static readonly LANGUAGE_CODES: Record<string, string> = {
+    en: 'english',
+    it: 'italian',
+    de: 'german',
+    fr: 'french',
+    es: 'spanish',
+  };
+
   private constructor() {
     // util class
   }
@@ -91,5 +99,9 @@ export class I18nUtil {
     }
 
     return key;
+  }
+
+  static getLanguageFromCode(languageCode: string): string {
+    return this.LANGUAGE_CODES[languageCode.toLowerCase()];
   }
 }

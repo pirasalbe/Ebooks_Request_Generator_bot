@@ -9,6 +9,7 @@ import { NullableHtmlElement } from '../html/nullable-html-element';
 import { Message } from '../message';
 
 export class AudibleResolverService extends AbstractResolver {
+  private static readonly HTML_ID = 'html';
   private static readonly MAIN_ID = '#center-1';
   private static readonly TITLE_ID = '.bc-heading.bc-size-title1.bc-text-bold';
   private static readonly AUTHOR_ID = '.authorLabel';
@@ -17,17 +18,33 @@ export class AudibleResolverService extends AbstractResolver {
     super();
   }
 
-  extractMessage(html: HTMLElement): Message {
-    const language: string = html.attributes.lang;
+  resolve(url: string): Promise<string> {
+    // override redirect
+    if (url.includes('?')) {
+      url += '&';
+    } else {
+      url += '?';
+    }
+    url += 'ipRedirectOverride=true';
 
-    // TODO language
-    console.log(language);
+    return super.resolve(url);
+  }
+
+  extractMessage(html: HTMLElement): Message {
+    const htmlElement: NullableHtmlElement = html.querySelector(
+      AudibleResolverService.HTML_ID
+    );
 
     const nullableMainDiv: NullableHtmlElement = html.querySelector(
       AudibleResolverService.MAIN_ID
     );
 
-    this.checkRequiredElements([nullableMainDiv]);
+    this.checkRequiredElements(
+      [htmlElement, nullableMainDiv],
+      'Missing main elements.'
+    );
+
+    const language: string = (htmlElement as HTMLElement).attributes.lang;
 
     const mainDiv: HTMLElement = nullableMainDiv as HTMLElement;
 
@@ -50,6 +67,10 @@ export class AudibleResolverService extends AbstractResolver {
 
     // tags
     message.addTag(Message.AUDIOBOOK_TAG);
+
+    if (this.isLanguageTagRequired(I18nUtil.getLanguageFromCode(language))) {
+      message.addTag(language);
+    }
 
     return message;
   }
