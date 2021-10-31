@@ -5,12 +5,14 @@ import { AbstractResolver } from '../abstract-resolver';
 import { HtmlUtil } from '../html/html-util';
 import { I18nUtil } from './../../i18n/i18n-util';
 import { Entry } from './../html/entry';
+import { NullableHtmlElement } from './../html/nullable-html-element';
 import { Message } from './../message';
 
 export class AmazonResolverService extends AbstractResolver {
   private static readonly SITE_LANGUAGE_ID = '.nav-logo-locale';
   private static readonly TITLE_ID = '#productTitle';
   private static readonly AUTHOR_ID = '.contributorNameID';
+  private static readonly AUTHOR_ALTERNATIVE_ID = '.author';
   private static readonly KINDLE_FORMAT_ID = '#productSubtitle';
   private static readonly KINDLE_UNLIMITED_ID = '.a-icon-kindle-unlimited';
   private static readonly DETAILS_ID = '.detail-bullet-list';
@@ -19,25 +21,23 @@ export class AmazonResolverService extends AbstractResolver {
 
   extractMessage(html: HTMLElement): Message {
     // checks
-    const kindleFormat: HTMLElement | null = html.querySelector(
+    const kindleFormat: NullableHtmlElement = html.querySelector(
       AmazonResolverService.KINDLE_FORMAT_ID
     );
 
     this.checkKindleFormat(kindleFormat);
 
-    const siteLanguage: HTMLElement | null = html.querySelector(
+    const siteLanguage: NullableHtmlElement = html.querySelector(
       AmazonResolverService.SITE_LANGUAGE_ID
     );
 
-    const title: HTMLElement | null = html.querySelector(
+    const title: NullableHtmlElement = html.querySelector(
       AmazonResolverService.TITLE_ID
     );
 
-    const author: HTMLElement | null = html.querySelector(
-      AmazonResolverService.AUTHOR_ID
-    );
+    const author: NullableHtmlElement = this.getAuthorElement(html);
 
-    const details: HTMLElement | null = html.querySelector(
+    const details: NullableHtmlElement = html.querySelector(
       AmazonResolverService.DETAILS_ID
     );
 
@@ -61,7 +61,7 @@ export class AmazonResolverService extends AbstractResolver {
     return message;
   }
 
-  private checkKindleFormat(format: HTMLElement | null): void {
+  private checkKindleFormat(format: NullableHtmlElement): void {
     if (
       format == null ||
       format.textContent == null ||
@@ -73,7 +73,25 @@ export class AmazonResolverService extends AbstractResolver {
     }
   }
 
-  private checkRequiredElements(elements: (HTMLElement | null)[]): void {
+  private getAuthorElement(html: HTMLElement): NullableHtmlElement {
+    let author: NullableHtmlElement = html.querySelector(
+      AmazonResolverService.AUTHOR_ID
+    );
+
+    if (author == null) {
+      const authorWrapper: NullableHtmlElement = html.querySelector(
+        AmazonResolverService.AUTHOR_ALTERNATIVE_ID
+      );
+
+      if (authorWrapper != null) {
+        author = authorWrapper.querySelector('.a-link-normal');
+      }
+    }
+
+    return author;
+  }
+
+  private checkRequiredElements(elements: NullableHtmlElement[]): void {
     const indexNullElement = elements.findIndex((e) => e == null);
     if (indexNullElement >= 0) {
       console.error(indexNullElement);
@@ -82,7 +100,7 @@ export class AmazonResolverService extends AbstractResolver {
   }
 
   private addTags(message: Message, html: HTMLElement): void {
-    const kindleUnlimited: HTMLElement | null = html.querySelector(
+    const kindleUnlimited: NullableHtmlElement = html.querySelector(
       AmazonResolverService.KINDLE_UNLIMITED_ID
     );
 
@@ -136,7 +154,7 @@ export class AmazonResolverService extends AbstractResolver {
    * @param li A detail element
    */
   private getDetailElement(li: HTMLElement): Entry<string, string> {
-    const parentSpan: HTMLElement | null = li.querySelector('.a-list-item');
+    const parentSpan: NullableHtmlElement = li.querySelector('.a-list-item');
     let entry: Entry<string, string>;
 
     if (parentSpan != null) {
