@@ -7,6 +7,7 @@ import { HtmlUtil } from './../html/html-util';
 import { AudibleAuthor, AudibleInformation } from './audible-information';
 
 export class AudibleResolverService extends AbstractResolver {
+  private static readonly OVERRIDE_LANGUAGE = 'ipRedirectOverride';
   private static readonly BOTTOM_ID = '#bottom-0';
   private static readonly SCRIPT_ID = 'script';
 
@@ -15,13 +16,20 @@ export class AudibleResolverService extends AbstractResolver {
   }
 
   resolve(url: string): Promise<string> {
-    // override redirect
-    if (url.includes('?')) {
-      url += '&';
-    } else {
-      url += '?';
+    // remove previously added override
+    url = url
+      .replace('&' + AudibleResolverService.OVERRIDE_LANGUAGE + '=false', '')
+      .replace('?' + AudibleResolverService.OVERRIDE_LANGUAGE + '=false', '');
+
+    if (!url.includes(AudibleResolverService.OVERRIDE_LANGUAGE + '=true')) {
+      // add override
+      if (url.includes('?')) {
+        url += '&';
+      } else {
+        url += '?';
+      }
+      url += AudibleResolverService.OVERRIDE_LANGUAGE + '=true';
     }
-    url += 'ipRedirectOverride=true';
 
     return super.resolve(url);
   }
