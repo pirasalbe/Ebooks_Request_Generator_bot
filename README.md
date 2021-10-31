@@ -43,6 +43,7 @@ Given an Amazon link of a Kindle book, it returns the request message.
 
 - amazon.com
 - amazon.co.uk
+- amazon.in
 - amazon.it
 - amazon.de
 - amazon.es

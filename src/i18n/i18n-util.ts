@@ -18,6 +18,13 @@ export class I18nUtil {
       french: 'french',
       spanish: 'spanish',
     }),
+    '.in': new LanguageStrings('language', 'publisher', {
+      english: I18nUtil.ENGLISH,
+      italian: 'italian',
+      german: 'german',
+      french: 'french',
+      spanish: 'spanish',
+    }),
     '.it': new LanguageStrings('lingua', 'editore', {
       english: 'inglese',
       italian: 'italiano',
