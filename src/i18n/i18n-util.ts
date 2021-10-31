@@ -18,6 +18,20 @@ export class I18nUtil {
       french: 'french',
       spanish: 'spanish',
     }),
+    '.ca': new LanguageStrings('language', 'publisher', {
+      english: I18nUtil.ENGLISH,
+      italian: 'italian',
+      german: 'german',
+      french: 'french',
+      spanish: 'spanish',
+    }),
+    '.com.au': new LanguageStrings('language', 'publisher', {
+      english: I18nUtil.ENGLISH,
+      italian: 'italian',
+      german: 'german',
+      french: 'french',
+      spanish: 'spanish',
+    }),
     '.in': new LanguageStrings('language', 'publisher', {
       english: I18nUtil.ENGLISH,
       italian: 'italian',
