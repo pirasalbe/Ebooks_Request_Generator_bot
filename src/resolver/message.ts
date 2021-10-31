@@ -27,8 +27,10 @@ export class Message {
     this.author = author;
   }
 
-  setPublisher(publisher: string) {
-    this.publisher = publisher;
+  setPublisher(publisher: string | null | undefined) {
+    if (publisher != null && publisher != undefined) {
+      this.publisher = publisher;
+    }
   }
 
   setUrl(url: string) {
