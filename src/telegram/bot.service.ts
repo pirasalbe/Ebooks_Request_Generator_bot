@@ -57,6 +57,6 @@ export class BotService {
   }
 
   private helpMessage(): string {
-    return 'Send an Amazon link to get the request from it.';
+    return 'Send a link to get the request from it.';
   }
 }
