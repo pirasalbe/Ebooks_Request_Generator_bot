@@ -19,6 +19,10 @@ export class AmazonResolverService extends AbstractResolver {
 
   private static readonly KINDLE = 'kindle';
 
+  constructor() {
+    super();
+  }
+
   extractMessage(html: HTMLElement): Message {
     // checks
     const kindleFormat: NullableHtmlElement = html.querySelector(
@@ -89,14 +93,6 @@ export class AmazonResolverService extends AbstractResolver {
     }
 
     return author;
-  }
-
-  private checkRequiredElements(elements: NullableHtmlElement[]): void {
-    const indexNullElement = elements.findIndex((e) => e == null);
-    if (indexNullElement >= 0) {
-      console.error(indexNullElement);
-      throw 'Error parsing page. Missing required elements.';
-    }
   }
 
   private addTags(message: Message, html: HTMLElement): void {

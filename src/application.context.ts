@@ -1,4 +1,5 @@
 import { AmazonResolverService } from './resolver/amazon/amazon-resolver.service';
+import { AudibleResolverService } from './resolver/audible/audible-resolver.service';
 import { Resolver } from './resolver/resolver';
 import { ResolverService } from './resolver/resolver.service';
 import { SiteResolver } from './resolver/site-resolver.enum';
@@ -14,6 +15,7 @@ export class ApplicationContext {
 
     const resolvers: Record<SiteResolver, Resolver> = {
       0: new AmazonResolverService(),
+      1: new AudibleResolverService(),
     };
 
     const resolverService: ResolverService = new ResolverService(resolvers);
