@@ -47,11 +47,11 @@ Given an Amazon link of a Kindle book, it returns the request message.
 - amazon.it
 - amazon.de
 - amazon.es
+- amazon.fr
 
 # Known bugs
 
 - Kindle unlimited detection not working with amazon.com links
-- Author detection not working with amazon.fr link
 
 # Instructions
 
