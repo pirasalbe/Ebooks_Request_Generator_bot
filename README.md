@@ -18,6 +18,7 @@ The available tags are:
 
 - language tag, such as _#italian_, _#french_, etc
 - kindle unlimited tag **#KU**
+- audiobook tag **#audiobook**
 
 The tags are automatically added based on the url provided.
 
@@ -50,6 +51,12 @@ Given an Amazon link of a Kindle book, it returns the request message.
 - amazon.de
 - amazon.es
 - amazon.fr
+
+### Extract message from Audible
+
+Given an Audible link of an audiobook, it returns the request message.
+
+It always add the _#audiobook_ tag.
 
 # Known bugs
 
