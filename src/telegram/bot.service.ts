@@ -1,5 +1,5 @@
 import { Context, Telegraf, Telegram } from 'telegraf';
-import { Update } from 'typegram';
+import { InlineQueryResult, InlineQueryResultArticle, InputTextMessageContent, Update } from 'typegram';
 
 import { ResolverService } from '../resolver/resolver.service';
 
@@ -38,25 +38,76 @@ export class BotService {
       ctx.reply(this.helpMessage());
     });
 
-    this.bot.on('text', (ctx) => {
-      try {
-        this.resolverService
-          .resolve(ctx.message.text)
+    this.bot.on('inline_query', (ctx) => {
+      if (ctx.inlineQuery.query != '') {
+        this.resolve(ctx.inlineQuery.query)
           .then((message: string) => {
-            ctx.reply(message);
+            ctx.answerInlineQuery([
+              this.inlineResult(
+                'Request',
+                message,
+                'Click me to send the request'
+              ),
+            ]);
           })
           .catch((error: string) => {
-            console.error('Error resolving message', ctx.message.text, error);
-            ctx.reply(error);
+            ctx.answerInlineQuery([this.inlineResult('Error!', error, error)]);
+          });
+      }
+    });
+
+    this.bot.on('text', (ctx) => {
+      this.resolve(ctx.message.text)
+        .then((message: string) => {
+          ctx.reply(message);
+        })
+        .catch((error: string) => {
+          ctx.reply(error);
+        });
+    });
+  }
+
+  private resolve(text: string): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      try {
+        this.resolverService
+          .resolve(text)
+          .then((message: string) => {
+            resolve(message);
+          })
+          .catch((error: string) => {
+            console.error('Error resolving message', text, error);
+            reject(error);
           });
       } catch (error) {
-        console.error('Error handling request', ctx.message.text, error);
-        ctx.reply('There was an error handling your request');
+        console.error('Error handling request', text, error);
+        reject('There was an error handling your request');
       }
     });
   }
 
   private helpMessage(): string {
     return 'Send a link to get the request from it.';
+  }
+
+  private inlineResult(
+    title: string,
+    message: string,
+    description: string
+  ): InlineQueryResult {
+    const content: InputTextMessageContent = {
+      message_text: message,
+      disable_web_page_preview: true,
+    };
+
+    const result: InlineQueryResultArticle = {
+      id: '1',
+      type: 'article',
+      title: title,
+      input_message_content: content,
+      description: description,
+    };
+
+    return result;
   }
 }
