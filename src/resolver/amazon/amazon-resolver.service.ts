@@ -19,6 +19,10 @@ export class AmazonResolverService extends AbstractResolver {
 
   private static readonly KINDLE = 'kindle';
 
+  constructor() {
+    super();
+  }
+
   extractMessage(html: HTMLElement): Message {
     // checks
     const kindleFormat: NullableHtmlElement = html.querySelector(

@@ -7,6 +7,14 @@ import { Message } from './message';
 import { Resolver } from './resolver';
 
 export abstract class AbstractResolver implements Resolver {
+  private cookies: Map<string, string>;
+  private cookiesHeader: string;
+
+  protected constructor() {
+    this.cookies = new Map<string, string>();
+    this.cookiesHeader = '';
+  }
+
   resolve(url: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       https.get(
@@ -15,15 +23,36 @@ export abstract class AbstractResolver implements Resolver {
           headers: {
             'User-Agent':
               'Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0',
+            Cookie: this.cookiesHeader,
           },
         },
         (response: http.IncomingMessage) => {
+          this.updateCookies(response.headers);
           this.processResponse(url, response)
             .then((message: string) => resolve(message))
             .catch((error) => reject(error));
         }
       );
     });
+  }
+
+  private updateCookies(headers: http.IncomingHttpHeaders): void {
+    const setCookie: string[] | undefined = headers['set-cookie'];
+
+    if (setCookie != undefined && setCookie.length > 0) {
+      for (const cookies of setCookie) {
+        const cookieInfo: string = cookies.split(';')[0];
+        const cookiePart: string[] = cookieInfo.split('=');
+
+        this.cookies.set(cookiePart[0], cookiePart[1]);
+      }
+
+      const cookiesArray: string[] = [];
+      this.cookies.forEach((value: string, key: string) => {
+        cookiesArray.push(key + '=' + value);
+      });
+      this.cookiesHeader = cookiesArray.join('; ');
+    }
   }
 
   private processResponse(
