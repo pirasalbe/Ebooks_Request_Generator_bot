@@ -36,6 +36,8 @@ export class ResolverService implements Resolver {
     let resolver: Resolver | null = null;
     if (url.hostname.includes('amazon')) {
       resolver = this.resolvers[SiteResolver.AMAZON];
+    } else if (url.hostname.includes('audible')) {
+      resolver = this.resolvers[SiteResolver.AUDIBLE];
     }
 
     return resolver;

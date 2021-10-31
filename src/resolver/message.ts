@@ -1,4 +1,6 @@
 export class Message {
+  public static readonly AUDIOBOOK_TAG = 'audiobook';
+
   private tags: string[];
   private title: string | null;
   private author: string | null;
@@ -34,7 +36,7 @@ export class Message {
   }
 
   toString(): string {
-    let message: string = '';
+    let message = '';
 
     // tags
     for (let i = 0; i < this.tags.length; i++) {

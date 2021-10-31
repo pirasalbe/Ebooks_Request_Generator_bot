@@ -1,51 +1,43 @@
 import { HTMLElement } from 'node-html-parser';
 
+import { I18nUtil } from '../../i18n/i18n-util';
 import { LanguageStrings } from '../../i18n/language-strings';
 import { AbstractResolver } from '../abstract-resolver';
+import { Entry } from '../html/entry';
 import { HtmlUtil } from '../html/html-util';
-import { I18nUtil } from './../../i18n/i18n-util';
-import { Entry } from './../html/entry';
-import { NullableHtmlElement } from './../html/nullable-html-element';
-import { Message } from './../message';
+import { NullableHtmlElement } from '../html/nullable-html-element';
+import { Message } from '../message';
 
-export class AmazonResolverService extends AbstractResolver {
-  private static readonly SITE_LANGUAGE_ID = '.nav-logo-locale';
-  private static readonly TITLE_ID = '#productTitle';
-  private static readonly AUTHOR_ID = '.contributorNameID';
-  private static readonly AUTHOR_ALTERNATIVE_ID = '.author';
-  private static readonly KINDLE_FORMAT_ID = '#productSubtitle';
-  private static readonly KINDLE_UNLIMITED_ID = '.a-icon-kindle-unlimited';
-  private static readonly DETAILS_ID = '.detail-bullet-list';
-
-  private static readonly KINDLE = 'kindle';
+export class AudibleResolverService extends AbstractResolver {
+  private static readonly MAIN_ID = '#center-1';
+  private static readonly TITLE_ID = '.bc-heading.bc-size-title1.bc-text-bold';
+  private static readonly AUTHOR_ID = '.authorLabel';
 
   constructor() {
     super();
   }
 
   extractMessage(html: HTMLElement): Message {
-    // checks
-    const kindleFormat: NullableHtmlElement = html.querySelector(
-      AmazonResolverService.KINDLE_FORMAT_ID
+    const language: string = html.attributes.lang;
+
+    // TODO language
+    console.log(language);
+
+    const nullableMainDiv: NullableHtmlElement = html.querySelector(
+      AudibleResolverService.MAIN_ID
     );
 
-    this.checkKindleFormat(kindleFormat);
+    this.checkRequiredElements([nullableMainDiv]);
 
-    const siteLanguage: NullableHtmlElement = html.querySelector(
-      AmazonResolverService.SITE_LANGUAGE_ID
-    );
+    const mainDiv: HTMLElement = nullableMainDiv as HTMLElement;
 
-    const title: NullableHtmlElement = html.querySelector(
-      AmazonResolverService.TITLE_ID
+    const title: NullableHtmlElement = mainDiv.querySelector(
+      AudibleResolverService.TITLE_ID
     );
 
     const author: NullableHtmlElement = this.getAuthorElement(html);
 
-    const details: NullableHtmlElement = html.querySelector(
-      AmazonResolverService.DETAILS_ID
-    );
-
-    this.checkRequiredElements([siteLanguage, title, author, details]);
+    this.checkRequiredElements([title, author]);
 
     // prepare message
     const message: Message = new Message();
@@ -53,56 +45,27 @@ export class AmazonResolverService extends AbstractResolver {
     // main info
     message.setTitle(HtmlUtil.getTextContent(title as HTMLElement));
     message.setAuthor(HtmlUtil.getTextContent(author as HTMLElement));
-    this.setDetails(
-      message,
-      HtmlUtil.getRawText(siteLanguage as HTMLElement),
-      details as HTMLElement
-    );
+
+    // TODO publisher
 
     // tags
-    this.addTags(message, html);
+    message.addTag(Message.AUDIOBOOK_TAG);
 
     return message;
   }
 
-  private checkKindleFormat(format: NullableHtmlElement): void {
-    if (
-      format == null ||
-      format.textContent == null ||
-      !format.textContent
-        .toLocaleLowerCase()
-        .includes(AmazonResolverService.KINDLE)
-    ) {
-      throw 'The product is not a kindle book';
-    }
-  }
-
   private getAuthorElement(html: HTMLElement): NullableHtmlElement {
-    let author: NullableHtmlElement = html.querySelector(
-      AmazonResolverService.AUTHOR_ID
+    let author: NullableHtmlElement = null;
+
+    const authorLabel: NullableHtmlElement = html.querySelector(
+      AudibleResolverService.AUTHOR_ID
     );
 
-    if (author == null) {
-      const authorWrapper: NullableHtmlElement = html.querySelector(
-        AmazonResolverService.AUTHOR_ALTERNATIVE_ID
-      );
-
-      if (authorWrapper != null) {
-        author = authorWrapper.querySelector('.a-link-normal');
-      }
+    if (authorLabel != null) {
+      author = authorLabel.querySelector('.bc-link');
     }
 
     return author;
-  }
-
-  private addTags(message: Message, html: HTMLElement): void {
-    const kindleUnlimited: NullableHtmlElement = html.querySelector(
-      AmazonResolverService.KINDLE_UNLIMITED_ID
-    );
-
-    if (kindleUnlimited != null) {
-      message.addTag('KU');
-    }
   }
 
   private setDetails(

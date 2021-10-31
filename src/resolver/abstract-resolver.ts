@@ -3,6 +3,7 @@ import * as https from 'https';
 import { HTMLElement, parse } from 'node-html-parser';
 
 import { I18nUtil } from './../i18n/i18n-util';
+import { NullableHtmlElement } from './html/nullable-html-element';
 import { Message } from './message';
 import { Resolver } from './resolver';
 
@@ -138,6 +139,14 @@ export abstract class AbstractResolver implements Resolver {
     // no need to add english tag
     if (languageLowerCase != null && languageLowerCase !== I18nUtil.ENGLISH) {
       message.addTag(languageLowerCase);
+    }
+  }
+
+  protected checkRequiredElements(elements: NullableHtmlElement[]): void {
+    const indexNullElement = elements.findIndex((e) => e == null);
+    if (indexNullElement >= 0) {
+      console.error(indexNullElement);
+      throw 'Error parsing page. Missing required elements.';
     }
   }
 }
