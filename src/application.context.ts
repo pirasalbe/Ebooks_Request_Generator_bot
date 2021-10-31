@@ -1,5 +1,5 @@
 import { AmazonResolverService } from './resolver/amazon/amazon-resolver.service';
-import { AudibleResolverService } from './resolver/amazon/audible-resolver.service';
+import { AudibleResolverService } from './resolver/audible/audible-resolver.service';
 import { Resolver } from './resolver/resolver';
 import { ResolverService } from './resolver/resolver.service';
 import { SiteResolver } from './resolver/site-resolver.enum';
