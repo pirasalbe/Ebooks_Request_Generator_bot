@@ -30,7 +30,7 @@ export class ScribdResolverService extends AbstractResolver {
         information.contentType !== 'book' &&
         information.contentType !== 'audiobook'
       ) {
-        throw 'The product is neither an ebook nor an audiobook';
+        throw 'The product is neither an ebook nor an audiobook.';
       }
 
       // prepare message
