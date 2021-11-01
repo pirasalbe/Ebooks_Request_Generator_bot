@@ -180,4 +180,23 @@ export class AmazonResolverService extends AbstractResolver {
       .replace('&lrm;', '')
       .replace(':', '');
   }
+
+  private addLanguageTag(
+    message: Message,
+    siteLanguage: string,
+    language: string
+  ): void {
+    const languageLowerCase: string | null = I18nUtil.getKey(
+      siteLanguage,
+      language
+    );
+
+    if (!this.isLanguageDefined(languageLowerCase)) {
+      // add language when it cannot be translated
+      message.addTag(language.toLowerCase());
+    } else if (this.isLanguageTagRequired(languageLowerCase)) {
+      // add language if it is not english
+      message.addTag(languageLowerCase as string);
+    }
+  }
 }

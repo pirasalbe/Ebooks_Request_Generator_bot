@@ -138,24 +138,11 @@ export abstract class AbstractResolver implements Resolver {
     }
   }
 
-  protected addLanguageTag(
-    message: Message,
-    siteLanguage: string,
-    language: string
-  ): void {
-    const languageLowerCase: string | null = I18nUtil.getKey(
-      siteLanguage,
-      language
-    );
-    // no need to add english tag
-    if (this.isLanguageTagRequired(languageLowerCase)) {
-      message.addTag(languageLowerCase as string);
-    }
+  protected isLanguageDefined(language: string | null | undefined): boolean {
+    return language != null && language != undefined;
   }
 
   protected isLanguageTagRequired(language: string | null | undefined) {
-    return (
-      language != null && language != undefined && language !== I18nUtil.ENGLISH
-    );
+    return this.isLanguageDefined(language) && language !== I18nUtil.ENGLISH;
   }
 }
