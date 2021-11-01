@@ -19,6 +19,7 @@ The available tags are:
 - language tag, such as _#italian_, _#french_, etc
 - kindle unlimited tag **#KU**
 - audiobook tag **#audiobook**
+- scribd tag **#scribd** for requests from Scribd
 
 The tags are automatically added based on the url provided.
 
@@ -58,9 +59,15 @@ Given an Audible link of an audiobook, it returns the request message.
 
 It always add the _#audiobook_ tag.
 
+### Extract message from Scribd
+
+Given a Scribd link of an ebook or an audiobook, it returns the request message.
+
+It always add the _#scribd_ tag. If it is an audiobook, it also add the _#audiobook_ tag.
+
 # Known bugs
 
-- None :)
+- Cannot get language information from Scribd links
 
 # Instructions
 
