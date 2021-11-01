@@ -108,6 +108,7 @@ export class AmazonFormatResolverService {
           if (response.statusCode == 200) {
             HttpUtil.processSuccessfulResponse(response, (data: string) => {
               return new Promise<HTMLElement>((resolve, reject) => {
+                console.log(response.headers);
                 console.log(data);
                 resolve(HtmlUtil.parseHTML(data));
               });
