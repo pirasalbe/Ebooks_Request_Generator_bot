@@ -20,18 +20,19 @@ export class HttpUtil {
     callback: (data: string) => Promise<T>
   ): Promise<T> {
     return new Promise<T>((resolve, reject) => {
-      let pageData: string | null = '';
+      let chunks: Buffer[] = [];
       response
-        .on('data', (data: string) => {
-          pageData += data;
+        .on('data', (data: Buffer) => {
+          chunks.push(data);
         })
         .on('error', (error) => {
-          pageData = null;
+          chunks = [];
           reject(error);
         })
         .on('end', () => {
-          if (pageData !== null) {
-            callback(pageData as string)
+          if (chunks.length > 0) {
+            const pageData = Buffer.concat(chunks).toString();
+            callback(pageData)
               .then((result: T) => resolve(result))
               .catch((error) => reject(error));
           } else {

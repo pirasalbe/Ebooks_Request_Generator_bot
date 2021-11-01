@@ -5,7 +5,7 @@ import { HTMLElement } from 'node-html-parser';
 import { I18nUtil } from './../i18n/i18n-util';
 import { HtmlUtil } from './html/html-util';
 import { NullableHtmlElement } from './html/nullable-html-element';
-import { HttpUtil } from './http-util';
+import { HttpUtil } from './http/http-util';
 import { Message } from './message';
 import { Resolver } from './resolver';
 

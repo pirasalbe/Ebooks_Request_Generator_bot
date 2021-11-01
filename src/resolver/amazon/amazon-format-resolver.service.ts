@@ -4,7 +4,7 @@ import { HTMLElement } from 'node-html-parser';
 
 import { HtmlUtil } from '../html/html-util';
 import { NullableHtmlElement } from '../html/nullable-html-element';
-import { HttpUtil } from '../http-util';
+import { HttpUtil } from '../http/http-util';
 
 export class AmazonFormatResolverService {
   private static readonly KINDLE_UNLIMITED_ID = '.a-icon-kindle-unlimited';
@@ -101,17 +101,15 @@ export class AmazonFormatResolverService {
             'User-Agent': HttpUtil.USER_AGENT_VALUE,
             'Content-Type': 'application/json',
             Accept: '*/*',
-            'Accept-Encoding': 'gzip, deflate, br',
             'x-amz-acp-params': acpParams,
           },
         },
         (response: http.IncomingMessage) => {
           if (response.statusCode == 200) {
             HttpUtil.processSuccessfulResponse(response, (data: string) => {
-              return new Promise<HTMLElement>((resolve) => {
-                console.log(data);
-                resolve(HtmlUtil.parseHTML(data));
-              });
+              return new Promise<HTMLElement>((resolve, reject) =>
+                resolve(HtmlUtil.parseHTML(data))
+              );
             })
               .then((html: HTMLElement) => resolve(html))
               .catch((error) => reject(error));
