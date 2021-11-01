@@ -11,7 +11,7 @@ export class I18nUtil {
       french: 'french',
       spanish: 'spanish',
     }),
-    '.uk.co': new LanguageStrings('language', 'publisher', {
+    '.co.uk': new LanguageStrings('language', 'publisher', {
       english: I18nUtil.ENGLISH,
       italian: 'italian',
       german: 'german',
