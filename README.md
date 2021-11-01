@@ -60,7 +60,7 @@ It always add the _#audiobook_ tag.
 
 # Known bugs
 
-- Kindle unlimited detection not working with amazon.com links
+- None :)
 
 # Instructions
 

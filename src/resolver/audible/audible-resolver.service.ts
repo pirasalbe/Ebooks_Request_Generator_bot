@@ -34,37 +34,39 @@ export class AudibleResolverService extends AbstractResolver {
     return super.resolve(url);
   }
 
-  extractMessage(html: HTMLElement): Message {
-    const bottom: NullableHtmlElement = html.querySelector(
-      AudibleResolverService.BOTTOM_ID
-    );
+  extractMessage(html: HTMLElement): Promise<Message> {
+    return new Promise<Message>((resolve, reject) => {
+      const bottom: NullableHtmlElement = html.querySelector(
+        AudibleResolverService.BOTTOM_ID
+      );
 
-    this.checkRequiredElements([bottom]);
+      this.checkRequiredElements([bottom]);
 
-    const information: AudibleInformation = this.getAudibleInformation(
-      bottom as HTMLElement
-    );
+      const information: AudibleInformation = this.getAudibleInformation(
+        bottom as HTMLElement
+      );
 
-    // prepare message
-    const message: Message = new Message();
+      // prepare message
+      const message: Message = new Message();
 
-    // main info
-    message.setTitle(information.name);
+      // main info
+      message.setTitle(information.name);
 
-    message.setAuthor(
-      information.author.map((a: AudibleAuthor) => a.name).join(', ')
-    );
+      message.setAuthor(
+        information.author.map((a: AudibleAuthor) => a.name).join(', ')
+      );
 
-    message.setPublisher(information.publisher);
+      message.setPublisher(information.publisher);
 
-    // tags
-    message.addTag(Message.AUDIOBOOK_TAG);
+      // tags
+      message.addTag(Message.AUDIOBOOK_TAG);
 
-    if (this.isLanguageTagRequired(information.inLanguage)) {
-      message.addTag(information.inLanguage);
-    }
+      if (this.isLanguageTagRequired(information.inLanguage)) {
+        message.addTag(information.inLanguage);
+      }
 
-    return message;
+      resolve(message);
+    });
   }
 
   getAudibleInformation(bottom: HTMLElement): AudibleInformation {

@@ -1,8 +1,12 @@
-import { HTMLElement } from 'node-html-parser';
+import { HTMLElement, parse } from 'node-html-parser';
 
 export class HtmlUtil {
   private constructor() {
     // util class
+  }
+
+  static parseHTML(data: string): HTMLElement {
+    return parse(data);
   }
 
   static getRawText(element: HTMLElement): string {

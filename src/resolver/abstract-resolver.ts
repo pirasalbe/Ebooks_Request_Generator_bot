@@ -1,9 +1,11 @@
 import * as http from 'http';
 import * as https from 'https';
-import { HTMLElement, parse } from 'node-html-parser';
+import { HTMLElement } from 'node-html-parser';
 
 import { I18nUtil } from './../i18n/i18n-util';
+import { HtmlUtil } from './html/html-util';
 import { NullableHtmlElement } from './html/nullable-html-element';
+import { HttpUtil } from './http/http-util';
 import { Message } from './message';
 import { Resolver } from './resolver';
 
@@ -22,8 +24,7 @@ export abstract class AbstractResolver implements Resolver {
         url,
         {
           headers: {
-            'User-Agent':
-              'Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0',
+            'User-Agent': HttpUtil.USER_AGENT_VALUE,
             Cookie: this.cookiesHeader,
           },
         },
@@ -82,42 +83,28 @@ export abstract class AbstractResolver implements Resolver {
     url: string,
     response: http.IncomingMessage
   ): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      let pageData: string | null = '';
-      response
-        .on('data', (data: string) => {
-          pageData += data;
-        })
-        .on('error', (error) => {
-          pageData = null;
-          reject(error);
-        })
-        .on('end', () => {
-          if (pageData !== null) {
-            this.processPage(url, pageData as string)
-              .then((message: Message) => resolve(message.toString()))
-              .catch((error) => reject(error));
-          }
-        });
+    return HttpUtil.processSuccessfulResponse(response, (data: string) => {
+      return new Promise<string>((resolve, reject) => {
+        this.processPage(url, data)
+          .then((message: Message) => resolve(message.toString()))
+          .catch((error) => reject(error));
+      });
     });
   }
 
   private processPage(url: string, data: string): Promise<Message> {
     return new Promise<Message>((resolve, reject) => {
       try {
-        const message: Message = this.extractMessage(
-          this.parseHTML(data as string)
-        );
-        message.setUrl(url);
-        resolve(message);
+        this.extractMessage(HtmlUtil.parseHTML(data as string))
+          .then((message: Message) => {
+            message.setUrl(url);
+            resolve(message);
+          })
+          .catch((error) => reject(error));
       } catch (error) {
         reject(error);
       }
     });
-  }
-
-  private parseHTML(data: string): HTMLElement {
-    return parse(data);
   }
 
   /**
@@ -125,7 +112,7 @@ export abstract class AbstractResolver implements Resolver {
    * @param html HTML received from the URL
    * @returns Message
    */
-  abstract extractMessage(html: HTMLElement): Message;
+  abstract extractMessage(html: HTMLElement): Promise<Message>;
 
   protected checkRequiredElements(
     elements: NullableHtmlElement[],
@@ -138,24 +125,11 @@ export abstract class AbstractResolver implements Resolver {
     }
   }
 
-  protected addLanguageTag(
-    message: Message,
-    siteLanguage: string,
-    language: string
-  ): void {
-    const languageLowerCase: string | null = I18nUtil.getKey(
-      siteLanguage,
-      language
-    );
-    // no need to add english tag
-    if (this.isLanguageTagRequired(languageLowerCase)) {
-      message.addTag(languageLowerCase as string);
-    }
+  protected isLanguageDefined(language: string | null | undefined): boolean {
+    return language != null && language != undefined;
   }
 
   protected isLanguageTagRequired(language: string | null | undefined) {
-    return (
-      language != null && language != undefined && language !== I18nUtil.ENGLISH
-    );
+    return this.isLanguageDefined(language) && language !== I18nUtil.ENGLISH;
   }
 }
