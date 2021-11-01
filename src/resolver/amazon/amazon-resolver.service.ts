@@ -23,46 +23,48 @@ export class AmazonResolverService extends AbstractResolver {
     super();
   }
 
-  extractMessage(html: HTMLElement): Message {
-    // checks
-    const kindleFormat: NullableHtmlElement = html.querySelector(
-      AmazonResolverService.KINDLE_FORMAT_ID
-    );
+  extractMessage(html: HTMLElement): Promise<Message> {
+    return new Promise<Message>((resolve, reject) => {
+      // checks
+      const kindleFormat: NullableHtmlElement = html.querySelector(
+        AmazonResolverService.KINDLE_FORMAT_ID
+      );
 
-    this.checkKindleFormat(kindleFormat);
+      this.checkKindleFormat(kindleFormat);
 
-    const siteLanguage: NullableHtmlElement = html.querySelector(
-      AmazonResolverService.SITE_LANGUAGE_ID
-    );
+      const siteLanguage: NullableHtmlElement = html.querySelector(
+        AmazonResolverService.SITE_LANGUAGE_ID
+      );
 
-    const title: NullableHtmlElement = html.querySelector(
-      AmazonResolverService.TITLE_ID
-    );
+      const title: NullableHtmlElement = html.querySelector(
+        AmazonResolverService.TITLE_ID
+      );
 
-    const author: NullableHtmlElement = this.getAuthorElement(html);
+      const author: NullableHtmlElement = this.getAuthorElement(html);
 
-    const details: NullableHtmlElement = html.querySelector(
-      AmazonResolverService.DETAILS_ID
-    );
+      const details: NullableHtmlElement = html.querySelector(
+        AmazonResolverService.DETAILS_ID
+      );
 
-    this.checkRequiredElements([siteLanguage, title, author, details]);
+      this.checkRequiredElements([siteLanguage, title, author, details]);
 
-    // prepare message
-    const message: Message = new Message();
+      // prepare message
+      const message: Message = new Message();
 
-    // main info
-    message.setTitle(HtmlUtil.getTextContent(title as HTMLElement));
-    message.setAuthor(HtmlUtil.getTextContent(author as HTMLElement));
-    this.setDetails(
-      message,
-      HtmlUtil.getRawText(siteLanguage as HTMLElement),
-      details as HTMLElement
-    );
+      // main info
+      message.setTitle(HtmlUtil.getTextContent(title as HTMLElement));
+      message.setAuthor(HtmlUtil.getTextContent(author as HTMLElement));
+      this.setDetails(
+        message,
+        HtmlUtil.getRawText(siteLanguage as HTMLElement),
+        details as HTMLElement
+      );
 
-    // tags
-    this.addTags(message, html);
+      // tags
+      this.addKindleUnlimited(message, html);
 
-    return message;
+      resolve(message);
+    });
   }
 
   private checkKindleFormat(format: NullableHtmlElement): void {
@@ -95,14 +97,18 @@ export class AmazonResolverService extends AbstractResolver {
     return author;
   }
 
-  private addTags(message: Message, html: HTMLElement): void {
+  private addKindleUnlimited(message: Message, html: HTMLElement): void {
     const kindleUnlimited: NullableHtmlElement = html.querySelector(
       AmazonResolverService.KINDLE_UNLIMITED_ID
     );
 
-    if (kindleUnlimited != null) {
+    if (kindleUnlimited != null || this.existKindleFormat(html)) {
       message.addTag('KU');
     }
+  }
+
+  private existKindleFormat(html: HTMLElement): boolean {
+    return false;
   }
 
   private setDetails(

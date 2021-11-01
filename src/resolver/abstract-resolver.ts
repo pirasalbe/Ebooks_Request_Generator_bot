@@ -105,11 +105,12 @@ export abstract class AbstractResolver implements Resolver {
   private processPage(url: string, data: string): Promise<Message> {
     return new Promise<Message>((resolve, reject) => {
       try {
-        const message: Message = this.extractMessage(
-          this.parseHTML(data as string)
-        );
-        message.setUrl(url);
-        resolve(message);
+        this.extractMessage(this.parseHTML(data as string))
+          .then((message: Message) => {
+            message.setUrl(url);
+            resolve(message);
+          })
+          .catch((error) => reject(error));
       } catch (error) {
         reject(error);
       }
@@ -125,7 +126,7 @@ export abstract class AbstractResolver implements Resolver {
    * @param html HTML received from the URL
    * @returns Message
    */
-  abstract extractMessage(html: HTMLElement): Message;
+  abstract extractMessage(html: HTMLElement): Promise<Message>;
 
   protected checkRequiredElements(
     elements: NullableHtmlElement[],
