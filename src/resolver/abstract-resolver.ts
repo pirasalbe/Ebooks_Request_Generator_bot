@@ -1,9 +1,11 @@
 import * as http from 'http';
 import * as https from 'https';
-import { HTMLElement, parse } from 'node-html-parser';
+import { HTMLElement } from 'node-html-parser';
 
 import { I18nUtil } from './../i18n/i18n-util';
+import { HtmlUtil } from './html/html-util';
 import { NullableHtmlElement } from './html/nullable-html-element';
+import { HttpUtil } from './http-util';
 import { Message } from './message';
 import { Resolver } from './resolver';
 
@@ -22,8 +24,7 @@ export abstract class AbstractResolver implements Resolver {
         url,
         {
           headers: {
-            'User-Agent':
-              'Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0',
+            'User-Agent': HttpUtil.USER_AGENT_VALUE,
             Cookie: this.cookiesHeader,
           },
         },
@@ -82,30 +83,19 @@ export abstract class AbstractResolver implements Resolver {
     url: string,
     response: http.IncomingMessage
   ): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      let pageData: string | null = '';
-      response
-        .on('data', (data: string) => {
-          pageData += data;
-        })
-        .on('error', (error) => {
-          pageData = null;
-          reject(error);
-        })
-        .on('end', () => {
-          if (pageData !== null) {
-            this.processPage(url, pageData as string)
-              .then((message: Message) => resolve(message.toString()))
-              .catch((error) => reject(error));
-          }
-        });
+    return HttpUtil.processSuccessfulResponse(response, (data: string) => {
+      return new Promise<string>((resolve, reject) => {
+        this.processPage(url, data)
+          .then((message: Message) => resolve(message.toString()))
+          .catch((error) => reject(error));
+      });
     });
   }
 
   private processPage(url: string, data: string): Promise<Message> {
     return new Promise<Message>((resolve, reject) => {
       try {
-        this.extractMessage(this.parseHTML(data as string))
+        this.extractMessage(HtmlUtil.parseHTML(data as string))
           .then((message: Message) => {
             message.setUrl(url);
             resolve(message);
@@ -115,10 +105,6 @@ export abstract class AbstractResolver implements Resolver {
         reject(error);
       }
     });
-  }
-
-  private parseHTML(data: string): HTMLElement {
-    return parse(data);
   }
 
   /**

@@ -7,6 +7,7 @@ import { I18nUtil } from './../../i18n/i18n-util';
 import { Entry } from './../html/entry';
 import { NullableHtmlElement } from './../html/nullable-html-element';
 import { Message } from './../message';
+import { AmazonFormatResolverService } from './amazon-format-resolver.service';
 
 export class AmazonResolverService extends AbstractResolver {
   private static readonly SITE_LANGUAGE_ID = '.nav-logo-locale';
@@ -14,13 +15,17 @@ export class AmazonResolverService extends AbstractResolver {
   private static readonly AUTHOR_ID = '.contributorNameID';
   private static readonly AUTHOR_ALTERNATIVE_ID = '.author';
   private static readonly KINDLE_FORMAT_ID = '#productSubtitle';
-  private static readonly KINDLE_UNLIMITED_ID = '.a-icon-kindle-unlimited';
   private static readonly DETAILS_ID = '.detail-bullet-list';
+
+  private static readonly LINK_CLASS = '.a-link-normal';
 
   private static readonly KINDLE = 'kindle';
 
-  constructor() {
+  private amazonFormatResolverService: AmazonFormatResolverService;
+
+  constructor(amazonFormatResolverService: AmazonFormatResolverService) {
     super();
+    this.amazonFormatResolverService = amazonFormatResolverService;
   }
 
   extractMessage(html: HTMLElement): Promise<Message> {
@@ -61,9 +66,9 @@ export class AmazonResolverService extends AbstractResolver {
       );
 
       // tags
-      this.addKindleUnlimited(message, html);
-
-      resolve(message);
+      this.addKindleUnlimitedTag(message, html)
+        .then(() => resolve(message))
+        .catch(() => resolve(message));
     });
   }
 
@@ -90,25 +95,31 @@ export class AmazonResolverService extends AbstractResolver {
       );
 
       if (authorWrapper != null) {
-        author = authorWrapper.querySelector('.a-link-normal');
+        author = authorWrapper.querySelector(AmazonResolverService.LINK_CLASS);
       }
     }
 
     return author;
   }
 
-  private addKindleUnlimited(message: Message, html: HTMLElement): void {
-    const kindleUnlimited: NullableHtmlElement = html.querySelector(
-      AmazonResolverService.KINDLE_UNLIMITED_ID
-    );
-
-    if (kindleUnlimited != null || this.existKindleFormat(html)) {
-      message.addTag('KU');
-    }
-  }
-
-  private existKindleFormat(html: HTMLElement): boolean {
-    return false;
+  private addKindleUnlimitedTag(
+    message: Message,
+    html: HTMLElement
+  ): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.amazonFormatResolverService
+        .isKindleUnlimited(html)
+        .then((exists: boolean) => {
+          if (exists) {
+            message.addTag('KU');
+          }
+          resolve();
+        })
+        .catch((error) => {
+          console.error('Error retrieving book formats.', error);
+          reject();
+        });
+    });
   }
 
   private setDetails(
