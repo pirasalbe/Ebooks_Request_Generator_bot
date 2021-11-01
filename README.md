@@ -61,7 +61,7 @@ It always add the _#audiobook_ tag.
 
 ### Extract message from Scribd
 
-Given a Scribd link of an ebook or an audiobook, it returns the request message.
+Given a Scribd link of either an ebook or an audiobook, it returns the request message.
 
 It always add the _#scribd_ tag. If it is an audiobook, it also add the _#audiobook_ tag.
 
