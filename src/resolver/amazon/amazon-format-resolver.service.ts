@@ -108,7 +108,7 @@ export class AmazonFormatResolverService {
         (response: http.IncomingMessage) => {
           if (response.statusCode == 200) {
             HttpUtil.processSuccessfulResponse(response, (data: string) => {
-              return new Promise<HTMLElement>((resolve, reject) =>
+              return new Promise<HTMLElement>((resolve) =>
                 resolve(HtmlUtil.parseHTML(data))
               );
             })

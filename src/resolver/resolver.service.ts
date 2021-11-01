@@ -34,10 +34,13 @@ export class ResolverService implements Resolver {
    */
   private getResolver(url: URL): Resolver | null {
     let resolver: Resolver | null = null;
+
     if (url.hostname.includes('amazon')) {
       resolver = this.resolvers[SiteResolver.AMAZON];
     } else if (url.hostname.includes('audible')) {
       resolver = this.resolvers[SiteResolver.AUDIBLE];
+    } else if (url.hostname.includes('scribd')) {
+      resolver = this.resolvers[SiteResolver.SCRIBD];
     }
 
     return resolver;

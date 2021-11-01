@@ -35,7 +35,7 @@ export class AudibleResolverService extends AbstractResolver {
   }
 
   extractMessage(html: HTMLElement): Promise<Message> {
-    return new Promise<Message>((resolve, reject) => {
+    return new Promise<Message>((resolve) => {
       const bottom: NullableHtmlElement = html.querySelector(
         AudibleResolverService.BOTTOM_ID
       );
@@ -69,7 +69,7 @@ export class AudibleResolverService extends AbstractResolver {
     });
   }
 
-  getAudibleInformation(bottom: HTMLElement): AudibleInformation {
+  private getAudibleInformation(bottom: HTMLElement): AudibleInformation {
     const scripts: HTMLElement[] = (bottom as HTMLElement).querySelectorAll(
       AudibleResolverService.SCRIPT_ID
     );

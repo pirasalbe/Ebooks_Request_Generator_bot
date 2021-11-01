@@ -3,6 +3,7 @@ import { AmazonResolverService } from './resolver/amazon/amazon-resolver.service
 import { AudibleResolverService } from './resolver/audible/audible-resolver.service';
 import { Resolver } from './resolver/resolver';
 import { ResolverService } from './resolver/resolver.service';
+import { ScribdResolverService } from './resolver/scribd/scribd-resolver.service';
 import { SiteResolver } from './resolver/site-resolver.enum';
 import { BotService } from './telegram/bot.service';
 
@@ -17,6 +18,7 @@ export class ApplicationContext {
     const resolvers: Record<SiteResolver, Resolver> = {
       0: new AmazonResolverService(new AmazonFormatResolverService()),
       1: new AudibleResolverService(),
+      2: new ScribdResolverService(),
     };
 
     const resolverService: ResolverService = new ResolverService(resolvers);

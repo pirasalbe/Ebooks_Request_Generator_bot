@@ -29,7 +29,7 @@ export class AmazonResolverService extends AbstractResolver {
   }
 
   extractMessage(html: HTMLElement): Promise<Message> {
-    return new Promise<Message>((resolve, reject) => {
+    return new Promise<Message>((resolve) => {
       // checks
       const kindleFormat: NullableHtmlElement = html.querySelector(
         AmazonResolverService.KINDLE_FORMAT_ID
