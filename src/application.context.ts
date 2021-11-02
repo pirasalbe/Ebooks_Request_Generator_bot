@@ -1,3 +1,4 @@
+import { AmazonCaptchaResolverService } from './resolver/amazon/amazon-captcha-resolver.service';
 import { AmazonFormatResolverService } from './resolver/amazon/amazon-format-resolver.service';
 import { AmazonResolverService } from './resolver/amazon/amazon-resolver.service';
 import { AudibleResolverService } from './resolver/audible/audible-resolver.service';
@@ -16,7 +17,10 @@ export class ApplicationContext {
     const token: string = process.env.BOT_TOKEN as string;
 
     const resolvers: Record<SiteResolver, Resolver> = {
-      0: new AmazonResolverService(new AmazonFormatResolverService()),
+      0: new AmazonResolverService(
+        new AmazonFormatResolverService(),
+        new AmazonCaptchaResolverService()
+      ),
       1: new AudibleResolverService(),
       2: new ScribdResolverService(),
     };

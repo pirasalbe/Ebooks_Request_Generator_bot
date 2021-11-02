@@ -10,8 +10,8 @@ import { Message } from './message';
 import { Resolver } from './resolver';
 
 export abstract class AbstractResolver implements Resolver {
-  private cookies: Map<string, string>;
-  private cookiesHeader: string;
+  protected cookies: Map<string, string>;
+  protected cookiesHeader: string;
 
   protected constructor() {
     this.cookies = new Map<string, string>();
@@ -25,6 +25,7 @@ export abstract class AbstractResolver implements Resolver {
         {
           headers: {
             'User-Agent': HttpUtil.USER_AGENT_VALUE,
+            'Accept-Encoding': HttpUtil.ACCEPT_ENCODING,
             Cookie: this.cookiesHeader,
           },
         },

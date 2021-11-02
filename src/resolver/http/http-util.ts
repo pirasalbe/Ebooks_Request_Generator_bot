@@ -4,6 +4,7 @@ import * as http from 'http';
 export class HttpUtil {
   static readonly USER_AGENT_VALUE =
     'Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0';
+  static readonly ACCEPT_ENCODING = 'compress';
 
   private constructor() {
     // util class
@@ -11,7 +12,9 @@ export class HttpUtil {
 
   static saveResponse(data: string): void {
     fs.writeFile('index.html', data, (err: NodeJS.ErrnoException | null) => {
-      console.error('Cannot save file', err);
+      if (err != null) {
+        console.error('Cannot save file', err);
+      }
     });
   }
 

@@ -7,6 +7,7 @@ import { I18nUtil } from './../../i18n/i18n-util';
 import { Entry } from './../html/entry';
 import { NullableHtmlElement } from './../html/nullable-html-element';
 import { Message } from './../message';
+import { AmazonCaptchaResolverService } from './amazon-captcha-resolver.service';
 import { AmazonFormatResolverService } from './amazon-format-resolver.service';
 
 export class AmazonResolverService extends AbstractResolver {
@@ -22,14 +23,22 @@ export class AmazonResolverService extends AbstractResolver {
   private static readonly KINDLE = 'kindle';
 
   private amazonFormatResolverService: AmazonFormatResolverService;
+  private amazonCaptchaResolverService: AmazonCaptchaResolverService;
 
-  constructor(amazonFormatResolverService: AmazonFormatResolverService) {
+  constructor(
+    amazonFormatResolverService: AmazonFormatResolverService,
+    amazonCaptchaResolverService: AmazonCaptchaResolverService
+  ) {
     super();
     this.amazonFormatResolverService = amazonFormatResolverService;
+    this.amazonCaptchaResolverService = amazonCaptchaResolverService;
   }
 
   extractMessage(html: HTMLElement): Promise<Message> {
     return new Promise<Message>((resolve) => {
+      // captcha
+      this.amazonCaptchaResolverService.checkCaptcha(html, this.cookiesHeader);
+
       // checks
       const kindleFormat: NullableHtmlElement = html.querySelector(
         AmazonResolverService.KINDLE_FORMAT_ID
