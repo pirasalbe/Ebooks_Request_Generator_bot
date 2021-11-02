@@ -12,7 +12,9 @@ export class HttpUtil {
 
   static saveResponse(data: string): void {
     fs.writeFile('index.html', data, (err: NodeJS.ErrnoException | null) => {
-      console.error('Cannot save file', err);
+      if (err != null) {
+        console.error('Cannot save file', err);
+      }
     });
   }
 
