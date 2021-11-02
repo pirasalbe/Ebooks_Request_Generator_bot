@@ -61,7 +61,7 @@ export class AmazonFormatResolverService {
               reject(error);
             });
         } else {
-          console.error(html, asinValue, acpParams);
+          console.error(asinValue, acpParams);
           reject('Missing required elements.');
         }
       }
@@ -101,7 +101,7 @@ export class AmazonFormatResolverService {
             'User-Agent': HttpUtil.USER_AGENT_VALUE,
             'Content-Type': 'application/json',
             Accept: '*/*',
-            'Accept-Encoding': 'compress',
+            'Accept-Encoding': HttpUtil.ACCEPT_ENCODING,
             'x-amz-acp-params': acpParams,
           },
         },

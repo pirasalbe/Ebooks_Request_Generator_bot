@@ -25,6 +25,7 @@ export abstract class AbstractResolver implements Resolver {
         {
           headers: {
             'User-Agent': HttpUtil.USER_AGENT_VALUE,
+            'Accept-Encoding': HttpUtil.ACCEPT_ENCODING,
             Cookie: this.cookiesHeader,
           },
         },
