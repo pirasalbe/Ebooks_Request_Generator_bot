@@ -1,10 +1,9 @@
-import * as CaptchaSolver from 'captcha-solver';
+import { HTMLElement } from 'node-html-parser';
 
 export class AmazonCaptchaResolverService {
   private static readonly KINDLE_UNLIMITED_ID = '.a-icon-kindle-unlimited';
 
-  private solveCaptcha(): void {
-    const solver = new CaptchaSolver('browser');
-    const codes = solver.solve();
+  checkCaptcha(html: HTMLElement): boolean {
+    return false;
   }
 }
