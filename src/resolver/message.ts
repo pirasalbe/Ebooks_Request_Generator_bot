@@ -1,26 +1,26 @@
 export class Message {
   public static readonly AUDIOBOOK_TAG = 'audiobook';
 
-  private tags: string[];
-  private title: string | null;
+  public static tags: string[]; //made it public to display request type in the inline preview
+  public static title: string | null; //made it public to display title in the inline preview
   private author: string | null;
   private publisher: string;
   private url: string | null;
 
   constructor() {
-    this.tags = ['request'];
-    this.title = null;
+    Message.tags = ['request'];
+    Message.title = null;
     this.author = null;
-    this.publisher = 'Self Published';
+    this.publisher = 'Self-Published';
     this.url = null;
   }
 
   addTag(tag: string): void {
-    this.tags.push(tag);
+    Message.tags.push(tag);
   }
 
   setTitle(title: string) {
-    this.title = title;
+    Message.title = title;
   }
 
   setAuthor(author: string) {
@@ -41,20 +41,21 @@ export class Message {
     let message = '';
 
     // tags
-    for (let i = 0; i < this.tags.length; i++) {
+    for (let i = 0; i < Message.tags.length; i++) {
       if (i > 0) {
         message += ' ';
       }
-      message += '#' + this.tags[i];
+      message += '#' + Message.tags[i];
     }
 
-    message += '\n';
+    message += '\n\n';
 
     // info
-    message += 'Title: ' + this.title + '\n';
-    message += 'Author: ' + this.author + '\n';
-    message += 'Publisher: ' + this.publisher + '\n';
-    message += this.url;
+    // Bookcrush format
+    message += 'Title: <code>' + Message.title + '</code>' + '\n';
+    message += 'Author: <code>' + this.author + '</code>' + '\n';
+    message += 'Publisher: <i>' + this.publisher + '</i>' + '\n\n';
+    message += '<a href = "' + this.url + '">Link</a>';
 
     return message;
   }
