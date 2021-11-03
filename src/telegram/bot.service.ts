@@ -1,6 +1,8 @@
-import { Context, Telegraf, Telegram } from 'telegraf';
-import { InlineQueryResult, InlineQueryResultArticle, InputTextMessageContent, Update } from 'typegram';
-
+import { url } from 'inspector';
+import { Context, Markup, Telegraf, Telegram } from 'telegraf';
+import { switchToCurrentChat } from 'telegraf/typings/button';
+import { InlineKeyboardMarkup, InlineQueryResult, InlineQueryResultArticle, InputTextMessageContent, Update } from 'typegram';
+import { Message } from '../resolver/message'
 import { ResolverService } from '../resolver/resolver.service';
 
 export class BotService {
@@ -32,10 +34,15 @@ export class BotService {
    */
   private initializeHandlers(): void {
     this.bot.start((ctx) => {
-      ctx.reply(this.helpMessage());
+      ctx.replyWithHTML("Hey, " + ctx.from.first_name + " 👋" + this.helpMessage(), {
+        disable_web_page_preview: true, ...Markup.inlineKeyboard([
+          Markup.button.switchToCurrentChat('Make a Request', ''),
+        ])
+      }
+      );
     });
     this.bot.help((ctx) => {
-      ctx.reply(this.helpMessage());
+      ctx.replyWithHTML("Hey, " + ctx.from.first_name + " 👋" + this.helpMessage());
     });
 
     this.bot.on('inline_query', (ctx) => {
@@ -44,22 +51,54 @@ export class BotService {
           .then((message: string) => {
             ctx.answerInlineQuery([
               this.inlineResult(
-                'Request',
+                'Request ' + Message.tags[0],
                 message,
-                'Click me to send the request'
+                Message.title + '\n' + '',
+                'https://telegra.ph/file/06d1f7c944004bb0dcef1.jpg',
+                // TODO:
+                // Markup.inlineKeyboard([
+                // Markup.button.switchToCurrentChat('New Request', ''),
+                // Markup.button.switchToCurrentChat('Edit Link', ctx.message.text)
+                // ])
               ),
-            ]);
+            ],
+              {
+                switch_pm_text: 'Use in PM',
+                switch_pm_parameter: 'help'
+              });
           })
           .catch((error: string) => {
-            ctx.answerInlineQuery([this.inlineResult('Error!', error, error)]);
+            ctx.answerInlineQuery([this.inlineResult('Error!', error + "\n" + ctx.inlineQuery.query, error, 'https://www.downloadclipart.net/large/14121-warning-icon-design.png')]);
+          });
+      }
+      else {
+        ctx.answerInlineQuery([
+          this.inlineResult(
+            'Incomplete Request!',
+            'Incomplete Request!',
+            'Paste an amazon/audible link to request',
+            'https://www.downloadclipart.net/large/14121-warning-icon-design.png', //for invalid requests
+          ),
+        ],
+          {
+            switch_pm_text: 'Use in PM',
+            switch_pm_parameter: 'help'
           });
       }
     });
 
-    this.bot.on('text', (ctx) => {
+    this.bot.on('text', async (ctx) => {
+      let loader = await ctx.reply("Processing...")
       this.resolve(ctx.message.text)
-        .then((message: string) => {
-          ctx.reply(message);
+        .then(async (message: string) => {
+          await ctx.telegram.editMessageText(ctx.from.id, loader.message_id, undefined, message, { 
+              parse_mode: 'HTML',
+              disable_web_page_preview: true, ...Markup.inlineKeyboard([
+              Markup.button.switchToCurrentChat('New Request', ''),
+              Markup.button.switchToCurrentChat('Edit Link', ctx.message.text)
+            ])
+          }
+          );
         })
         .catch((error: string) => {
           ctx.reply(error);
@@ -87,17 +126,22 @@ export class BotService {
   }
 
   private helpMessage(): string {
-    return 'Send a link to get the request from it.';
+    return `\n\nSend me an amazon or audible link to get a well-formatted request ready to be posted in BookCrush:Requests group.
+
+You can use me inline as well. Just click on the button below or send <code>@bkcrushreqbot amazon/audible-link</code>"`;
   }
 
   private inlineResult(
     title: string,
     message: string,
-    description: string
+    description: string,
+    thumb_url: string,
+    // keyboard: InlineKeyboardMarkup
   ): InlineQueryResult {
     const content: InputTextMessageContent = {
       message_text: message,
       disable_web_page_preview: true,
+      parse_mode: 'HTML'
     };
 
     const result: InlineQueryResultArticle = {
@@ -106,8 +150,9 @@ export class BotService {
       title: title,
       input_message_content: content,
       description: description,
+      thumb_url: thumb_url,
+      // reply_markup: {inline_keyboard: keyboard} 
     };
-
     return result;
   }
 }
