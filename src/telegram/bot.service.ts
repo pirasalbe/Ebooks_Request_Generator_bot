@@ -1,5 +1,4 @@
-import { Context, Telegraf, Telegram } from 'telegraf';
-import { ExtraAnswerInlineQuery } from 'telegraf/typings/telegram-types';
+import { Context, Markup, Telegraf, Telegram } from 'telegraf';
 import {
   InlineQueryResult,
   InlineQueryResultArticle,
@@ -16,10 +15,6 @@ export class BotService {
     'https://telegra.ph/file/5b2fad22d5b296b843acf.jpg';
   private static readonly INVALID_THUMB_URL =
     'https://www.downloadclipart.net/large/14121-warning-icon-design.png';
-  private static readonly EXTRA_INLINE_RESPONSE: ExtraAnswerInlineQuery = {
-    switch_pm_text: 'Use in PM',
-    switch_pm_parameter: 'help',
-  };
 
   private telegram: Telegram;
   private bot: Telegraf<Context<Update>>;
@@ -60,43 +55,34 @@ export class BotService {
         if (ctx.inlineQuery.query != '') {
           this.resolve(this.extractUrl(ctx.inlineQuery.query))
             .then((message: Message) => {
-              ctx.answerInlineQuery(
-                [
-                  this.inlineResult(
-                    'Request',
-                    message.toString(),
-                    message.toSmallString(),
-                    BotService.SUCCESSFULL_THUMB_URL
-                  ),
-                ],
-                BotService.EXTRA_INLINE_RESPONSE
-              );
+              ctx.answerInlineQuery([
+                this.inlineResult(
+                  'Request',
+                  message.toString(),
+                  message.toSmallString(),
+                  BotService.SUCCESSFULL_THUMB_URL
+                ),
+              ]);
             })
             .catch((error: string) => {
-              ctx.answerInlineQuery(
-                [
-                  this.inlineResult(
-                    'Error!',
-                    error,
-                    error,
-                    BotService.INVALID_THUMB_URL
-                  ),
-                ],
-                BotService.EXTRA_INLINE_RESPONSE
-              );
+              ctx.answerInlineQuery([
+                this.inlineResult(
+                  'Error!',
+                  error,
+                  error,
+                  BotService.INVALID_THUMB_URL
+                ),
+              ]);
             });
         } else {
-          ctx.answerInlineQuery(
-            [
-              this.inlineResult(
-                'Incomplete Request!',
-                'Incomplete Request!',
-                this.smallHelpMessage(),
-                BotService.INVALID_THUMB_URL
-              ),
-            ],
-            BotService.EXTRA_INLINE_RESPONSE
-          );
+          ctx.answerInlineQuery([
+            this.inlineResult(
+              'Incomplete Request!',
+              'Incomplete Request!',
+              this.smallHelpMessage(),
+              BotService.INVALID_THUMB_URL
+            ),
+          ]);
         }
       });
     });
@@ -118,10 +104,14 @@ export class BotService {
                     {
                       disable_web_page_preview: true,
                       parse_mode: 'HTML',
+                      ...Markup.inlineKeyboard([
+                        Markup.button.switchToChat('Forward', ctx.message.text),
+                      ]),
                     }
                   );
                 })
                 .catch((error: string) => {
+                  ctx.deleteMessage(loader.message_id);
                   ctx.reply(error);
                 });
             })
