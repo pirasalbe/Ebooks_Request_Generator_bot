@@ -9,7 +9,7 @@ export class Message {
 
   constructor() {
     Message.tags = ['request'];
-    Message.title = null;
+    this.title = null;
     this.author = null;
     this.publisher = 'Self-Published';
     this.url = null;
@@ -51,12 +51,15 @@ export class Message {
     message += '\n\n';
 
     // info
-    // Bookcrush format
-    message += 'Title: <code>' + Message.title + '</code>' + '\n';
+    message += 'Title: <code>' + this.title + '</code>' + '\n';
     message += 'Author: <code>' + this.author + '</code>' + '\n';
     message += 'Publisher: <i>' + this.publisher + '</i>' + '\n\n';
-    message += '<a href = "' + this.url + '">Link</a>';
+    message += '<a href="' + this.url + '">Link</a>';
 
     return message;
+  }
+
+  toSmallString(): string {
+    return this.title as string;
   }
 }

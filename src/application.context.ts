@@ -6,6 +6,7 @@ import { Resolver } from './resolver/resolver';
 import { ResolverService } from './resolver/resolver.service';
 import { ScribdResolverService } from './resolver/scribd/scribd-resolver.service';
 import { SiteResolver } from './resolver/site-resolver.enum';
+import { StorytelResolverService } from './resolver/storytel/storytel-resolver.service';
 import { BotService } from './telegram/bot.service';
 
 export class ApplicationContext {
@@ -23,6 +24,7 @@ export class ApplicationContext {
       ),
       1: new AudibleResolverService(),
       2: new ScribdResolverService(),
+      3: new StorytelResolverService(),
     };
 
     const resolverService: ResolverService = new ResolverService(resolvers);
