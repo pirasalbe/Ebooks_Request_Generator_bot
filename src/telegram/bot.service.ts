@@ -58,7 +58,7 @@ export class BotService {
     this.bot.on('inline_query', (ctx) => {
       this.safeHandling(() => {
         if (ctx.inlineQuery.query != '') {
-          this.resolve(ctx.inlineQuery.query)
+          this.resolve(this.extractUrl(ctx.inlineQuery.query))
             .then((message: Message) => {
               ctx.answerInlineQuery(
                 [
@@ -103,30 +103,33 @@ export class BotService {
 
     this.bot.on('text', (ctx) => {
       this.safeHandling(() => {
-        ctx
-          .reply('Processing...')
-          .then((loader: TelegramMessage.TextMessage) => {
-            this.resolve(ctx.message.text)
-              .then((message: Message) => {
-                ctx.telegram.editMessageText(
-                  ctx.from.id,
-                  loader.message_id,
-                  undefined,
-                  message.toString(),
-                  {
-                    disable_web_page_preview: true,
-                    parse_mode: 'HTML',
-                  }
-                );
-              })
-              .catch((error: string) => {
-                ctx.reply(error);
-              });
-          })
-          .catch((error: string) => {
-            console.error('Cannot start processing request.', error);
-            ctx.reply('Cannot start processing request.');
-          });
+        // manage direct messages only
+        if (ctx.message.via_bot == undefined) {
+          ctx
+            .reply('Processing...')
+            .then((loader: TelegramMessage.TextMessage) => {
+              this.resolve(this.extractUrl(ctx.message.text))
+                .then((message: Message) => {
+                  ctx.telegram.editMessageText(
+                    ctx.from.id,
+                    loader.message_id,
+                    undefined,
+                    message.toString(),
+                    {
+                      disable_web_page_preview: true,
+                      parse_mode: 'HTML',
+                    }
+                  );
+                })
+                .catch((error: string) => {
+                  ctx.reply(error);
+                });
+            })
+            .catch((error: string) => {
+              console.error('Cannot start processing request.', error);
+              ctx.reply('Cannot start processing request.');
+            });
+        }
       });
     });
   }
@@ -137,6 +140,24 @@ export class BotService {
     } catch (e) {
       console.error('Unexpected error', e);
     }
+  }
+
+  private extractUrl(text: string): string {
+    let result: string = text;
+
+    if (text.includes(' ')) {
+      const elements: string[] = text.split(' ');
+
+      const url: string | undefined = elements.find((s: string) =>
+        s.startsWith('http')
+      );
+
+      if (url != undefined) {
+        result = url;
+      }
+    }
+
+    return result;
   }
 
   private resolve(text: string): Promise<Message> {
