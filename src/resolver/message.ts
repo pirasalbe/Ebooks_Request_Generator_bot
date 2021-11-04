@@ -48,7 +48,7 @@ export class Message {
       message += '#' + this.tags[i];
     }
 
-    message += '\n';
+    message += '\n\n';
 
     // info
     // Bookcrush format

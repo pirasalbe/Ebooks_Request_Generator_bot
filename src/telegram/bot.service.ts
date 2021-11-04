@@ -5,6 +5,7 @@ import {
   InlineQueryResultArticle,
   InputTextMessageContent,
   Message as TelegramMessage,
+  MessageEntity,
   Update,
 } from 'typegram';
 
@@ -100,10 +101,22 @@ export class BotService {
     });
 
     this.bot.on('text', async (ctx) => {
+      // Do not process via_bot updates
+      if(ctx.message.via_bot) {
+        return;
+      }
+      console.log(ctx.message)
       ctx
         .reply('Processing...')
         .then((loader: TelegramMessage.TextMessage) => {
-          this.resolve(ctx.message.text)
+          // Extract only the URL from the pasted text
+          let extractedUrl = ''
+          ctx.message?.entities?.forEach((entity: MessageEntity) => { 
+            if (entity.type === 'url') {
+              extractedUrl = ctx.message.text.substring(entity.offset, entity.offset + entity.length);
+            }
+          });
+          this.resolve(extractedUrl)
             .then((message: Message) => {
               ctx.telegram.editMessageText(
                 ctx.from.id,
