@@ -17,14 +17,16 @@ export class Message {
   }
 
   addTag(tag: string): void {
-    Message.tags.pop()
+    if (Message.tags[0] == 'ebook') {
+      Message.tags.pop()
+    }
     Message.tags.push(tag);
   }
 
   setTitle(title: string) {
     Message.title = title;
   }
-
+  
   setAuthor(author: string) {
     this.author = author;
   }
@@ -42,16 +44,26 @@ export class Message {
   toString(): string {
     let message = '';
     let tags = '';
+    let site = ''
 
     message += '#request'
 
     message += '\n\n';
-
+    if(this.url?.includes("amazon")) {
+      site = "Amazon"
+    }
+    else if(this.url?.includes("audible")) {
+      site = "Audible"
+    }
+    else if(this.url?.includes("scribd")) {
+      site = "Scribd"
+    }
     // Bookcrush format
     message += '<code>' + Message.title + '</code>' + '\n';
     message += '<code>' + this.author + '</code>' + '\n';
     message += '<i>' + this.publisher + '</i>' + '\n\n';
-    message += '<a href = "' + this.url + '">Link</a>';
+    let clean_url = this.url?.split("?")[0]
+    message += `<a href = \"` + clean_url + `\">${site} Link</a>`;
     
     message += '\n\n';
     // tags

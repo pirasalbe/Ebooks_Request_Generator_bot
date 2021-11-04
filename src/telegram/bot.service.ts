@@ -42,7 +42,12 @@ export class BotService {
       );
     });
     this.bot.help((ctx) => {
-      ctx.replyWithHTML("Hey, " + ctx.from.first_name + " 👋" + this.helpMessage());
+      ctx.replyWithHTML("Hey, " + ctx.from.first_name + " 👋" + this.helpMessage(), {
+        disable_web_page_preview: true, ...Markup.inlineKeyboard([
+          Markup.button.switchToCurrentChat('Make a Request', ''),
+        ])
+      }
+      );
     });
 
     this.bot.on('inline_query', (ctx) => {
@@ -51,7 +56,7 @@ export class BotService {
           .then((message: string) => {
             ctx.answerInlineQuery([
               this.inlineResult(
-                'Request ' + Message.tags[0],
+                'Request ' + Message.tags[0].charAt(0).toUpperCase() + Message.tags[0].slice(1),
                 message,
                 Message.title + '\n' + '',
                 'https://telegra.ph/file/06d1f7c944004bb0dcef1.jpg',
@@ -88,14 +93,18 @@ export class BotService {
     });
 
     this.bot.on('text', async (ctx) => {
+      // Do not process via_bot messages
+      if(ctx.message.via_bot) {
+        return
+      }
       let loader = await ctx.reply("Processing...")
       this.resolve(ctx.message.text)
         .then(async (message: string) => {
-          await ctx.telegram.editMessageText(ctx.from.id, loader.message_id, undefined, message, { 
-              parse_mode: 'HTML',
-              disable_web_page_preview: true, ...Markup.inlineKeyboard([
+          await ctx.telegram.editMessageText(ctx.from.id, loader.message_id, undefined, message, {
+            parse_mode: 'HTML',
+            disable_web_page_preview: true, ...Markup.inlineKeyboard([
               Markup.button.switchToCurrentChat('New Request', ''),
-              Markup.button.switchToCurrentChat('Edit Link', ctx.message.text)
+              Markup.button.switchToCurrentChat('Repost', ctx.message.text)
             ])
           }
           );
