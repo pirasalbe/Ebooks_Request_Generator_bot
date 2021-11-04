@@ -4,6 +4,7 @@ import { AbstractResolver } from '../abstract-resolver';
 import { NullableHtmlElement } from '../html/nullable-html-element';
 import { Message } from '../message';
 import { HtmlUtil } from './../html/html-util';
+import { SiteResolver } from './../site-resolver.enum';
 import { AudibleAuthor, AudibleInformation } from './audible-information';
 
 export class AudibleResolverService extends AbstractResolver {
@@ -47,7 +48,7 @@ export class AudibleResolverService extends AbstractResolver {
       );
 
       // prepare message
-      const message: Message = new Message();
+      const message: Message = new Message(SiteResolver.AUDIBLE);
 
       // main info
       message.setTitle(information.name);

@@ -3,6 +3,7 @@ import { HTMLElement } from 'node-html-parser';
 import { AbstractResolver } from '../abstract-resolver';
 import { HtmlUtil } from '../html/html-util';
 import { Message } from '../message';
+import { SiteResolver } from './../site-resolver.enum';
 import {
   StorytelElement,
   StorytelInformation,
@@ -29,7 +30,7 @@ export class StorytelResolverService extends AbstractResolver {
         this.getStorytelInformation(content);
 
       // prepare message
-      const message: Message = new Message();
+      const message: Message = new Message(SiteResolver.STORYTEL);
 
       // main info
       message.setTitle(information.getTitle());
