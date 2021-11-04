@@ -153,6 +153,7 @@ export class BotService {
   private helpMessage(): string {
     return (
       this.smallHelpMessage() +
+      ' You can then forward the same request to the group.' +
       '\n\n' +
       'You can use me inline as well. Just click on the button below or send <code>@ebooks_request_generator_bot link</code>.'
     );
