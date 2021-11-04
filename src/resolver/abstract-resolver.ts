@@ -18,8 +18,8 @@ export abstract class AbstractResolver implements Resolver {
     this.cookiesHeader = '';
   }
 
-  resolve(url: string): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
+  resolve(url: string): Promise<Message> {
+    return new Promise<Message>((resolve, reject) => {
       https.get(
         url,
         {
@@ -32,7 +32,7 @@ export abstract class AbstractResolver implements Resolver {
         (response: http.IncomingMessage) => {
           this.updateCookies(response.headers);
           this.processResponse(url, response)
-            .then((message: string) => resolve(message))
+            .then((message: Message) => resolve(message))
             .catch((error) => reject(error));
         }
       );
@@ -61,17 +61,17 @@ export abstract class AbstractResolver implements Resolver {
   private processResponse(
     url: string,
     response: http.IncomingMessage
-  ): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
+  ): Promise<Message> {
+    return new Promise<Message>((resolve, reject) => {
       if (response.statusCode == 200) {
         // success
         this.processSuccessfulResponse(url, response)
-          .then((message: string) => resolve(message))
+          .then((message: Message) => resolve(message))
           .catch((error) => reject(error));
       } else if (response.statusCode == 301 || response.statusCode == 302) {
         // redirect
         this.resolve(response.headers.location as string)
-          .then((message: string) => resolve(message))
+          .then((message: Message) => resolve(message))
           .catch((error) => reject(error));
       } else {
         // something went wrong
@@ -83,11 +83,11 @@ export abstract class AbstractResolver implements Resolver {
   private processSuccessfulResponse(
     url: string,
     response: http.IncomingMessage
-  ): Promise<string> {
+  ): Promise<Message> {
     return HttpUtil.processSuccessfulResponse(response, (data: string) => {
-      return new Promise<string>((resolve, reject) => {
+      return new Promise<Message>((resolve, reject) => {
         this.processPage(url, data)
-          .then((message: Message) => resolve(message.toString()))
+          .then((message: Message) => resolve(message))
           .catch((error) => reject(error));
       });
     });
@@ -120,7 +120,7 @@ export abstract class AbstractResolver implements Resolver {
     customMessage = 'Missing required elements.'
   ): void {
     const indexNullElement = elements.findIndex((e) => e == null);
-    if (indexNullElement >= 0) {
+    if (elements.length == 0 || indexNullElement >= 0) {
       console.error(indexNullElement);
       throw 'Error parsing page. ' + customMessage;
     }
