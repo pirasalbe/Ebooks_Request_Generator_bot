@@ -5,6 +5,8 @@ import {
   InputTextMessageContent,
   Message as TelegramMessage,
   Update,
+  User,
+  UserFromGetMe,
 } from 'typegram';
 
 import { Message } from '../resolver/message';
@@ -89,8 +91,8 @@ export class BotService {
 
     this.bot.on('text', (ctx) => {
       this.safeHandling(() => {
-        // manage direct messages only
-        if (ctx.message.via_bot == undefined) {
+        // avoid messages from the bot
+        if (!this.isMessageFromBot(ctx.message.via_bot, ctx.botInfo)) {
           ctx
             .reply('Processing...')
             .then((loader: TelegramMessage.TextMessage) => {
@@ -148,6 +150,13 @@ export class BotService {
     }
 
     return result;
+  }
+
+  private isMessageFromBot(
+    user: User | undefined,
+    bot: UserFromGetMe
+  ): boolean {
+    return user != undefined && user.is_bot && user.id == bot.id;
   }
 
   private resolve(text: string): Promise<Message> {
