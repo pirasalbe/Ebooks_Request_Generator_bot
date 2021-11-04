@@ -15,7 +15,7 @@ export class AudibleResolverService extends AbstractResolver {
     super();
   }
 
-  resolve(url: string): Promise<string> {
+  resolve(url: string): Promise<Message> {
     // remove previously added override
     url = url
       .replace('&' + AudibleResolverService.OVERRIDE_LANGUAGE + '=false', '')

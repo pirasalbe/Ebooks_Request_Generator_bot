@@ -89,7 +89,7 @@ export class AmazonResolverService extends AbstractResolver {
         .toLocaleLowerCase()
         .includes(AmazonResolverService.KINDLE)
     ) {
-      throw 'Provided link is not of a Kindle Edition, Make sure to copy the kindle edition link from amazon.\n';
+      throw 'Provided link is not of a Kindle Edition, Make sure to copy the kindle edition link from amazon.';
     }
   }
 

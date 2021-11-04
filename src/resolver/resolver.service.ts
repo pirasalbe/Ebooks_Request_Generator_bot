@@ -1,5 +1,6 @@
 import { URL } from 'url';
 
+import { Message } from './message';
 import { Resolver } from './resolver';
 import { SiteResolver } from './site-resolver.enum';
 
@@ -10,8 +11,8 @@ export class ResolverService implements Resolver {
     this.resolvers = resolvers;
   }
 
-  resolve(url: string): Promise<string> {
-    let result: Promise<string>;
+  resolve(url: string): Promise<Message> {
+    let result: Promise<Message>;
 
     const urlObject = new URL(url);
 
@@ -41,6 +42,8 @@ export class ResolverService implements Resolver {
       resolver = this.resolvers[SiteResolver.AUDIBLE];
     } else if (url.hostname.includes('scribd')) {
       resolver = this.resolvers[SiteResolver.SCRIBD];
+    } else if (url.hostname.includes('storytel')) {
+      resolver = this.resolvers[SiteResolver.STORYTEL];
     }
 
     return resolver;
