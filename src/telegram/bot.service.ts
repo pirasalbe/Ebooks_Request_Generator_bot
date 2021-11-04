@@ -56,75 +56,87 @@ export class BotService {
     });
 
     this.bot.on('inline_query', (ctx) => {
-      if (ctx.inlineQuery.query != '') {
-        this.resolve(ctx.inlineQuery.query)
-          .then((message: Message) => {
-            ctx.answerInlineQuery(
-              [
-                this.inlineResult(
-                  'Request',
-                  message.toString(),
-                  message.toSmallString(),
-                  BotService.SUCCESSFULL_THUMB_URL
-                ),
-              ],
-              BotService.EXTRA_INLINE_RESPONSE
-            );
-          })
-          .catch((error: string) => {
-            ctx.answerInlineQuery(
-              [
-                this.inlineResult(
-                  'Error!',
-                  error,
-                  error,
-                  BotService.INVALID_THUMB_URL
-                ),
-              ],
-              BotService.EXTRA_INLINE_RESPONSE
-            );
-          });
-      } else {
-        ctx.answerInlineQuery(
-          [
-            this.inlineResult(
-              'Incomplete Request!',
-              'Incomplete Request!',
-              this.smallHelpMessage(),
-              BotService.INVALID_THUMB_URL
-            ),
-          ],
-          BotService.EXTRA_INLINE_RESPONSE
-        );
-      }
-    });
-
-    this.bot.on('text', async (ctx) => {
-      ctx
-        .reply('Processing...')
-        .then((loader: TelegramMessage.TextMessage) => {
-          this.resolve(ctx.message.text)
+      this.safeHandling(() => {
+        if (ctx.inlineQuery.query != '') {
+          this.resolve(ctx.inlineQuery.query)
             .then((message: Message) => {
-              ctx.telegram.editMessageText(
-                ctx.from.id,
-                loader.message_id,
-                undefined,
-                message.toString(),
-                {
-                  disable_web_page_preview: true,
-                  parse_mode: 'HTML',
-                }
+              ctx.answerInlineQuery(
+                [
+                  this.inlineResult(
+                    'Request',
+                    message.toString(),
+                    message.toSmallString(),
+                    BotService.SUCCESSFULL_THUMB_URL
+                  ),
+                ],
+                BotService.EXTRA_INLINE_RESPONSE
               );
             })
             .catch((error: string) => {
-              ctx.reply(error);
+              ctx.answerInlineQuery(
+                [
+                  this.inlineResult(
+                    'Error!',
+                    error,
+                    error,
+                    BotService.INVALID_THUMB_URL
+                  ),
+                ],
+                BotService.EXTRA_INLINE_RESPONSE
+              );
             });
-        })
-        .catch((error: string) => {
-          console.error('Cannot start processing request.', error);
-          ctx.reply('Cannot start processing request.');
-        });
+        } else {
+          ctx.answerInlineQuery(
+            [
+              this.inlineResult(
+                'Incomplete Request!',
+                'Incomplete Request!',
+                this.smallHelpMessage(),
+                BotService.INVALID_THUMB_URL
+              ),
+            ],
+            BotService.EXTRA_INLINE_RESPONSE
+          );
+        }
+      });
     });
+
+    this.bot.on('text', (ctx) => {
+      this.safeHandling(() => {
+        ctx
+          .reply('Processing...')
+          .then((loader: TelegramMessage.TextMessage) => {
+            this.resolve(ctx.message.text)
+              .then((message: Message) => {
+                ctx.telegram.editMessageText(
+                  ctx.from.id,
+                  loader.message_id,
+                  undefined,
+                  message.toString(),
+                  {
+                    disable_web_page_preview: true,
+                    parse_mode: 'HTML',
+                  }
+                );
+              })
+              .catch((error: string) => {
+                ctx.reply(error);
+              });
+          })
+          .catch((error: string) => {
+            console.error('Cannot start processing request.', error);
+            ctx.reply('Cannot start processing request.');
+          });
+      });
+    });
+  }
+
+  private safeHandling(unsafeFunction: () => void): void {
+    try {
+      unsafeFunction();
+    } catch (e) {
+      console.error('Unexpected error', e);
+    }
   }
 
   private resolve(text: string): Promise<Message> {
