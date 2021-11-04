@@ -53,11 +53,11 @@ export class BotService {
     this.bot.on('inline_query', (ctx) => {
       if (ctx.inlineQuery.query != '') {
         this.resolve(ctx.inlineQuery.query)
-          .then((message: string) => {
+          .then((message: Message) => {
             ctx.answerInlineQuery([
               this.inlineResult(
                 'Request ' + Message.tags[0].charAt(0).toUpperCase() + Message.tags[0].slice(1),
-                message,
+                message.toString(),
                 Message.title + '\n' + '',
                 'https://telegra.ph/file/06d1f7c944004bb0dcef1.jpg',
                 // TODO:
@@ -99,8 +99,8 @@ export class BotService {
       }
       let loader = await ctx.reply("Processing...")
       this.resolve(ctx.message.text)
-        .then(async (message: string) => {
-          await ctx.telegram.editMessageText(ctx.from.id, loader.message_id, undefined, message, {
+        .then(async (message: Message) => {
+          await ctx.telegram.editMessageText(ctx.from.id, loader.message_id, undefined, message.toString(), {
             parse_mode: 'HTML',
             disable_web_page_preview: true, ...Markup.inlineKeyboard([
               Markup.button.switchToCurrentChat('New Request', ''),
@@ -115,12 +115,12 @@ export class BotService {
     });
   }
 
-  private resolve(text: string): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
+  private resolve(text: string): Promise<Message> {
+    return new Promise<Message>((resolve, reject) => {
       try {
         this.resolverService
           .resolve(text)
-          .then((message: string) => {
+          .then((message: Message) => {
             resolve(message);
           })
           .catch((error: string) => {
@@ -129,7 +129,7 @@ export class BotService {
           });
       } catch (error) {
         console.error('Error handling request', text, error);
-        reject('There was an error handling your request');
+        reject('There was an error handling your request.');
       }
     });
   }
