@@ -39,7 +39,7 @@ export class Message {
 
   toString(): string {
     let message = '';
-
+    let site = '';
     // tags
     for (let i = 0; i < this.tags.length; i++) {
       if (i > 0) {
@@ -49,13 +49,25 @@ export class Message {
     }
 
     message += '\n\n';
+    
+    if(this.url?.includes("amazon")) {
+      site = "Amazon"
+    }
+    else if(this.url?.includes("audible")) {
+      site = "Audible"
+    }
+    else if(this.url?.includes("scribd")) {
+      site = "Scribd"
+    }
+    else if(this.url?.includes("storytel")) {
+      site = "Storytel"
+    }
 
     // info
-    // Bookcrush format
-    message += 'Title: <code>' + this.title + '</code>' + '\n';
-    message += 'Author: <code>' + this.author + '</code>' + '\n';
-    message += 'Publisher: <i>' + this.publisher + '</i>' + '\n\n';
-    message += '<a href="' + this.url + '">Link</a>';
+    message += '<code>' + this.title + '</code>' + '\n';
+    message += '<code>' + this.author + '</code>' + '\n';
+    message += '<i>' + this.publisher + '</i>' + '\n\n';
+    message += '<a href="' + this.url + `">${site} Link</a>`;
 
     return message;
   }

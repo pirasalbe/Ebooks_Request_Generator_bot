@@ -58,7 +58,11 @@ export class BotService {
 
     this.bot.on('inline_query', (ctx) => {
       if (ctx.inlineQuery.query != '') {
-        this.resolve(ctx.inlineQuery.query)
+        // Extract only the URL from the pasted text
+        let queryParams = ctx.inlineQuery.query.split('http', 2)
+        let extractedUrl = 'http' + queryParams[1]
+        console.log(extractedUrl)
+        this.resolve(extractedUrl)
           .then((message: Message) => {
             ctx.answerInlineQuery(
               [
