@@ -9,6 +9,7 @@ export type StorytelInformation = StorytelElement & {
   name: string;
   author: StorytelAuthor[];
   publisher: StorytelPublisher;
+  datePublished: string;
   inLanguage: string;
 };
 
@@ -45,6 +46,18 @@ export class StorytelInformationWrapper {
     }
 
     return publisher;
+  }
+
+  getDatePublished(): string | null {
+    let datePublished: string | null;
+
+    if (this.audiobook.datePublished != '') {
+      datePublished = this.audiobook.datePublished;
+    } else {
+      datePublished = this.book.datePublished;
+    }
+
+    return datePublished;
   }
 
   getLanguageCode(): string {

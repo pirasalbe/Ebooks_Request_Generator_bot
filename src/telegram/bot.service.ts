@@ -1,11 +1,12 @@
-import { Context, Telegraf, Telegram } from 'telegraf';
-import { ExtraAnswerInlineQuery } from 'telegraf/typings/telegram-types';
+import { Context, Markup, Telegraf, Telegram } from 'telegraf';
 import {
   InlineQueryResult,
   InlineQueryResultArticle,
   InputTextMessageContent,
   Message as TelegramMessage,
   Update,
+  User,
+  UserFromGetMe,
 } from 'typegram';
 
 import { Message } from '../resolver/message';
@@ -16,10 +17,6 @@ export class BotService {
     'https://telegra.ph/file/5b2fad22d5b296b843acf.jpg';
   private static readonly INVALID_THUMB_URL =
     'https://www.downloadclipart.net/large/14121-warning-icon-design.png';
-  private static readonly EXTRA_INLINE_RESPONSE: ExtraAnswerInlineQuery = {
-    switch_pm_text: 'Use in PM',
-    switch_pm_parameter: 'help',
-  };
 
   private telegram: Telegram;
   private bot: Telegraf<Context<Update>>;
@@ -56,75 +53,110 @@ export class BotService {
     });
 
     this.bot.on('inline_query', (ctx) => {
-      if (ctx.inlineQuery.query != '') {
-        this.resolve(ctx.inlineQuery.query)
-          .then((message: Message) => {
-            ctx.answerInlineQuery(
-              [
+      this.safeHandling(() => {
+        if (ctx.inlineQuery.query != '') {
+          this.resolve(this.extractUrl(ctx.inlineQuery.query))
+            .then((message: Message) => {
+              ctx.answerInlineQuery([
                 this.inlineResult(
                   'Request',
                   message.toString(),
                   message.toSmallString(),
                   BotService.SUCCESSFULL_THUMB_URL
                 ),
-              ],
-              BotService.EXTRA_INLINE_RESPONSE
-            );
-          })
-          .catch((error: string) => {
-            ctx.answerInlineQuery(
-              [
+              ]);
+            })
+            .catch((error: string) => {
+              ctx.answerInlineQuery([
                 this.inlineResult(
                   'Error!',
                   error,
                   error,
                   BotService.INVALID_THUMB_URL
                 ),
-              ],
-              BotService.EXTRA_INLINE_RESPONSE
-            );
-          });
-      } else {
-        ctx.answerInlineQuery(
-          [
+              ]);
+            });
+        } else {
+          ctx.answerInlineQuery([
             this.inlineResult(
               'Incomplete Request!',
               'Incomplete Request!',
               this.smallHelpMessage(),
               BotService.INVALID_THUMB_URL
             ),
-          ],
-          BotService.EXTRA_INLINE_RESPONSE
-        );
-      }
+          ]);
+        }
+      });
     });
 
-    this.bot.on('text', async (ctx) => {
-      ctx
-        .reply('Processing...')
-        .then((loader: TelegramMessage.TextMessage) => {
-          this.resolve(ctx.message.text)
-            .then((message: Message) => {
-              ctx.telegram.editMessageText(
-                ctx.from.id,
-                loader.message_id,
-                undefined,
-                message.toString(),
-                {
-                  disable_web_page_preview: true,
-                  parse_mode: 'HTML',
-                }
-              );
+    this.bot.on('text', (ctx) => {
+      this.safeHandling(() => {
+        // avoid messages from the bot
+        if (!this.isMessageFromBot(ctx.message.via_bot, ctx.botInfo)) {
+          ctx
+            .reply('Processing...')
+            .then((loader: TelegramMessage.TextMessage) => {
+              this.resolve(this.extractUrl(ctx.message.text))
+                .then((message: Message) => {
+                  ctx.telegram.editMessageText(
+                    ctx.from.id,
+                    loader.message_id,
+                    undefined,
+                    message.toString(),
+                    {
+                      disable_web_page_preview: true,
+                      parse_mode: 'HTML',
+                      ...Markup.inlineKeyboard([
+                        Markup.button.switchToChat('Forward', ctx.message.text),
+                      ]),
+                    }
+                  );
+                })
+                .catch((error: string) => {
+                  ctx.deleteMessage(loader.message_id);
+                  ctx.reply(error);
+                });
             })
             .catch((error: string) => {
-              ctx.reply(error);
+              console.error('Cannot start processing request.', error);
+              ctx.reply('Cannot start processing request.');
             });
-        })
-        .catch((error: string) => {
-          console.error('Cannot start processing request.', error);
-          ctx.reply('Cannot start processing request.');
-        });
+        }
+      });
     });
+  }
+
+  private safeHandling(unsafeFunction: () => void): void {
+    try {
+      unsafeFunction();
+    } catch (e) {
+      console.error('Unexpected error', e);
+    }
+  }
+
+  private extractUrl(text: string): string {
+    let result: string = text;
+
+    if (text.includes(' ')) {
+      const elements: string[] = text.split(' ');
+
+      const url: string | undefined = elements.find((s: string) =>
+        s.startsWith('http')
+      );
+
+      if (url != undefined) {
+        result = url;
+      }
+    }
+
+    return result;
+  }
+
+  private isMessageFromBot(
+    user: User | undefined,
+    bot: UserFromGetMe
+  ): boolean {
+    return user != undefined && user.is_bot && user.id == bot.id;
   }
 
   private resolve(text: string): Promise<Message> {
@@ -153,6 +185,7 @@ export class BotService {
   private helpMessage(): string {
     return (
       this.smallHelpMessage() +
+      ' You can then forward the same request to the group.' +
       '\n\n' +
       'You can use me inline as well. Just click on the button below or send <code>@ebooks_request_generator_bot link</code>.'
     );

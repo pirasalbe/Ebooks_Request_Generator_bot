@@ -4,6 +4,7 @@ import { AbstractResolver } from '../abstract-resolver';
 import { HtmlUtil } from '../html/html-util';
 import { NullableHtmlElement } from '../html/nullable-html-element';
 import { Message } from '../message';
+import { SiteResolver } from './../site-resolver.enum';
 import { ScribdInformation, ScribdInformationWrapper } from './scribd-information';
 
 export class ScribdResolverService extends AbstractResolver {
@@ -34,7 +35,7 @@ export class ScribdResolverService extends AbstractResolver {
       }
 
       // prepare message
-      const message: Message = new Message();
+      const message: Message = new Message(SiteResolver.SCRIBD);
 
       // main info
       message.setTitle(information.title);
