@@ -17,10 +17,10 @@ export class BotService {
     'https://telegra.ph/file/5b2fad22d5b296b843acf.jpg';
   private static readonly INVALID_THUMB_URL =
     'https://www.downloadclipart.net/large/14121-warning-icon-design.png';
-  private static readonly EXTRA_INLINE_RESPONSE: ExtraAnswerInlineQuery = {
-    switch_pm_text: 'Use in PM',
-    switch_pm_parameter: 'help',
-  };
+//   private static readonly EXTRA_INLINE_RESPONSE: ExtraAnswerInlineQuery = {
+//     switch_pm_text: 'Use in PM',
+//     switch_pm_parameter: 'help',
+//   };
 
   private telegram: Telegram;
   private bot: Telegraf<Context<Update>>;
@@ -73,7 +73,7 @@ export class BotService {
                   BotService.SUCCESSFULL_THUMB_URL
                 ),
               ],
-              BotService.EXTRA_INLINE_RESPONSE
+//Removed per feedack: BotService.EXTRA_INLINE_RESPONSE
             );
           })
           .catch((error: string) => {
@@ -86,7 +86,7 @@ export class BotService {
                   BotService.INVALID_THUMB_URL
                 ),
               ],
-              BotService.EXTRA_INLINE_RESPONSE
+//Removed per feedback: BotService.EXTRA_INLINE_RESPONSE
             );
           });
       } else {
@@ -130,6 +130,10 @@ export class BotService {
                 {
                   disable_web_page_preview: true,
                   parse_mode: 'HTML',
+                  disable_web_page_preview: true, ...Markup.inlineKeyboard([
+                  Markup.button.switchToCurrentChat('New Request', ''),
+                  Markup.button.switchToChat('Forward', ctx.message.text)
+                ])
                 }
               );
             })
@@ -164,7 +168,7 @@ export class BotService {
   }
 
   private smallHelpMessage(): string {
-    return 'Send me an Amazon/Audible/Scribd/Storytel/Archive link to get a well-formatted request ready to be posted in groups.';
+    return 'Send me an Amazon/Audible/Scribd/Storytel/Archive link to get a well-formatted request. You can then forward the same request to the group.';
   }
 
   private helpMessage(): string {
