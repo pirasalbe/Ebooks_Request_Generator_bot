@@ -58,6 +58,10 @@ export class Message {
     else if(this.url?.includes("scribd")) {
       site = "Scribd"
     }
+    else if(this.url?.includes("storytel")) {
+      site = "Storytel"
+    }
+
     // Bookcrush format
     message += '<code>' + Message.title + '</code>' + '\n';
     message += '<code>' + this.author + '</code>' + '\n';

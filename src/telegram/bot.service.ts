@@ -36,7 +36,7 @@ export class BotService {
     this.bot.start((ctx) => {
       ctx.replyWithHTML("Hey, " + ctx.from.first_name + " 👋" + this.helpMessage(), {
         disable_web_page_preview: true, ...Markup.inlineKeyboard([
-          Markup.button.switchToCurrentChat('Make a Request', ''),
+          Markup.button.switchToChat('Make a Request', ''),
         ])
       }
       );
@@ -44,7 +44,7 @@ export class BotService {
     this.bot.help((ctx) => {
       ctx.replyWithHTML("Hey, " + ctx.from.first_name + " 👋" + this.helpMessage(), {
         disable_web_page_preview: true, ...Markup.inlineKeyboard([
-          Markup.button.switchToCurrentChat('Make a Request', ''),
+          Markup.button.switchToChat('Make a Request', ''),
         ])
       }
       );
@@ -67,10 +67,11 @@ export class BotService {
                 // ])
               ),
             ],
-              {
-                switch_pm_text: 'Use in PM',
-                switch_pm_parameter: 'help'
-              });
+              // {
+              //   switch_pm_text: 'Switch to PM',
+              //   switch_pm_parameter: 'help'
+              // }
+              );
           })
           .catch((error: string) => {
             ctx.answerInlineQuery([this.inlineResult('Error!', error + "\n" + ctx.inlineQuery.query, error, 'https://www.downloadclipart.net/large/14121-warning-icon-design.png')]);
@@ -81,14 +82,15 @@ export class BotService {
           this.inlineResult(
             'Incomplete Request!',
             'Incomplete Request!',
-            'Paste an amazon/audible link to request',
+            'Paste an amazon/audible/storytel link to request',
             'https://www.downloadclipart.net/large/14121-warning-icon-design.png', //for invalid requests
           ),
         ],
-          {
-            switch_pm_text: 'Use in PM',
-            switch_pm_parameter: 'help'
-          });
+          // {
+          //   switch_pm_text: 'Switch to PM',
+          //   switch_pm_parameter: 'help'
+          // }
+          );
       }
     });
 
@@ -104,7 +106,7 @@ export class BotService {
             parse_mode: 'HTML',
             disable_web_page_preview: true, ...Markup.inlineKeyboard([
               Markup.button.switchToCurrentChat('New Request', ''),
-              Markup.button.switchToCurrentChat('Repost', ctx.message.text)
+              Markup.button.switchToChat('Forward', ctx.message.text)
             ])
           }
           );
@@ -135,9 +137,9 @@ export class BotService {
   }
 
   private helpMessage(): string {
-    return `\n\nSend me an amazon or audible link to get a well-formatted request ready to be posted in BookCrush:Requests group.
+    return `\n\nSend me an amazon/audible/storytel link to get a well-formatted request. You can then forward the same request to <b>BookCrush: Requests</b> group.
 
-You can use me inline as well. Just click on the button below or send <code>@bkcrushreqbot amazon/audible-link</code>"`;
+You can use me inline as well. Just click on the button below and choose <b>BookCrush: Requests</b> group or send <code>@bkcrushreqbot amazon/audible/storytel-link</code>`;
   }
 
   private inlineResult(
