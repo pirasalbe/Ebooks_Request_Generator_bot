@@ -44,6 +44,8 @@ export class ResolverService implements Resolver {
       resolver = this.resolvers[SiteResolver.SCRIBD];
     } else if (url.hostname.includes('storytel')) {
       resolver = this.resolvers[SiteResolver.STORYTEL];
+    } else if (url.hostname.includes('archive')) {
+      resolver = this.resolvers[SiteResolver.ARCHIVE];
     }
 
     return resolver;
