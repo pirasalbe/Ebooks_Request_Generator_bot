@@ -1,30 +1,42 @@
+import { SiteResolver } from './site-resolver.enum';
 
 export class Message {
   public static readonly AUDIOBOOK_TAG = 'audiobook';
 
-  public static tags: string[]; //made it public to display request type in the inline preview
-  public static title: string | null; //made it public to display title in the inline preview
+  private site: SiteResolver;
+  private tags: string[];
+  private title: string | null;
   private author: string | null;
   private publisher: string;
   private url: string | null;
 
-  constructor() {
-    Message.tags = ['ebook']; //Bookcrush requires #ebook tag
-    Message.title = null;
+  constructor(site: SiteResolver) {
+    this.site = site;
+    this.tags = ['ebook'];
+    this.title = null;
     this.author = null;
     this.publisher = 'Self-Published';
     this.url = null;
   }
 
+  private getSiteName(): string {
+    const name: string = SiteResolver[this.site];
+
+    const firstLetter = name[0].toUpperCase();
+    const otherLetters = name.substr(1).toLowerCase();
+
+    return firstLetter + otherLetters;
+  }
+
   addTag(tag: string): void {
-    if (Message.tags[0] == 'ebook') {
-      Message.tags.pop()
+    if (this.tags[0] == 'ebook') {
+      this.tags.pop()
     }
-    Message.tags.push(tag);
+    this.tags.push(tag);
   }
 
   setTitle(title: string) {
-    Message.title = title;
+    this.title = title;
   }
   
   setAuthor(author: string) {
@@ -63,25 +75,26 @@ export class Message {
     }
 
     // Bookcrush format
-    message += '<code>' + Message.title + '</code>' + '\n';
+    message += '<code>' + this.title + '</code>' + '\n';
     message += '<code>' + this.author + '</code>' + '\n';
     message += '<i>' + this.publisher + '</i>' + '\n\n';
-    let clean_url = this.url?.split("?")[0]
-    message += `<a href = \"` + clean_url + `\">${site} Link</a>`;
-    
-    message += '\n\n';
+    message += '<a href="' + this.url + '">' + this.getSiteName() + ' Link</a>';
+
     // tags
-    for (let i = 0; i < Message.tags.length; i++) {
+    for (let i = 0; i < this.tags.length; i++) {
       if (i > 0) {
         message += '';
       }
-      if (Message.tags[i] != "request") {
-        tags += '#' + Message.tags[i] + ' ';
+      if (this.tags[i] != "request") {
+        tags += '#' + this.tags[i] + ' ';
       }
     }
 
-    message += tags
-
+    message += '\n\n';
     return message;
+  }
+
+  toSmallString(): string {
+    return this.title as string;
   }
 }

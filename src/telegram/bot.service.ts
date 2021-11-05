@@ -1,11 +1,23 @@
-import { url } from 'inspector';
 import { Context, Markup, Telegraf, Telegram } from 'telegraf';
-import { switchToCurrentChat } from 'telegraf/typings/button';
-import { InlineKeyboardMarkup, InlineQueryResult, InlineQueryResultArticle, InputTextMessageContent, Update } from 'typegram';
-import { Message } from '../resolver/message'
+import {
+  InlineQueryResult,
+  InlineQueryResultArticle,
+  InputTextMessageContent,
+  Message as TelegramMessage,
+  Update,
+  User,
+  UserFromGetMe,
+} from 'typegram';
+
+import { Message } from '../resolver/message';
 import { ResolverService } from '../resolver/resolver.service';
 
 export class BotService {
+  private static readonly SUCCESSFULL_THUMB_URL =
+    'https://telegra.ph/file/5b2fad22d5b296b843acf.jpg';
+  private static readonly INVALID_THUMB_URL =
+    'https://www.downloadclipart.net/large/14121-warning-icon-design.png';
+
   private telegram: Telegram;
   private bot: Telegraf<Context<Update>>;
 
@@ -51,70 +63,110 @@ export class BotService {
     });
 
     this.bot.on('inline_query', (ctx) => {
-      if (ctx.inlineQuery.query != '') {
-        this.resolve(ctx.inlineQuery.query)
-          .then((message: Message) => {
-            ctx.answerInlineQuery([
-              this.inlineResult(
-                'Request ' + Message.tags[0].charAt(0).toUpperCase() + Message.tags[0].slice(1),
-                message.toString(),
-                Message.title + '\n' + '',
-                'https://telegra.ph/file/06d1f7c944004bb0dcef1.jpg',
-                // TODO:
-                // Markup.inlineKeyboard([
-                // Markup.button.switchToCurrentChat('New Request', ''),
-                // Markup.button.switchToCurrentChat('Edit Link', ctx.message.text)
-                // ])
-              ),
-            ],
-              // {
-              //   switch_pm_text: 'Switch to PM',
-              //   switch_pm_parameter: 'help'
-              // }
-              );
-          })
-          .catch((error: string) => {
-            ctx.answerInlineQuery([this.inlineResult('Error!', error + "\n" + ctx.inlineQuery.query, error, 'https://www.downloadclipart.net/large/14121-warning-icon-design.png')]);
-          });
-      }
-      else {
-        ctx.answerInlineQuery([
-          this.inlineResult(
-            'Incomplete Request!',
-            'Incomplete Request!',
-            'Paste an amazon/audible/storytel link to request',
-            'https://www.downloadclipart.net/large/14121-warning-icon-design.png', //for invalid requests
-          ),
-        ],
-          // {
-          //   switch_pm_text: 'Switch to PM',
-          //   switch_pm_parameter: 'help'
-          // }
-          );
-      }
+      this.safeHandling(() => {
+        if (ctx.inlineQuery.query != '') {
+          this.resolve(this.extractUrl(ctx.inlineQuery.query))
+            .then((message: Message) => {
+              ctx.answerInlineQuery([
+                this.inlineResult(
+                  'Request',
+                  message.toString(),
+                  message.toSmallString(),
+                  BotService.SUCCESSFULL_THUMB_URL
+                ),
+              ]);
+            })
+            .catch((error: string) => {
+              ctx.answerInlineQuery([
+                this.inlineResult(
+                  'Error!',
+                  error,
+                  error,
+                  BotService.INVALID_THUMB_URL
+                ),
+              ]);
+            });
+        } else {
+          ctx.answerInlineQuery([
+            this.inlineResult(
+              'Incomplete Request!',
+              'Incomplete Request!',
+              this.smallHelpMessage(),
+              BotService.INVALID_THUMB_URL
+            ),
+          ]);
+        }
+      });
     });
 
-    this.bot.on('text', async (ctx) => {
-      // Do not process via_bot messages
-      if(ctx.message.via_bot) {
-        return
-      }
-      let loader = await ctx.reply("Processing...")
-      this.resolve(ctx.message.text)
-        .then(async (message: Message) => {
-          await ctx.telegram.editMessageText(ctx.from.id, loader.message_id, undefined, message.toString(), {
-            parse_mode: 'HTML',
-            disable_web_page_preview: true, ...Markup.inlineKeyboard([
-              Markup.button.switchToCurrentChat('New Request', ''),
-              Markup.button.switchToChat('Forward', ctx.message.text)
-            ])
-          }
-          );
-        })
-        .catch((error: string) => {
-          ctx.reply(error);
-        });
+    this.bot.on('text', (ctx) => {
+      this.safeHandling(() => {
+        // avoid messages from the bot
+        if (!this.isMessageFromBot(ctx.message.via_bot, ctx.botInfo)) {
+          ctx
+            .reply('Processing...')
+            .then((loader: TelegramMessage.TextMessage) => {
+              this.resolve(this.extractUrl(ctx.message.text))
+                .then((message: Message) => {
+                  ctx.telegram.editMessageText(
+                    ctx.from.id,
+                    loader.message_id,
+                    undefined,
+                    message.toString(),
+                    {
+                      disable_web_page_preview: true,
+                      parse_mode: 'HTML',
+                      ...Markup.inlineKeyboard([
+                        Markup.button.switchToChat('Forward', ctx.message.text),
+                      ]),
+                    }
+                  );
+                })
+                .catch((error: string) => {
+                  ctx.deleteMessage(loader.message_id);
+                  ctx.reply(error);
+                });
+            })
+            .catch((error: string) => {
+              console.error('Cannot start processing request.', error);
+              ctx.reply('Cannot start processing request.');
+            });
+        }
+      });
     });
+  }
+
+  private safeHandling(unsafeFunction: () => void): void {
+    try {
+      unsafeFunction();
+    } catch (e) {
+      console.error('Unexpected error', e);
+    }
+  }
+
+  private extractUrl(text: string): string {
+    let result: string = text;
+
+    if (text.includes(' ')) {
+      const elements: string[] = text.replaceAll('\n', ' ').split(' ');
+
+      const url: string | undefined = elements.find((s: string) =>
+        s.startsWith('http')
+      );
+
+      if (url != undefined) {
+        result = url;
+      }
+    }
+
+    return result;
+  }
+
+  private isMessageFromBot(
+    user: User | undefined,
+    bot: UserFromGetMe
+  ): boolean {
+    return user != undefined && user.is_bot && user.id == bot.id;
   }
 
   private resolve(text: string): Promise<Message> {
@@ -135,11 +187,18 @@ export class BotService {
       }
     });
   }
-
+  
+  private smallHelpMessage(): string {
+    return 'Send me an Amazon/Audible/Scribd/Storytel/Archive link to get a well-formatted request ready to be posted in groups.';
+  }
+  
   private helpMessage(): string {
-    return `\n\nSend me an amazon/audible/storytel link to get a well-formatted request. You can then forward the same request to <b>BookCrush: Requests</b> group.
-
-You can use me inline as well. Just click on the button below and choose <b>BookCrush: Requests</b> group or send <code>@bkcrushreqbot amazon/audible/storytel-link</code>`;
+    return (
+      this.smallHelpMessage() +
+      ' You can then forward the same request to the group.' +
+      '\n\n' +
+      'You can use me inline as well. Just click on the button below or send <code>@ebooks_request_generator_bot link</code>.'
+    );
   }
 
   private inlineResult(

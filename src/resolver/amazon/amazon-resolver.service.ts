@@ -7,6 +7,7 @@ import { I18nUtil } from './../../i18n/i18n-util';
 import { Entry } from './../html/entry';
 import { NullableHtmlElement } from './../html/nullable-html-element';
 import { Message } from './../message';
+import { SiteResolver } from './../site-resolver.enum';
 import { AmazonCaptchaResolverService } from './amazon-captcha-resolver.service';
 import { AmazonFormatResolverService } from './amazon-format-resolver.service';
 
@@ -63,7 +64,7 @@ export class AmazonResolverService extends AbstractResolver {
       this.checkRequiredElements([siteLanguage, title, author, details]);
 
       // prepare message
-      const message: Message = new Message();
+      const message: Message = new Message(SiteResolver.AMAZON);
 
       // main info
       message.setTitle(HtmlUtil.getTextContent(title as HTMLElement));
@@ -204,7 +205,8 @@ export class AmazonResolverService extends AbstractResolver {
       .replaceAll('\n', '')
       .replace('&rlm;', '')
       .replace('&lrm;', '')
-      .replace(':', '');
+      .replace(':', '')
+      .trim();
   }
 
   private addLanguageTag(
