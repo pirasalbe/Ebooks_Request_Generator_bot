@@ -138,7 +138,7 @@ export class BotService {
     let result: string = text;
 
     if (text.includes(' ')) {
-      const elements: string[] = text.split(' ');
+      const elements: string[] = text.replaceAll('\n', ' ').split(' ');
 
       const url: string | undefined = elements.find((s: string) =>
         s.startsWith('http')
