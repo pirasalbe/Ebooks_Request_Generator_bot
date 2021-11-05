@@ -14,7 +14,7 @@ import { ResolverService } from '../resolver/resolver.service';
 
 export class BotService {
   private static readonly SUCCESSFULL_THUMB_URL =
-    'https://telegra.ph/file/5b2fad22d5b296b843acf.jpg';
+    'https://telegra.ph/file/06d1f7c944004bb0dcef1.jpg';
   private static readonly INVALID_THUMB_URL =
     'https://www.downloadclipart.net/large/14121-warning-icon-design.png';
 
@@ -191,7 +191,7 @@ export class BotService {
   private smallHelpMessage(): string {
     return 'Send me an Amazon/Audible/Scribd/Storytel/Archive link to get a well-formatted request ready to be posted in groups.';
   }
-  
+
   private helpMessage(): string {
     return (
       this.smallHelpMessage() +

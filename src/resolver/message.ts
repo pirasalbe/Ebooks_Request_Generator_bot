@@ -91,6 +91,7 @@ export class Message {
     }
 
     message += '\n\n';
+    message += tags;
     return message;
   }
 
