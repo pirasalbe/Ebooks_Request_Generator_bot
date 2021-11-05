@@ -70,7 +70,7 @@ It always add the _#scribd_ tag. If it is an audiobook, it also add the _#audiob
 
 Given a Storytel link of either an ebook or an audiobook, it returns the request message.
 
-It always add the _#storytel_tag. If it is an audiobook, it also add the _#audiobook_ tag.
+It always add the _#storytel_ tag. If it is an audiobook, it also add the _#audiobook_ tag.
 
 # Known bugs
 
