@@ -71,8 +71,8 @@ export class BotService {
               ctx.answerInlineQuery([
                 this.inlineResult(
                   'Error!',
-                  error,
-                  error,
+                  String(error),
+                  String(error),
                   BotService.INVALID_THUMB_URL
                 ),
               ]);
@@ -182,12 +182,17 @@ export class BotService {
       const elements: string[] = text.replaceAll('\n', ' ').split(' ');
 
       const url: string | undefined = elements.find((s: string) =>
-        s.startsWith('http')
+        s.includes('http')
       );
 
       if (url != undefined) {
         result = url;
       }
+    }
+
+    const index: number = result.indexOf('http');
+    if (index > 0) {
+      result = result.substr(index);
     }
 
     return result;
