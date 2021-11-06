@@ -13,6 +13,14 @@ export type StorytelInformation = StorytelElement & {
   inLanguage: string;
 };
 
+export type StorytelAuthor = {
+  name: string;
+};
+
+export type StorytelPublisher = {
+  name: string;
+};
+
 export class StorytelInformationWrapper {
   private book: StorytelInformation;
   private audiobook: StorytelInformation;
@@ -64,8 +72,8 @@ export class StorytelInformationWrapper {
     return this.audiobook.inLanguage;
   }
 
-  getLanguage(): string {
-    let language: string | undefined;
+  getLanguage(): string | null {
+    let language: string | null = null;
 
     const code = this.getLanguageCode().toUpperCase();
 
@@ -75,19 +83,20 @@ export class StorytelInformationWrapper {
           c.areaServed == code && c.availableLanguage.length > 0
       );
 
+    let contactPointLanguage: string | undefined;
     if (contactPoint != undefined) {
-      language = contactPoint.availableLanguage.find(
+      contactPointLanguage = contactPoint.availableLanguage.find(
         (l: string) =>
           contactPoint.availableLanguage.length == 1 ||
           l.toLowerCase() != I18nUtil.ENGLISH
       );
     }
 
-    if (language == undefined) {
-      language = I18nUtil.ENGLISH;
+    if (contactPointLanguage != undefined) {
+      language = contactPointLanguage.toLowerCase();
     }
 
-    return language.toLowerCase();
+    return language;
   }
 }
 
@@ -101,10 +110,25 @@ export type StorytelOrganizationContactPoint = {
   availableLanguage: string[];
 };
 
-export type StorytelAuthor = {
-  name: string;
+export type StorytelDetailsWrapper = {
+  component: string;
+  props: StorytelDetails;
 };
 
-export type StorytelPublisher = {
+export type StorytelDetails = {
+  book: StorytelDetailsBook;
+  countryIso: string;
+  language: string;
+};
+
+export type StorytelDetailsBook = {
+  language: StorytelDetailsBookLanguage;
+  originalTitle: string;
+  title: string;
+  id: string;
+};
+
+export type StorytelDetailsBookLanguage = {
+  id: string;
   name: string;
 };

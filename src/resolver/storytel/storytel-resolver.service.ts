@@ -3,9 +3,12 @@ import { HTMLElement } from 'node-html-parser';
 import { AbstractResolver } from '../abstract-resolver';
 import { HtmlUtil } from '../html/html-util';
 import { Message } from '../message';
+import { I18nUtil } from './../../i18n/i18n-util';
 import { NullableHtmlElement } from './../html/nullable-html-element';
 import { SiteResolver } from './../site-resolver.enum';
 import {
+  StorytelDetails,
+  StorytelDetailsWrapper,
   StorytelElement,
   StorytelInformation,
   StorytelInformationWrapper,
@@ -14,6 +17,12 @@ import {
 
 export class StorytelResolverService extends AbstractResolver {
   private static readonly CONTENT_ID = 'script[type="application/ld+json"]';
+
+  private static readonly LANGUAGE_CONTENT_ID = 'script[type="module"]';
+  private static readonly LANGUAGE_START_INDEX =
+    'requestIdleCallback(function(){         $$ejs(';
+  private static readonly LANGUAGE_END_INDEX = ',})}, {timeout: 1000});';
+
   private static readonly DETAIL_ID = '.detail-header';
   private static readonly BOOK_ID = '.icon-glasses';
   private static readonly AUDIOBOOK_ID = '.icon-headphones';
@@ -30,13 +39,17 @@ export class StorytelResolverService extends AbstractResolver {
 
       this.checkRequiredElements(content, 'No information available.');
 
+      const languageNullable: NullableHtmlElement = html.querySelector(
+        StorytelResolverService.LANGUAGE_CONTENT_ID
+      );
+
       const detailsNullable: NullableHtmlElement = html.querySelector(
         StorytelResolverService.DETAIL_ID
       );
 
       this.checkRequiredElements(
-        [detailsNullable],
-        'Cannot determine the format.'
+        [languageNullable, detailsNullable],
+        'Cannot determine the format and the language.'
       );
 
       const details: HTMLElement = detailsNullable as HTMLElement;
@@ -47,6 +60,8 @@ export class StorytelResolverService extends AbstractResolver {
       const audiobookIcon: NullableHtmlElement = details.querySelector(
         StorytelResolverService.AUDIOBOOK_ID
       );
+
+      const languageElement: HTMLElement = languageNullable as HTMLElement;
 
       const information: StorytelInformationWrapper =
         this.getStorytelInformation(content);
@@ -67,13 +82,83 @@ export class StorytelResolverService extends AbstractResolver {
         message.addTag(Message.AUDIOBOOK_TAG);
       }
 
-      const language: string = information.getLanguage();
+      let language: string | null = information.getLanguage();
+      if (!this.isLanguageDefined(language)) {
+        language = this.getLanguageInformation(languageElement);
+      }
+
       if (this.isLanguageTagRequired(language)) {
-        message.addTag(language);
+        message.addTag(language as string);
       }
 
       resolve(message);
     });
+  }
+
+  private getLanguageInformation(languageElement: HTMLElement): string {
+    let result: string = I18nUtil.ENGLISH;
+
+    const script: string = HtmlUtil.getRawText(languageElement).replaceAll(
+      '\n',
+      ' '
+    );
+
+    const start: number = script.indexOf(
+      StorytelResolverService.LANGUAGE_START_INDEX
+    );
+    const end: number = script.indexOf(
+      StorytelResolverService.LANGUAGE_END_INDEX
+    );
+
+    if (start > -1 && end > -1) {
+      const details: StorytelDetails | null = this.getStorytelDetails(
+        script,
+        start,
+        end
+      );
+
+      if (details != null && details.book.language.name != '') {
+        result = details.book.language.name.toLowerCase();
+      }
+    }
+
+    return result;
+  }
+
+  private getStorytelDetails(
+    script: string,
+    start: number,
+    end: number
+  ): StorytelDetails | null {
+    let result: StorytelDetails | null = null;
+
+    // {'bookcoverkrbmfsKpzJ' : { 'component' : 'BookCover.df2df6a9.js', 'props'
+    const jsonString: string =
+      script
+        .substring(
+          start + StorytelResolverService.LANGUAGE_START_INDEX.length,
+          end
+        )
+        .replaceAll("{'", '{"')
+        .replaceAll("},'", '},"')
+        .replaceAll("' : { 'component' : '", '" : { "component" : "')
+        .replaceAll("', 'props'", '", "props"') + '}';
+
+    const json: any = JSON.parse(jsonString);
+
+    const keys: string[] = Object.keys(json);
+    for (let i = 0; i < keys.length && result == null; i++) {
+      const key = keys[i];
+      if (key.startsWith('bookselect')) {
+        const wrapper: StorytelDetailsWrapper = json[
+          key
+        ] as StorytelDetailsWrapper;
+
+        result = wrapper.props;
+      }
+    }
+
+    return result;
   }
 
   private getStorytelInformation(
