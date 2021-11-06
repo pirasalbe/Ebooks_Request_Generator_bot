@@ -50,16 +50,24 @@ export class Message {
     this.url = url;
   }
 
+  private toTagsString(start = 0): string {
+    let tags = '';
+
+    for (let i = start; i < this.tags.length; i++) {
+      if (i > start) {
+        tags += ' ';
+      }
+      tags += '#' + this.tags[i];
+    }
+
+    return tags;
+  }
+
   toString(): string {
     let message = '';
 
     // tags
-    for (let i = 0; i < this.tags.length; i++) {
-      if (i > 0) {
-        message += ' ';
-      }
-      message += '#' + this.tags[i];
-    }
+    message += this.toTagsString();
 
     message += '\n\n';
 
@@ -72,7 +80,11 @@ export class Message {
     return message;
   }
 
-  toSmallString(): string {
+  toTileString(): string {
+    return this.toTagsString(1);
+  }
+
+  toDetailsString(): string {
     return this.title as string;
   }
 }

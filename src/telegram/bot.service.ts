@@ -60,9 +60,9 @@ export class BotService {
             .then((message: Message) => {
               ctx.answerInlineQuery([
                 this.inlineResult(
-                  'Request',
+                  'Request ' + message.toTileString(),
                   message.toString(),
-                  message.toSmallString(),
+                  message.toDetailsString(),
                   BotService.SUCCESSFULL_THUMB_URL
                 ),
               ]);
