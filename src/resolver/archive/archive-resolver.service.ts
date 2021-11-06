@@ -1,4 +1,5 @@
 import { HTMLElement } from 'node-html-parser';
+import { URL } from 'url';
 
 import { AbstractResolver } from '../abstract-resolver';
 import { Message } from '../message';
@@ -14,8 +15,8 @@ export class ArchiveResolverService extends AbstractResolver {
     super();
   }
 
-  extractMessage(html: HTMLElement): Promise<Message> {
-    return new Promise<Message>((resolve) => {
+  extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {
+    return new Promise<Message[]>((resolve) => {
       const containers: HTMLElement[] = html.querySelectorAll(
         ArchiveResolverService.CONTAINERS_ID
       );
@@ -27,7 +28,7 @@ export class ArchiveResolverService extends AbstractResolver {
       // 2- details (list of DETAILS_ID)
 
       // prepare message
-      const message: Message = new Message(SiteResolver.ARCHIVE);
+      const message: Message = new Message(SiteResolver.ARCHIVE, url);
 
       // main info
       // message.setTitle(information.getTitle());
@@ -47,7 +48,7 @@ export class ArchiveResolverService extends AbstractResolver {
       //   message.addTag(language);
       // }
 
-      resolve(message);
+      resolve([message]);
     });
   }
 }
