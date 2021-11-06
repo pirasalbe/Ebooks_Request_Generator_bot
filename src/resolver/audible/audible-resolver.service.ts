@@ -1,4 +1,5 @@
 import { HTMLElement } from 'node-html-parser';
+import { URL } from 'url';
 
 import { AbstractResolver } from '../abstract-resolver';
 import { NullableHtmlElement } from '../html/nullable-html-element';
@@ -16,21 +17,9 @@ export class AudibleResolverService extends AbstractResolver {
     super();
   }
 
-  resolve(url: string): Promise<Message[]> {
-    // remove previously added override
-    url = url
-      .replace('&' + AudibleResolverService.OVERRIDE_LANGUAGE + '=false', '')
-      .replace('?' + AudibleResolverService.OVERRIDE_LANGUAGE + '=false', '');
-
-    if (!url.includes(AudibleResolverService.OVERRIDE_LANGUAGE + '=true')) {
-      // add override
-      if (url.includes('?')) {
-        url += '&';
-      } else {
-        url += '?';
-      }
-      url += AudibleResolverService.OVERRIDE_LANGUAGE + '=true';
-    }
+  resolve(url: URL): Promise<Message[]> {
+    // add override to avoid redirection
+    url.searchParams.set(AudibleResolverService.OVERRIDE_LANGUAGE, 'true');
 
     return super.resolve(url);
   }

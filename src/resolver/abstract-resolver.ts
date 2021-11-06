@@ -1,6 +1,7 @@
 import * as http from 'http';
 import * as https from 'https';
 import { HTMLElement } from 'node-html-parser';
+import { URL } from 'url';
 
 import { I18nUtil } from './../i18n/i18n-util';
 import { HtmlUtil } from './html/html-util';
@@ -15,10 +16,11 @@ export abstract class AbstractResolver implements Resolver {
 
   protected constructor() {
     this.cookies = new Map<string, string>();
+    this.cookies.set('accept-language', 'en-US,en;q=0.9');
     this.cookiesHeader = '';
   }
 
-  resolve(url: string): Promise<Message[]> {
+  resolve(url: URL): Promise<Message[]> {
     return new Promise<Message[]>((resolve, reject) => {
       https.get(
         url,
@@ -59,7 +61,7 @@ export abstract class AbstractResolver implements Resolver {
   }
 
   private processResponse(
-    url: string,
+    url: URL,
     response: http.IncomingMessage
   ): Promise<Message[]> {
     return new Promise<Message[]>((resolve, reject) => {
@@ -70,7 +72,7 @@ export abstract class AbstractResolver implements Resolver {
           .catch((error) => reject(error));
       } else if (response.statusCode == 301 || response.statusCode == 302) {
         // redirect
-        this.resolve(response.headers.location as string)
+        this.resolve(new URL(response.headers.location as string))
           .then((messages: Message[]) => resolve(messages))
           .catch((error) => reject(error));
       } else {
@@ -81,7 +83,7 @@ export abstract class AbstractResolver implements Resolver {
   }
 
   private processSuccessfulResponse(
-    url: string,
+    url: URL,
     response: http.IncomingMessage
   ): Promise<Message[]> {
     return HttpUtil.processSuccessfulResponse(response, (data: string) => {
@@ -93,13 +95,13 @@ export abstract class AbstractResolver implements Resolver {
     });
   }
 
-  private processPage(url: string, data: string): Promise<Message[]> {
+  private processPage(url: URL, data: string): Promise<Message[]> {
     return new Promise<Message[]>((resolve, reject) => {
       try {
         this.extractMessages(HtmlUtil.parseHTML(data as string))
           .then((messages: Message[]) => {
             for (const message of messages) {
-              message.setUrl(url);
+              message.setUrl(url.toString());
             }
             resolve(messages);
           })

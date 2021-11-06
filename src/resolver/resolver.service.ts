@@ -4,19 +4,19 @@ import { Message } from './message';
 import { Resolver } from './resolver';
 import { SiteResolver } from './site-resolver.enum';
 
-export class ResolverService implements Resolver {
+export class ResolverService {
   private resolvers: Record<SiteResolver, Resolver>;
 
   constructor(resolvers: Record<SiteResolver, Resolver>) {
     this.resolvers = resolvers;
   }
 
-  resolve(url: string): Promise<Message[]> {
+  resolve(link: string): Promise<Message[]> {
     let result: Promise<Message[]>;
 
-    const urlObject = new URL(url);
+    const url = new URL(link);
 
-    const resolver: Resolver | null = this.getResolver(urlObject);
+    const resolver: Resolver | null = this.getResolver(url);
     if (resolver) {
       result = resolver.resolve(url);
     } else {
