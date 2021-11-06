@@ -11,13 +11,21 @@ import { Message } from './message';
 import { Resolver } from './resolver';
 
 export abstract class AbstractResolver implements Resolver {
-  protected cookies: Map<string, string>;
-  protected cookiesHeader: string;
+  /**
+   * key: hostname
+   * value: map of cookies
+   */
+  protected cookies: Map<string, Map<string, string>>;
+
+  /**
+   * key: hostname
+   * value: cookieString
+   */
+  protected cookiesHeaders: Map<string, string>;
 
   protected constructor() {
-    this.cookies = new Map<string, string>();
-    this.cookies.set('accept-language', 'en-US,en;q=0.9');
-    this.cookiesHeader = '';
+    this.cookies = new Map<string, Map<string, string>>();
+    this.cookiesHeaders = new Map<string, string>();
   }
 
   resolve(url: URL): Promise<Message[]> {
@@ -28,11 +36,12 @@ export abstract class AbstractResolver implements Resolver {
           headers: {
             'User-Agent': HttpUtil.USER_AGENT_VALUE,
             'Accept-Encoding': HttpUtil.ACCEPT_ENCODING,
-            Cookie: this.cookiesHeader,
+            'Accept-Language': 'en-US,en;q=0.9',
+            Cookie: this.getHostCookiesHeader(url.hostname),
           },
         },
         (response: http.IncomingMessage) => {
-          this.updateCookies(response.headers);
+          this.updateCookies(url.hostname, response.headers);
           this.processResponse(url, response)
             .then((messages: Message[]) => resolve(messages))
             .catch((error) => reject(error));
@@ -41,7 +50,26 @@ export abstract class AbstractResolver implements Resolver {
     });
   }
 
-  private updateCookies(headers: http.IncomingHttpHeaders): void {
+  private getHostCookiesHeader(host: string): string {
+    let header: string | undefined = this.cookiesHeaders.get(host);
+
+    if (header == undefined) {
+      header = '';
+    }
+
+    return header;
+  }
+
+  private getHostCookies(host: string): Map<string, string> {
+    if (!this.cookies.has(host)) {
+      this.cookies.set(host, new Map<string, string>());
+    }
+
+    return this.cookies.get(host) as Map<string, string>;
+  }
+
+  private updateCookies(host: string, headers: http.IncomingHttpHeaders): void {
+    const hostCookies: Map<string, string> = this.getHostCookies(host);
     const setCookie: string[] | undefined = headers['set-cookie'];
 
     if (setCookie != undefined && setCookie.length > 0) {
@@ -49,14 +77,14 @@ export abstract class AbstractResolver implements Resolver {
         const cookieInfo: string = cookies.split(';')[0];
         const cookiePart: string[] = cookieInfo.split('=');
 
-        this.cookies.set(cookiePart[0], cookiePart[1]);
+        hostCookies.set(cookiePart[0], cookiePart[1]);
       }
 
       const cookiesArray: string[] = [];
-      this.cookies.forEach((value: string, key: string) => {
+      hostCookies.forEach((value: string, key: string) => {
         cookiesArray.push(key + '=' + value);
       });
-      this.cookiesHeader = cookiesArray.join('; ');
+      this.cookiesHeaders.set(host, cookiesArray.join('; '));
     }
   }
 

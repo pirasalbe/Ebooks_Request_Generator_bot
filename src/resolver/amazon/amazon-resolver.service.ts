@@ -38,7 +38,7 @@ export class AmazonResolverService extends AbstractResolver {
   extractMessages(html: HTMLElement): Promise<Message[]> {
     return new Promise<Message[]>((resolve) => {
       // captcha
-      this.amazonCaptchaResolverService.checkCaptcha(html, this.cookiesHeader);
+      this.amazonCaptchaResolverService.checkCaptcha(html, this.cookiesHeaders);
 
       // checks
       const kindleFormat: NullableHtmlElement = html.querySelector(
