@@ -4,6 +4,7 @@ import {
   InlineQueryResultArticle,
   InputTextMessageContent,
   Message as TelegramMessage,
+  MessageEntity,
   Update,
   User,
   UserFromGetMe,
@@ -55,7 +56,7 @@ export class BotService {
     this.bot.on('inline_query', (ctx) => {
       this.safeHandling(() => {
         if (ctx.inlineQuery.query != '') {
-          this.resolve(this.extractUrl(ctx.inlineQuery.query))
+          this.resolve(this.extractUrlFromText(ctx.inlineQuery.query))
             .then((message: Message) => {
               ctx.answerInlineQuery([
                 this.inlineResult(
@@ -96,7 +97,9 @@ export class BotService {
           ctx
             .reply('Processing...')
             .then((loader: TelegramMessage.TextMessage) => {
-              this.resolve(this.extractUrl(ctx.message.text))
+              this.resolve(
+                this.extractUrl(ctx.message.text, ctx.message.entities)
+              )
                 .then((message: Message) => {
                   ctx.telegram.editMessageText(
                     ctx.from.id,
@@ -134,7 +137,45 @@ export class BotService {
     }
   }
 
-  private extractUrl(text: string): string {
+  private extractUrl(text: string, entities: MessageEntity[] = []): string {
+    let result: string | null = null;
+
+    // check entities
+    if (entities.length > 0) {
+      result = this.extractUrlFromEntities(text, entities);
+    }
+
+    // no url found, check text
+    if (result == null) {
+      result = this.extractUrlFromText(text);
+    }
+
+    return result;
+  }
+
+  private extractUrlFromEntities(
+    text: string,
+    entities: MessageEntity[]
+  ): string | null {
+    let result: string | null = null;
+
+    const textLinkEntity: MessageEntity | undefined = entities.find(
+      (e: MessageEntity) => e.type == 'text_link'
+    );
+    const urlEntity: MessageEntity | undefined = entities.find(
+      (e: MessageEntity) => e.type == 'url'
+    );
+    if (textLinkEntity != undefined) {
+      const entity = textLinkEntity as MessageEntity.TextLinkMessageEntity;
+      result = entity.url;
+    } else if (urlEntity != undefined) {
+      result = text.substr(urlEntity.offset, urlEntity.length);
+    }
+
+    return result;
+  }
+
+  private extractUrlFromText(text: string): string {
     let result: string = text;
 
     if (text.includes(' ')) {
