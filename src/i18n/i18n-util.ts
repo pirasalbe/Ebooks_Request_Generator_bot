@@ -26,7 +26,7 @@ export class I18nUtil {
       spanish: 'spanisch',
     }),
     fr: new LanguageStrings('langue', 'éditeur', {
-      english: 'inglés',
+      english: 'anglais',
       italian: 'italien',
       german: 'allemand',
       french: 'français',
