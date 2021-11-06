@@ -27,6 +27,8 @@ export class AmazonResolverService extends AbstractResolver {
 
   private static readonly KINDLE = 'kindle';
 
+  private static readonly URL_PREFIX = '/dp/';
+
   private amazonFormatResolverService: AmazonFormatResolverService;
   private amazonCaptchaResolverService: AmazonCaptchaResolverService;
 
@@ -78,13 +80,14 @@ export class AmazonResolverService extends AbstractResolver {
       this.setDetails(message, siteLanguage, details as HTMLElement);
 
       // tags
-      this.addKindleUnlimitedTag(message, html)
+      const asin: string = this.getAsin(url);
+      this.addKindleUnlimitedTag(message, asin, html)
         .then(() => resolve([message]))
         .catch(() => resolve([message]));
     });
   }
 
-  getSiteLanguage(siteLanguageElements: HTMLElement[]): string {
+  private getSiteLanguage(siteLanguageElements: HTMLElement[]): string {
     let languageText = '';
     let index = -1;
 
@@ -136,13 +139,25 @@ export class AmazonResolverService extends AbstractResolver {
     return author;
   }
 
+  private getAsin(url: URL): string {
+    const path: string = url.pathname;
+
+    const index: number = path.indexOf(AmazonResolverService.URL_PREFIX);
+    if (index < 0) {
+      throw 'Cannot parse the url properly.';
+    }
+
+    return path.substr(index + AmazonResolverService.URL_PREFIX.length, 10);
+  }
+
   private addKindleUnlimitedTag(
     message: Message,
+    asin: string,
     html: HTMLElement
   ): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.amazonFormatResolverService
-        .isKindleUnlimited(html)
+        .isKindleUnlimited(asin, html)
         .then((exists: boolean) => {
           if (exists) {
             message.addTag('KU');
