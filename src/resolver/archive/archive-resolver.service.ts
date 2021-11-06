@@ -14,6 +14,8 @@ import { ArchiveInformation } from './archive-information';
 export class ArchiveResolverService extends AbstractResolver {
   private static readonly SITE_LANGUAGE = 'en';
 
+  private static readonly FORMAT_ID = '[itemtype="http://schema.org/Book"]';
+
   private static readonly CONTAINERS_ID = '.thats-left.item-details-metadata';
 
   private static readonly TITLE_ID = '.item-title';
@@ -28,6 +30,14 @@ export class ArchiveResolverService extends AbstractResolver {
 
   extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {
     return new Promise<Message[]>((resolve) => {
+      const format: NullableHtmlElement = html.querySelector(
+        ArchiveResolverService.FORMAT_ID
+      );
+
+      if (format == null) {
+        throw 'Provided link is not of an ebook.';
+      }
+
       const containers: HTMLElement[] = html.querySelectorAll(
         ArchiveResolverService.CONTAINERS_ID
       );
@@ -51,8 +61,6 @@ export class ArchiveResolverService extends AbstractResolver {
       message.setTitle(HtmlUtil.getTextContent(information.header.title));
 
       message.setAuthor(HtmlUtil.getTextContent(author as HTMLElement));
-
-      // message.setPublisher(information.getPublisher());
 
       // tags
       message.addTag('archive');
@@ -116,14 +124,9 @@ export class ArchiveResolverService extends AbstractResolver {
       ArchiveResolverService.DETAILS_ID
     );
 
-    // TODO cicle metadata
-    // look for:
-    // * publisher if it is null
-    // * language
     for (let i = 0; i < metadata.length && (!language || !publisher); i++) {
       const element = metadata[i];
       const entry: Entry<string, string> = this.getDetailElement(element);
-      console.log(entry);
       const key: string | null = I18nUtil.getKey(
         ArchiveResolverService.SITE_LANGUAGE,
         entry.getKey()

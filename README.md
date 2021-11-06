@@ -72,6 +72,12 @@ Given a Storytel link of either an ebook or an audiobook, it returns the request
 
 It always add the _#storytel_ tag. If it is an audiobook, it also add the _#audiobook_ tag.
 
+### Extract message from Archive
+
+Given a Archive link of an ebook, it returns the request message.
+
+It always add the _#archive_ tag.
+
 # Known bugs
 
 - Cannot get language information from Scribd links
