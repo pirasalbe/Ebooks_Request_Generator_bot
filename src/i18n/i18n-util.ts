@@ -4,63 +4,35 @@ export class I18nUtil {
   public static readonly ENGLISH: string = 'english';
 
   private static readonly LANGUAGES: Record<string, LanguageStrings> = {
-    '.us': new LanguageStrings('language', 'publisher', {
+    en: new LanguageStrings('language', 'publisher', {
       english: I18nUtil.ENGLISH,
       italian: 'italian',
       german: 'german',
       french: 'french',
       spanish: 'spanish',
     }),
-    '.co.uk': new LanguageStrings('language', 'publisher', {
-      english: I18nUtil.ENGLISH,
-      italian: 'italian',
-      german: 'german',
-      french: 'french',
-      spanish: 'spanish',
-    }),
-    '.ca': new LanguageStrings('language', 'publisher', {
-      english: I18nUtil.ENGLISH,
-      italian: 'italian',
-      german: 'german',
-      french: 'french',
-      spanish: 'spanish',
-    }),
-    '.com.au': new LanguageStrings('language', 'publisher', {
-      english: I18nUtil.ENGLISH,
-      italian: 'italian',
-      german: 'german',
-      french: 'french',
-      spanish: 'spanish',
-    }),
-    '.in': new LanguageStrings('language', 'publisher', {
-      english: I18nUtil.ENGLISH,
-      italian: 'italian',
-      german: 'german',
-      french: 'french',
-      spanish: 'spanish',
-    }),
-    '.it': new LanguageStrings('lingua', 'editore', {
+    it: new LanguageStrings('lingua', 'editore', {
       english: 'inglese',
       italian: 'italiano',
       german: 'tedesco',
       french: 'francese',
       spanish: 'spagnolo',
     }),
-    '.de': new LanguageStrings('sprache', 'herausgeber', {
+    de: new LanguageStrings('sprache', 'herausgeber', {
       english: 'englisch',
       italian: 'italienisch',
       german: 'deutsch',
       french: 'französisch',
       spanish: 'spanisch',
     }),
-    '.fr': new LanguageStrings('langue', 'éditeur', {
-      english: 'inglés',
+    fr: new LanguageStrings('langue', 'éditeur', {
+      english: 'anglais',
       italian: 'italien',
       german: 'allemand',
       french: 'français',
       spanish: 'espagnol',
     }),
-    '.es': new LanguageStrings('idioma', 'editorial', {
+    es: new LanguageStrings('idioma', 'editorial', {
       english: 'inglés',
       italian: 'italiano',
       german: 'aleman',
