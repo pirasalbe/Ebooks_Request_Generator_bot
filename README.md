@@ -76,7 +76,7 @@ It always add the _#storytel_ tag. If it is an audiobook, it also add the _#audi
 
 - Cannot get language information from Scribd links
 
-- Cannot get informations from some Storytel url ([example](https://www.storytel.com/in/en/books/770401-Pradnyavant-2---Pardeshi))
+- Cannot get informations from some Storytel links ([example](https://www.storytel.com/in/en/books/770401-Pradnyavant-2---Pardeshi))
 
 # Instructions
 
