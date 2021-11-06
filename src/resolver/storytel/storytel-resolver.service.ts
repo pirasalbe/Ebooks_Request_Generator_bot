@@ -1,4 +1,5 @@
 import { HTMLElement } from 'node-html-parser';
+import { URL } from 'url';
 
 import { AbstractResolver } from '../abstract-resolver';
 import { HtmlUtil } from '../html/html-util';
@@ -32,7 +33,7 @@ export class StorytelResolverService extends AbstractResolver {
     super();
   }
 
-  extractMessages(html: HTMLElement): Promise<Message[]> {
+  extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {
     return new Promise<Message[]>((resolve) => {
       const content: HTMLElement[] = html.querySelectorAll(
         StorytelResolverService.CONTENT_ID
@@ -68,7 +69,7 @@ export class StorytelResolverService extends AbstractResolver {
         this.getStorytelInformation(content);
 
       // prepare message
-      const message: Message = new Message(SiteResolver.STORYTEL);
+      const message: Message = new Message(SiteResolver.STORYTEL, url);
 
       // main info
       message.setTitle(information.getTitle());

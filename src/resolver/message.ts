@@ -1,3 +1,5 @@
+import { URL } from 'url';
+
 import { SiteResolver } from './site-resolver.enum';
 
 export class Message {
@@ -8,19 +10,19 @@ export class Message {
   private title: string | null;
   private author: string | null;
   private publisher: string;
-  private url: string | null;
+  private url: URL;
 
-  constructor(site: SiteResolver) {
+  constructor(site: SiteResolver, url: URL) {
     this.site = site;
     this.tags = ['request'];
     this.title = null;
     this.author = null;
     this.publisher = 'Self-Published';
-    this.url = null;
+    this.url = url;
   }
 
   clone(): Message {
-    const clone: Message = new Message(this.site);
+    const clone: Message = new Message(this.site, this.url);
 
     clone.tags = [];
     for (const tag of this.tags) {
@@ -30,7 +32,6 @@ export class Message {
     clone.title = this.title;
     clone.author = this.author;
     clone.publisher = this.publisher;
-    clone.url = this.url;
 
     return clone;
   }
@@ -62,7 +63,7 @@ export class Message {
     }
   }
 
-  setUrl(url: string) {
+  setUrl(url: URL) {
     this.url = url;
   }
 
@@ -91,7 +92,12 @@ export class Message {
     message += '<code>' + this.title + '</code>' + '\n';
     message += '<code>' + this.author + '</code>' + '\n';
     message += '<i>' + this.publisher + '</i>' + '\n\n';
-    message += '<a href="' + this.url + '">' + this.getSiteName() + ' Link</a>';
+    message +=
+      '<a href="' +
+      this.url.toString() +
+      '">' +
+      this.getSiteName() +
+      ' Link</a>';
 
     return message;
   }

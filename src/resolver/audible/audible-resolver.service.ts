@@ -24,7 +24,7 @@ export class AudibleResolverService extends AbstractResolver {
     return super.resolve(url);
   }
 
-  extractMessages(html: HTMLElement): Promise<Message[]> {
+  extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {
     return new Promise<Message[]>((resolve) => {
       const bottom: NullableHtmlElement = html.querySelector(
         AudibleResolverService.BOTTOM_ID
@@ -37,7 +37,7 @@ export class AudibleResolverService extends AbstractResolver {
       );
 
       // prepare message
-      const message: Message = new Message(SiteResolver.AUDIBLE);
+      const message: Message = new Message(SiteResolver.AUDIBLE, url);
 
       // main info
       message.setTitle(information.name);

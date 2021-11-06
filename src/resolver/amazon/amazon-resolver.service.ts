@@ -1,4 +1,5 @@
 import { HTMLElement } from 'node-html-parser';
+import { URL } from 'url';
 
 import { LanguageStrings } from '../../i18n/language-strings';
 import { AbstractResolver } from '../abstract-resolver';
@@ -38,7 +39,7 @@ export class AmazonResolverService extends AbstractResolver {
     this.amazonCaptchaResolverService = amazonCaptchaResolverService;
   }
 
-  extractMessages(html: HTMLElement): Promise<Message[]> {
+  extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {
     return new Promise<Message[]>((resolve) => {
       // captcha
       this.amazonCaptchaResolverService.checkCaptcha(html, this.cookiesHeaders);
@@ -69,7 +70,7 @@ export class AmazonResolverService extends AbstractResolver {
       this.checkRequiredElements([title, author, details]);
 
       // prepare message
-      const message: Message = new Message(SiteResolver.AMAZON);
+      const message: Message = new Message(SiteResolver.AMAZON, url);
 
       // main info
       message.setTitle(HtmlUtil.getTextContent(title as HTMLElement));
