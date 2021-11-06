@@ -6,7 +6,7 @@ export class AmazonCaptchaResolverService {
   private static readonly CAPTCHA_FORM_ID =
     'form[action="/errors/validateCaptcha"]';
 
-  checkCaptcha(html: HTMLElement, cookies: string): void {
+  checkCaptcha(html: HTMLElement, cookies: Map<string, string>): void {
     const captchaForm: NullableHtmlElement = html.querySelector(
       AmazonCaptchaResolverService.CAPTCHA_FORM_ID
     );

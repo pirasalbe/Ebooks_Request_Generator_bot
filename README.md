@@ -76,6 +76,8 @@ It always add the _#storytel_ and _#audiobook_ tags.
 
 - Cannot get language information from Scribd links
 
+- Cannot get informations from some Storytel url ([example](https://www.storytel.com/in/en/books/770401-Pradnyavant-2---Pardeshi))
+
 # Instructions
 
 ## Build

@@ -4,6 +4,7 @@ import {
   InlineQueryResultArticle,
   InputTextMessageContent,
   Message as TelegramMessage,
+  MessageEntity,
   Update,
   User,
   UserFromGetMe,
@@ -55,23 +56,32 @@ export class BotService {
     this.bot.on('inline_query', (ctx) => {
       this.safeHandling(() => {
         if (ctx.inlineQuery.query != '') {
-          this.resolve(this.extractUrl(ctx.inlineQuery.query))
-            .then((message: Message) => {
-              ctx.answerInlineQuery([
-                this.inlineResult(
-                  'Request',
-                  message.toString(),
-                  message.toSmallString(),
-                  BotService.SUCCESSFULL_THUMB_URL
-                ),
-              ]);
+          this.resolve(this.extractUrlFromText(ctx.inlineQuery.query))
+            .then((messages: Message[]) => {
+              const inlineResults: InlineQueryResult[] = [];
+
+              for (let i = 0; i < messages.length; i++) {
+                const message: Message = messages[i];
+
+                inlineResults.push(
+                  this.inlineResult(
+                    'Request ' + message.toTileString(),
+                    message.toString(),
+                    message.toDetailsString(),
+                    BotService.SUCCESSFULL_THUMB_URL,
+                    String(i)
+                  )
+                );
+              }
+
+              ctx.answerInlineQuery(inlineResults);
             })
             .catch((error: string) => {
               ctx.answerInlineQuery([
                 this.inlineResult(
                   'Error!',
-                  error,
-                  error,
+                  String(error),
+                  String(error),
                   BotService.INVALID_THUMB_URL
                 ),
               ]);
@@ -96,21 +106,20 @@ export class BotService {
           ctx
             .reply('Processing...')
             .then((loader: TelegramMessage.TextMessage) => {
-              this.resolve(this.extractUrl(ctx.message.text))
-                .then((message: Message) => {
-                  ctx.telegram.editMessageText(
-                    ctx.from.id,
-                    loader.message_id,
-                    undefined,
-                    message.toString(),
-                    {
+              this.resolve(
+                this.extractUrl(ctx.message.text, ctx.message.entities)
+              )
+                .then((messages: Message[]) => {
+                  ctx.deleteMessage(loader.message_id);
+                  for (const message of messages) {
+                    ctx.reply(message.toString(), {
                       disable_web_page_preview: true,
                       parse_mode: 'HTML',
                       ...Markup.inlineKeyboard([
                         Markup.button.switchToChat('Forward', ctx.message.text),
                       ]),
-                    }
-                  );
+                    });
+                  }
                 })
                 .catch((error: string) => {
                   ctx.deleteMessage(loader.message_id);
@@ -134,19 +143,62 @@ export class BotService {
     }
   }
 
-  private extractUrl(text: string): string {
+  private extractUrl(text: string, entities: MessageEntity[] = []): string {
+    let result: string | null = null;
+
+    // check entities
+    if (entities.length > 0) {
+      result = this.extractUrlFromEntities(text, entities);
+    }
+
+    // no url found, check text
+    if (result == null) {
+      result = this.extractUrlFromText(text);
+    }
+
+    return result;
+  }
+
+  private extractUrlFromEntities(
+    text: string,
+    entities: MessageEntity[]
+  ): string | null {
+    let result: string | null = null;
+
+    const textLinkEntity: MessageEntity | undefined = entities.find(
+      (e: MessageEntity) => e.type == 'text_link'
+    );
+    const urlEntity: MessageEntity | undefined = entities.find(
+      (e: MessageEntity) => e.type == 'url'
+    );
+    if (textLinkEntity != undefined) {
+      const entity = textLinkEntity as MessageEntity.TextLinkMessageEntity;
+      result = entity.url;
+    } else if (urlEntity != undefined) {
+      result = text.substr(urlEntity.offset, urlEntity.length);
+    }
+
+    return result;
+  }
+
+  private extractUrlFromText(text: string): string {
     let result: string = text;
 
     if (text.includes(' ')) {
       const elements: string[] = text.replaceAll('\n', ' ').split(' ');
 
       const url: string | undefined = elements.find((s: string) =>
-        s.startsWith('http')
+        s.includes('http')
       );
 
       if (url != undefined) {
         result = url;
       }
+    }
+
+    const index: number = result.indexOf('http');
+    if (index > 0) {
+      result = result.substr(index);
     }
 
     return result;
@@ -159,13 +211,13 @@ export class BotService {
     return user != undefined && user.is_bot && user.id == bot.id;
   }
 
-  private resolve(text: string): Promise<Message> {
-    return new Promise<Message>((resolve, reject) => {
+  private resolve(text: string): Promise<Message[]> {
+    return new Promise<Message[]>((resolve, reject) => {
       try {
         this.resolverService
           .resolve(text)
-          .then((message: Message) => {
-            resolve(message);
+          .then((messages: Message[]) => {
+            resolve(messages);
           })
           .catch((error: string) => {
             console.error('Error resolving message', text, error);
@@ -195,7 +247,8 @@ export class BotService {
     title: string,
     message: string,
     description: string,
-    thumb_url: string
+    thumb_url: string,
+    index = '1'
   ): InlineQueryResult {
     const content: InputTextMessageContent = {
       message_text: message,
@@ -204,7 +257,7 @@ export class BotService {
     };
 
     const result: InlineQueryResultArticle = {
-      id: '1',
+      id: index,
       type: 'article',
       title: title,
       input_message_content: content,

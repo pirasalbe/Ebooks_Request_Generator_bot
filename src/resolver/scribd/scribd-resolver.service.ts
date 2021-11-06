@@ -1,4 +1,5 @@
 import { HTMLElement } from 'node-html-parser';
+import { URL } from 'url';
 
 import { AbstractResolver } from '../abstract-resolver';
 import { HtmlUtil } from '../html/html-util';
@@ -15,8 +16,8 @@ export class ScribdResolverService extends AbstractResolver {
     super();
   }
 
-  extractMessage(html: HTMLElement): Promise<Message> {
-    return new Promise<Message>((resolve) => {
+  extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {
+    return new Promise<Message[]>((resolve) => {
       const content: NullableHtmlElement = html.querySelector(
         ScribdResolverService.CONTENT_ID
       );
@@ -35,7 +36,7 @@ export class ScribdResolverService extends AbstractResolver {
       }
 
       // prepare message
-      const message: Message = new Message(SiteResolver.SCRIBD);
+      const message: Message = new Message(SiteResolver.SCRIBD, url);
 
       // main info
       message.setTitle(information.title);
@@ -50,7 +51,7 @@ export class ScribdResolverService extends AbstractResolver {
         message.addTag(Message.AUDIOBOOK_TAG);
       }
 
-      resolve(message);
+      resolve([message]);
     });
   }
 

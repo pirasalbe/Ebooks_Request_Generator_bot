@@ -9,19 +9,23 @@ import { HttpUtil } from '../http/http-util';
 export class AmazonFormatResolverService {
   private static readonly KINDLE_UNLIMITED_ID = '.a-icon-kindle-unlimited';
 
-  private static readonly FORMATS_ID_PLACEHOLDER = 'PLACEHOLDER';
+  private static readonly PLACEHOLDER = 'PLACEHOLDER';
   private static readonly FORMATS_ID =
     '[data-card-metrics-id="morpheus-popularity-rank-sidesheet-card_DetailPage_' +
-    AmazonFormatResolverService.FORMATS_ID_PLACEHOLDER +
+    AmazonFormatResolverService.PLACEHOLDER +
     '"]';
-  private static readonly ASIN_ID = '.landingAsinValue';
+
+  private static readonly KINDLE_ID = 'div[data-a-name="kindle_meta_binding"]';
+  private static readonly ASIN_ID =
+    'input[type="hidden"][value="' +
+    AmazonFormatResolverService.PLACEHOLDER +
+    '"]';
 
   private static readonly FORMAT_URL =
     'https://www.amazon.COM/acp/morpheus-popularity-rank-sidesheet-card/tmips-psvsypciab/getSidesheetHtml?';
-  private static readonly VALUE_ATTRIBUTE = 'value';
   private static readonly ACP_PARAMS_ATTRIBUTE = 'data-acp-params';
 
-  isKindleUnlimited(html: HTMLElement): Promise<boolean> {
+  isKindleUnlimited(asin: string, html: HTMLElement): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       if (this.existsKindleUnlimitedElement(html)) {
         resolve(true);
@@ -29,30 +33,28 @@ export class AmazonFormatResolverService {
         // request format
         const formats: NullableHtmlElement = this.findFormatsWrapper(html);
 
-        let asin: NullableHtmlElement = null;
         let acpParams: string | undefined = undefined;
-        let asinValue: string | undefined = undefined;
 
         if (formats != null) {
           acpParams = formats.getAttribute(
             AmazonFormatResolverService.ACP_PARAMS_ATTRIBUTE
           );
-
-          asin = formats.querySelector(AmazonFormatResolverService.ASIN_ID);
         }
 
-        if (asin != null) {
-          asinValue = asin.getAttribute(
-            AmazonFormatResolverService.VALUE_ATTRIBUTE
-          );
-        }
-
-        if (asinValue != undefined && acpParams != undefined) {
-          this.getFormats(acpParams, asinValue)
+        if (acpParams != undefined) {
+          this.getFormats(acpParams, asin)
             .then((div: HTMLElement) => {
-              // check kindle unlimited
-              if (this.existsKindleUnlimitedElement(div)) {
-                resolve(true);
+              const ebookElement: NullableHtmlElement = this.getEbookElement(
+                asin,
+                div
+              );
+              if (ebookElement != null) {
+                // check kindle unlimited on the right book
+                if (this.existsKindleUnlimitedElement(ebookElement)) {
+                  resolve(true);
+                } else {
+                  resolve(false);
+                }
               } else {
                 resolve(false);
               }
@@ -61,7 +63,7 @@ export class AmazonFormatResolverService {
               reject(error);
             });
         } else {
-          console.error(asinValue, acpParams);
+          console.error(asin, acpParams);
           reject('Missing required elements.');
         }
       }
@@ -82,7 +84,7 @@ export class AmazonFormatResolverService {
     for (let i = 0; i < 10 && formats == null; i++) {
       formats = parent.querySelector(
         AmazonFormatResolverService.FORMATS_ID.replace(
-          AmazonFormatResolverService.FORMATS_ID_PLACEHOLDER,
+          AmazonFormatResolverService.PLACEHOLDER,
           String(i)
         )
       );
@@ -128,5 +130,32 @@ export class AmazonFormatResolverService {
       );
       request.end();
     });
+  }
+
+  private getEbookElement(
+    asin: string,
+    html: HTMLElement
+  ): NullableHtmlElement {
+    let ebookElement: NullableHtmlElement = null;
+    let asinElement: NullableHtmlElement = null;
+
+    const kindleElement: NullableHtmlElement = html.querySelector(
+      AmazonFormatResolverService.KINDLE_ID
+    );
+
+    if (kindleElement != null) {
+      asinElement = kindleElement.querySelector(
+        AmazonFormatResolverService.ASIN_ID.replace(
+          AmazonFormatResolverService.PLACEHOLDER,
+          asin
+        )
+      );
+    }
+
+    if (asinElement != null) {
+      ebookElement = asinElement.parentNode;
+    }
+
+    return ebookElement;
   }
 }

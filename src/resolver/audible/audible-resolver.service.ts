@@ -1,4 +1,5 @@
 import { HTMLElement } from 'node-html-parser';
+import { URL } from 'url';
 
 import { AbstractResolver } from '../abstract-resolver';
 import { NullableHtmlElement } from '../html/nullable-html-element';
@@ -16,27 +17,15 @@ export class AudibleResolverService extends AbstractResolver {
     super();
   }
 
-  resolve(url: string): Promise<Message> {
-    // remove previously added override
-    url = url
-      .replace('&' + AudibleResolverService.OVERRIDE_LANGUAGE + '=false', '')
-      .replace('?' + AudibleResolverService.OVERRIDE_LANGUAGE + '=false', '');
-
-    if (!url.includes(AudibleResolverService.OVERRIDE_LANGUAGE + '=true')) {
-      // add override
-      if (url.includes('?')) {
-        url += '&';
-      } else {
-        url += '?';
-      }
-      url += AudibleResolverService.OVERRIDE_LANGUAGE + '=true';
-    }
+  resolve(url: URL): Promise<Message[]> {
+    // add override to avoid redirection
+    url.searchParams.set(AudibleResolverService.OVERRIDE_LANGUAGE, 'true');
 
     return super.resolve(url);
   }
 
-  extractMessage(html: HTMLElement): Promise<Message> {
-    return new Promise<Message>((resolve) => {
+  extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {
+    return new Promise<Message[]>((resolve) => {
       const bottom: NullableHtmlElement = html.querySelector(
         AudibleResolverService.BOTTOM_ID
       );
@@ -48,7 +37,7 @@ export class AudibleResolverService extends AbstractResolver {
       );
 
       // prepare message
-      const message: Message = new Message(SiteResolver.AUDIBLE);
+      const message: Message = new Message(SiteResolver.AUDIBLE, url);
 
       // main info
       message.setTitle(information.name);
@@ -66,7 +55,7 @@ export class AudibleResolverService extends AbstractResolver {
         message.addTag(information.inLanguage);
       }
 
-      resolve(message);
+      resolve([message]);
     });
   }
 
