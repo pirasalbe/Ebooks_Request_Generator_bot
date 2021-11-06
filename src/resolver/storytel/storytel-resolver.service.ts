@@ -10,6 +10,7 @@ import {
   StorytelDetails,
   StorytelDetailsWrapper,
   StorytelElement,
+  StorytelFormat,
   StorytelInformation,
   StorytelInformationWrapper,
   StorytelOrganization,
@@ -78,9 +79,6 @@ export class StorytelResolverService extends AbstractResolver {
 
       // tags
       message.addTag('storytel');
-      if (this.isAudiobook(bookIcon, audiobookIcon)) {
-        message.addTag(Message.AUDIOBOOK_TAG);
-      }
 
       let language: string | null = information.getLanguage();
       if (!this.isLanguageDefined(language)) {
@@ -91,7 +89,24 @@ export class StorytelResolverService extends AbstractResolver {
         message.addTag(language as string);
       }
 
-      resolve([message]);
+      const messages: Message[] = [];
+
+      switch (this.getFormat(bookIcon, audiobookIcon)) {
+        case StorytelFormat.BOTH:
+          messages.push(message.clone());
+          message.addTag(Message.AUDIOBOOK_TAG);
+          messages.push(message);
+          break;
+        case StorytelFormat.AUDIOBOOK:
+          message.addTag(Message.AUDIOBOOK_TAG);
+          messages.push(message);
+          break;
+        case StorytelFormat.EBOOK:
+        default:
+          break;
+      }
+
+      resolve(messages);
     });
   }
 
@@ -132,13 +147,14 @@ export class StorytelResolverService extends AbstractResolver {
   ): StorytelDetails | null {
     let result: StorytelDetails | null = null;
 
-    // {'bookcoverkrbmfsKpzJ' : { 'component' : 'BookCover.df2df6a9.js', 'props'
     const jsonString: string =
       script
+        // obtain the useful part
         .substring(
           start + StorytelResolverService.LANGUAGE_START_INDEX.length,
           end
         )
+        // fix quotes
         .replaceAll("{'", '{"')
         .replaceAll("},'", '},"')
         .replaceAll("' : { 'component' : '", '" : { "component" : "')
@@ -190,16 +206,18 @@ export class StorytelResolverService extends AbstractResolver {
     return new StorytelInformationWrapper(book, audiobook, organization);
   }
 
-  private isAudiobook(
+  private getFormat(
     bookIcon: NullableHtmlElement,
     audiobookIcon: NullableHtmlElement
-  ): boolean {
-    let result = false;
+  ): StorytelFormat {
+    let result: StorytelFormat | null = null;
 
     if (bookIcon == null && audiobookIcon != null) {
-      result = true;
+      result = StorytelFormat.AUDIOBOOK;
     } else if (bookIcon != null && audiobookIcon == null) {
-      result = false;
+      result = StorytelFormat.EBOOK;
+    } else if (bookIcon != null && audiobookIcon != null) {
+      result = StorytelFormat.BOTH;
     } else {
       console.error(bookIcon, audiobookIcon);
       throw 'The product is neither an ebook nor an audiobook.';

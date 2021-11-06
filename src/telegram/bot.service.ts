@@ -60,13 +60,16 @@ export class BotService {
             .then((messages: Message[]) => {
               const inlineResults: InlineQueryResult[] = [];
 
-              for (const message of messages) {
+              for (let i = 0; i < messages.length; i++) {
+                const message: Message = messages[i];
+
                 inlineResults.push(
                   this.inlineResult(
                     'Request ' + message.toTileString(),
                     message.toString(),
                     message.toDetailsString(),
-                    BotService.SUCCESSFULL_THUMB_URL
+                    BotService.SUCCESSFULL_THUMB_URL,
+                    String(i)
                   )
                 );
               }

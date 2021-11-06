@@ -19,6 +19,22 @@ export class Message {
     this.url = null;
   }
 
+  clone(): Message {
+    const clone: Message = new Message(this.site);
+
+    clone.tags = [];
+    for (const tag of this.tags) {
+      clone.tags.push(tag);
+    }
+
+    clone.title = this.title;
+    clone.author = this.author;
+    clone.publisher = this.publisher;
+    clone.url = this.url;
+
+    return clone;
+  }
+
   private getSiteName(): string {
     const name: string = SiteResolver[this.site];
 
