@@ -81,6 +81,8 @@ export class AmazonResolverService extends AbstractResolver {
 
       // tags
       const asin: string = this.getAsin(url);
+      message.setUrl(this.getAmazonAsinUrl(url, asin));
+
       this.addKindleUnlimitedTag(message, asin, html)
         .then(() => resolve([message]))
         .catch(() => resolve([message]));
@@ -265,5 +267,11 @@ export class AmazonResolverService extends AbstractResolver {
       // add language if it is not english
       message.addTag(languageLowerCase as string);
     }
+  }
+
+  private getAmazonAsinUrl(url: URL, asin: string): URL {
+    const newUrl: URL = new URL(url.toString());
+    newUrl.pathname = AmazonResolverService.URL_PREFIX + asin;
+    return newUrl;
   }
 }
