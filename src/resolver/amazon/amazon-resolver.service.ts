@@ -12,7 +12,10 @@ import { AmazonCaptchaResolverService } from './amazon-captcha-resolver.service'
 import { AmazonFormatResolverService } from './amazon-format-resolver.service';
 
 export class AmazonResolverService extends AbstractResolver {
-  private static readonly SITE_LANGUAGE_ID = '.nav-logo-locale';
+  private static readonly SITE_LANGUAGE_ID = 'script[type="text/javascript"]';
+  private static readonly SITE_LANGUAGE_PROPERTY =
+    "window.$Nav && $Nav.declare('config.languageCode','";
+
   private static readonly TITLE_ID = '#productTitle';
   private static readonly AUTHOR_ID = '.contributorNameID';
   private static readonly AUTHOR_ALTERNATIVE_ID = '.author';
@@ -47,9 +50,11 @@ export class AmazonResolverService extends AbstractResolver {
 
       this.checkKindleFormat(kindleFormat);
 
-      const siteLanguage: NullableHtmlElement = html.querySelector(
+      const siteLanguageElements: HTMLElement[] = html.querySelectorAll(
         AmazonResolverService.SITE_LANGUAGE_ID
       );
+
+      const siteLanguage: string = this.getSiteLanguage(siteLanguageElements);
 
       const title: NullableHtmlElement = html.querySelector(
         AmazonResolverService.TITLE_ID
@@ -61,7 +66,7 @@ export class AmazonResolverService extends AbstractResolver {
         AmazonResolverService.DETAILS_ID
       );
 
-      this.checkRequiredElements([siteLanguage, title, author, details]);
+      this.checkRequiredElements([title, author, details]);
 
       // prepare message
       const message: Message = new Message(SiteResolver.AMAZON);
@@ -69,17 +74,35 @@ export class AmazonResolverService extends AbstractResolver {
       // main info
       message.setTitle(HtmlUtil.getTextContent(title as HTMLElement));
       message.setAuthor(HtmlUtil.getTextContent(author as HTMLElement));
-      this.setDetails(
-        message,
-        HtmlUtil.getRawText(siteLanguage as HTMLElement),
-        details as HTMLElement
-      );
+      this.setDetails(message, siteLanguage, details as HTMLElement);
 
       // tags
       this.addKindleUnlimitedTag(message, html)
         .then(() => resolve([message]))
         .catch(() => resolve([message]));
     });
+  }
+
+  getSiteLanguage(siteLanguageElements: HTMLElement[]): string {
+    let languageText = '';
+    let index = -1;
+
+    for (let i = 0; i < siteLanguageElements.length && index < 0; i++) {
+      languageText = HtmlUtil.getRawText(siteLanguageElements[i]);
+
+      index = languageText.indexOf(
+        AmazonResolverService.SITE_LANGUAGE_PROPERTY
+      );
+    }
+
+    if (index < 0) {
+      throw 'Cannot get site language.';
+    }
+
+    return languageText.substr(
+      index + AmazonResolverService.SITE_LANGUAGE_PROPERTY.length,
+      2
+    );
   }
 
   private checkKindleFormat(format: NullableHtmlElement): void {
