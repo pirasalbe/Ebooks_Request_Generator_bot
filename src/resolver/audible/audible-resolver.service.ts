@@ -16,7 +16,7 @@ export class AudibleResolverService extends AbstractResolver {
     super();
   }
 
-  resolve(url: string): Promise<Message> {
+  resolve(url: string): Promise<Message[]> {
     // remove previously added override
     url = url
       .replace('&' + AudibleResolverService.OVERRIDE_LANGUAGE + '=false', '')
@@ -35,8 +35,8 @@ export class AudibleResolverService extends AbstractResolver {
     return super.resolve(url);
   }
 
-  extractMessage(html: HTMLElement): Promise<Message> {
-    return new Promise<Message>((resolve) => {
+  extractMessages(html: HTMLElement): Promise<Message[]> {
+    return new Promise<Message[]>((resolve) => {
       const bottom: NullableHtmlElement = html.querySelector(
         AudibleResolverService.BOTTOM_ID
       );
@@ -66,7 +66,7 @@ export class AudibleResolverService extends AbstractResolver {
         message.addTag(information.inLanguage);
       }
 
-      resolve(message);
+      resolve([message]);
     });
   }
 

@@ -15,8 +15,8 @@ export class ScribdResolverService extends AbstractResolver {
     super();
   }
 
-  extractMessage(html: HTMLElement): Promise<Message> {
-    return new Promise<Message>((resolve) => {
+  extractMessages(html: HTMLElement): Promise<Message[]> {
+    return new Promise<Message[]>((resolve) => {
       const content: NullableHtmlElement = html.querySelector(
         ScribdResolverService.CONTENT_ID
       );
@@ -50,7 +50,7 @@ export class ScribdResolverService extends AbstractResolver {
         message.addTag(Message.AUDIOBOOK_TAG);
       }
 
-      resolve(message);
+      resolve([message]);
     });
   }
 

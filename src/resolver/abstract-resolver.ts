@@ -18,8 +18,8 @@ export abstract class AbstractResolver implements Resolver {
     this.cookiesHeader = '';
   }
 
-  resolve(url: string): Promise<Message> {
-    return new Promise<Message>((resolve, reject) => {
+  resolve(url: string): Promise<Message[]> {
+    return new Promise<Message[]>((resolve, reject) => {
       https.get(
         url,
         {
@@ -32,7 +32,7 @@ export abstract class AbstractResolver implements Resolver {
         (response: http.IncomingMessage) => {
           this.updateCookies(response.headers);
           this.processResponse(url, response)
-            .then((message: Message) => resolve(message))
+            .then((messages: Message[]) => resolve(messages))
             .catch((error) => reject(error));
         }
       );
@@ -61,17 +61,17 @@ export abstract class AbstractResolver implements Resolver {
   private processResponse(
     url: string,
     response: http.IncomingMessage
-  ): Promise<Message> {
-    return new Promise<Message>((resolve, reject) => {
+  ): Promise<Message[]> {
+    return new Promise<Message[]>((resolve, reject) => {
       if (response.statusCode == 200) {
         // success
         this.processSuccessfulResponse(url, response)
-          .then((message: Message) => resolve(message))
+          .then((messages: Message[]) => resolve(messages))
           .catch((error) => reject(error));
       } else if (response.statusCode == 301 || response.statusCode == 302) {
         // redirect
         this.resolve(response.headers.location as string)
-          .then((message: Message) => resolve(message))
+          .then((messages: Message[]) => resolve(messages))
           .catch((error) => reject(error));
       } else {
         // something went wrong
@@ -83,23 +83,25 @@ export abstract class AbstractResolver implements Resolver {
   private processSuccessfulResponse(
     url: string,
     response: http.IncomingMessage
-  ): Promise<Message> {
+  ): Promise<Message[]> {
     return HttpUtil.processSuccessfulResponse(response, (data: string) => {
-      return new Promise<Message>((resolve, reject) => {
+      return new Promise<Message[]>((resolve, reject) => {
         this.processPage(url, data)
-          .then((message: Message) => resolve(message))
+          .then((messages: Message[]) => resolve(messages))
           .catch((error) => reject(error));
       });
     });
   }
 
-  private processPage(url: string, data: string): Promise<Message> {
-    return new Promise<Message>((resolve, reject) => {
+  private processPage(url: string, data: string): Promise<Message[]> {
+    return new Promise<Message[]>((resolve, reject) => {
       try {
-        this.extractMessage(HtmlUtil.parseHTML(data as string))
-          .then((message: Message) => {
-            message.setUrl(url);
-            resolve(message);
+        this.extractMessages(HtmlUtil.parseHTML(data as string))
+          .then((messages: Message[]) => {
+            for (const message of messages) {
+              message.setUrl(url);
+            }
+            resolve(messages);
           })
           .catch((error) => reject(error));
       } catch (error) {
@@ -113,7 +115,7 @@ export abstract class AbstractResolver implements Resolver {
    * @param html HTML received from the URL
    * @returns Message
    */
-  abstract extractMessage(html: HTMLElement): Promise<Message>;
+  abstract extractMessages(html: HTMLElement): Promise<Message[]>;
 
   protected checkRequiredElements(
     elements: NullableHtmlElement[],

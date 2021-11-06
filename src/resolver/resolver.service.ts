@@ -11,8 +11,8 @@ export class ResolverService implements Resolver {
     this.resolvers = resolvers;
   }
 
-  resolve(url: string): Promise<Message> {
-    let result: Promise<Message>;
+  resolve(url: string): Promise<Message[]> {
+    let result: Promise<Message[]>;
 
     const urlObject = new URL(url);
 

@@ -57,15 +57,21 @@ export class BotService {
       this.safeHandling(() => {
         if (ctx.inlineQuery.query != '') {
           this.resolve(this.extractUrlFromText(ctx.inlineQuery.query))
-            .then((message: Message) => {
-              ctx.answerInlineQuery([
-                this.inlineResult(
-                  'Request ' + message.toTileString(),
-                  message.toString(),
-                  message.toDetailsString(),
-                  BotService.SUCCESSFULL_THUMB_URL
-                ),
-              ]);
+            .then((messages: Message[]) => {
+              const inlineResults: InlineQueryResult[] = [];
+
+              for (const message of messages) {
+                inlineResults.push(
+                  this.inlineResult(
+                    'Request ' + message.toTileString(),
+                    message.toString(),
+                    message.toDetailsString(),
+                    BotService.SUCCESSFULL_THUMB_URL
+                  )
+                );
+              }
+
+              ctx.answerInlineQuery(inlineResults);
             })
             .catch((error: string) => {
               ctx.answerInlineQuery([
@@ -100,20 +106,17 @@ export class BotService {
               this.resolve(
                 this.extractUrl(ctx.message.text, ctx.message.entities)
               )
-                .then((message: Message) => {
-                  ctx.telegram.editMessageText(
-                    ctx.from.id,
-                    loader.message_id,
-                    undefined,
-                    message.toString(),
-                    {
+                .then((messages: Message[]) => {
+                  ctx.deleteMessage(loader.message_id);
+                  for (const message of messages) {
+                    ctx.reply(message.toString(), {
                       disable_web_page_preview: true,
                       parse_mode: 'HTML',
                       ...Markup.inlineKeyboard([
                         Markup.button.switchToChat('Forward', ctx.message.text),
                       ]),
-                    }
-                  );
+                    });
+                  }
                 })
                 .catch((error: string) => {
                   ctx.deleteMessage(loader.message_id);
@@ -205,13 +208,13 @@ export class BotService {
     return user != undefined && user.is_bot && user.id == bot.id;
   }
 
-  private resolve(text: string): Promise<Message> {
-    return new Promise<Message>((resolve, reject) => {
+  private resolve(text: string): Promise<Message[]> {
+    return new Promise<Message[]>((resolve, reject) => {
       try {
         this.resolverService
           .resolve(text)
-          .then((message: Message) => {
-            resolve(message);
+          .then((messages: Message[]) => {
+            resolve(messages);
           })
           .catch((error: string) => {
             console.error('Error resolving message', text, error);
@@ -241,7 +244,8 @@ export class BotService {
     title: string,
     message: string,
     description: string,
-    thumb_url: string
+    thumb_url: string,
+    index = '1'
   ): InlineQueryResult {
     const content: InputTextMessageContent = {
       message_text: message,
@@ -250,7 +254,7 @@ export class BotService {
     };
 
     const result: InlineQueryResultArticle = {
-      id: '1',
+      id: index,
       type: 'article',
       title: title,
       input_message_content: content,

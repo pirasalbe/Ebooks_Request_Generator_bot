@@ -35,8 +35,8 @@ export class AmazonResolverService extends AbstractResolver {
     this.amazonCaptchaResolverService = amazonCaptchaResolverService;
   }
 
-  extractMessage(html: HTMLElement): Promise<Message> {
-    return new Promise<Message>((resolve) => {
+  extractMessages(html: HTMLElement): Promise<Message[]> {
+    return new Promise<Message[]>((resolve) => {
       // captcha
       this.amazonCaptchaResolverService.checkCaptcha(html, this.cookiesHeader);
 
@@ -77,8 +77,8 @@ export class AmazonResolverService extends AbstractResolver {
 
       // tags
       this.addKindleUnlimitedTag(message, html)
-        .then(() => resolve(message))
-        .catch(() => resolve(message));
+        .then(() => resolve([message]))
+        .catch(() => resolve([message]));
     });
   }
 

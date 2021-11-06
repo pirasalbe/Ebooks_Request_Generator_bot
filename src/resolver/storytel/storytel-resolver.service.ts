@@ -31,8 +31,8 @@ export class StorytelResolverService extends AbstractResolver {
     super();
   }
 
-  extractMessage(html: HTMLElement): Promise<Message> {
-    return new Promise<Message>((resolve) => {
+  extractMessages(html: HTMLElement): Promise<Message[]> {
+    return new Promise<Message[]>((resolve) => {
       const content: HTMLElement[] = html.querySelectorAll(
         StorytelResolverService.CONTENT_ID
       );
@@ -91,7 +91,7 @@ export class StorytelResolverService extends AbstractResolver {
         message.addTag(language as string);
       }
 
-      resolve(message);
+      resolve([message]);
     });
   }
 
