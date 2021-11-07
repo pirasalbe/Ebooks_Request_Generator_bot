@@ -52,20 +52,16 @@ export class ArchiveResolverService extends AbstractResolver {
           ArchiveResolverService.AUTHOR_ID
         );
 
-      this.checkRequiredElements([author]);
-
       // prepare message
       const message: Message = new Message(SiteResolver.ARCHIVE, url);
 
       // main info
       message.setTitle(HtmlUtil.getTextContent(information.header.title));
 
-      message.setAuthor(HtmlUtil.getTextContent(author as HTMLElement));
-
       // tags
       message.addTag('archive');
 
-      this.setDetails(message, information.body);
+      this.setDetails(message, author, information.body);
 
       resolve([message]);
     });
@@ -107,9 +103,19 @@ export class ArchiveResolverService extends AbstractResolver {
     return information;
   }
 
-  private setDetails(message: Message, body: HTMLElement): void {
+  private setDetails(
+    message: Message,
+    authorElement: NullableHtmlElement,
+    body: HTMLElement
+  ): void {
+    let author = false;
     let publisher = false;
     let language = false;
+
+    if (authorElement != null) {
+      author = true;
+      message.setAuthor(HtmlUtil.getTextContent(authorElement as HTMLElement));
+    }
 
     const publisherElement: NullableHtmlElement = body.querySelector(
       ArchiveResolverService.PUBLISHER_ID
@@ -124,7 +130,11 @@ export class ArchiveResolverService extends AbstractResolver {
       ArchiveResolverService.DETAILS_ID
     );
 
-    for (let i = 0; i < metadata.length && (!language || !publisher); i++) {
+    for (
+      let i = 0;
+      i < metadata.length && (!language || !publisher || !author);
+      i++
+    ) {
       const element = metadata[i];
       const entry: Entry<string, string> = this.getDetailElement(element);
       const key: string | null = I18nUtil.getKey(
@@ -134,6 +144,12 @@ export class ArchiveResolverService extends AbstractResolver {
 
       if (key != null) {
         switch (key) {
+          case LanguageStrings.ASSOCIATED_NAMES_KEY:
+            if (!author) {
+              author = true;
+              message.setAuthor(entry.getValue());
+            }
+            break;
           case LanguageStrings.LANGUAGE_KEY:
             language = true;
             this.addLanguageTag(message, entry.getValue());
@@ -148,6 +164,10 @@ export class ArchiveResolverService extends AbstractResolver {
             break;
         }
       }
+    }
+
+    if (!author) {
+      throw 'Missing author.';
     }
   }
 
