@@ -104,7 +104,9 @@ export class BotService {
         // avoid messages from the bot
         if (!this.isMessageFromBot(ctx.message.via_bot, ctx.botInfo)) {
           ctx
-            .reply('Processing...')
+            .reply('Processing...', {
+              reply_to_message_id: ctx.message.message_id,
+            })
             .then((loader: TelegramMessage.TextMessage) => {
               this.resolve(
                 this.extractUrl(ctx.message.text, ctx.message.entities)
@@ -115,6 +117,7 @@ export class BotService {
                     ctx.reply(message.toString(), {
                       disable_web_page_preview: true,
                       parse_mode: 'HTML',
+                      reply_to_message_id: ctx.message.message_id,
                       ...Markup.inlineKeyboard([
                         Markup.button.switchToChat('Forward', ctx.message.text),
                       ]),
