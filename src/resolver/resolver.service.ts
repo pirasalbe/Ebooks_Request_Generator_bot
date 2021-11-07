@@ -46,6 +46,8 @@ export class ResolverService {
       resolver = this.resolvers[SiteResolver.STORYTEL];
     } else if (url.hostname.includes('archive')) {
       resolver = this.resolvers[SiteResolver.ARCHIVE];
+    } else if (url.hostname.includes('openlibrary')) {
+      resolver = this.resolvers[SiteResolver.OPENBOOKS];
     }
 
     return resolver;

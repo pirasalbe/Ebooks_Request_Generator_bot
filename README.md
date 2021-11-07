@@ -78,6 +78,12 @@ Given a Archive link of an ebook, it returns the request message.
 
 It always add the _#archive_ tag.
 
+### Extract message from OpenLibrary
+
+Given a OpenLibrary link of an ebook, it returns the request message.
+
+It always add the _#archive_ tag.
+
 # Known bugs
 
 - Cannot get language information from Scribd links

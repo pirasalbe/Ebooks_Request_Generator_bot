@@ -4,4 +4,5 @@ export enum SiteResolver {
   SCRIBD,
   STORYTEL,
   ARCHIVE,
+  OPENBOOKS,
 }
