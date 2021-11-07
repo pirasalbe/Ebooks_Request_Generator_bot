@@ -1,4 +1,5 @@
 import { Context, Markup, Telegraf, Telegram } from 'telegraf';
+import { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
 import {
   InlineQueryResult,
   InlineQueryResultArticle,
@@ -103,8 +104,12 @@ export class BotService {
       this.safeHandling(() => {
         // avoid messages from the bot
         if (!this.isMessageFromBot(ctx.message.via_bot, ctx.botInfo)) {
+          const extra: ExtraReplyMessage = {
+            reply_to_message_id: ctx.message.message_id,
+          };
+
           ctx
-            .reply('Processing...')
+            .reply('Processing...', extra)
             .then((loader: TelegramMessage.TextMessage) => {
               this.resolve(
                 this.extractUrl(ctx.message.text, ctx.message.entities)
@@ -115,6 +120,7 @@ export class BotService {
                     ctx.reply(message.toString(), {
                       disable_web_page_preview: true,
                       parse_mode: 'HTML',
+                      reply_to_message_id: ctx.message.message_id,
                       ...Markup.inlineKeyboard([
                         Markup.button.switchToChat('Forward', ctx.message.text),
                       ]),
@@ -123,12 +129,12 @@ export class BotService {
                 })
                 .catch((error: string) => {
                   ctx.deleteMessage(loader.message_id);
-                  ctx.reply(error);
+                  ctx.reply(error, extra);
                 });
             })
             .catch((error: string) => {
               console.error('Cannot start processing request.', error);
-              ctx.reply('Cannot start processing request.');
+              ctx.reply('Cannot start processing request.', extra);
             });
         }
       });
