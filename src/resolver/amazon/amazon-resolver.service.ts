@@ -180,10 +180,10 @@ export class AmazonResolverService extends AbstractResolver {
   ): void {
     const li: HTMLElement[] = details.getElementsByTagName('li');
 
-    let laungage = false;
+    let language = false;
     let publisher = false;
 
-    for (let i = 0; i < li.length && (!laungage || !publisher); i++) {
+    for (let i = 0; i < li.length && (!language || !publisher); i++) {
       const element = li[i];
       const entry: Entry<string, string> = this.getDetailElement(element);
       const key: string | null = I18nUtil.getKey(siteLanguage, entry.getKey());
@@ -191,7 +191,7 @@ export class AmazonResolverService extends AbstractResolver {
       if (key != null) {
         switch (key) {
           case LanguageStrings.LANGUAGE_KEY:
-            laungage = true;
+            language = true;
             this.addLanguageTag(message, siteLanguage, entry.getValue());
             break;
           case LanguageStrings.PUBLISHER_KEY:

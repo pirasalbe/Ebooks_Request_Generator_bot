@@ -4,35 +4,35 @@ export class I18nUtil {
   public static readonly ENGLISH: string = 'english';
 
   private static readonly LANGUAGES: Record<string, LanguageStrings> = {
-    en: new LanguageStrings('language', 'publisher', {
+    en: new LanguageStrings('language', 'publisher', 'associated-names', {
       english: I18nUtil.ENGLISH,
       italian: 'italian',
       german: 'german',
       french: 'french',
       spanish: 'spanish',
     }),
-    it: new LanguageStrings('lingua', 'editore', {
+    it: new LanguageStrings('lingua', 'editore', 'nomi-associati', {
       english: 'inglese',
       italian: 'italiano',
       german: 'tedesco',
       french: 'francese',
       spanish: 'spagnolo',
     }),
-    de: new LanguageStrings('sprache', 'herausgeber', {
+    de: new LanguageStrings('sprache', 'herausgeber', 'assoziierte-namen', {
       english: 'englisch',
       italian: 'italienisch',
       german: 'deutsch',
       french: 'französisch',
       spanish: 'spanisch',
     }),
-    fr: new LanguageStrings('langue', 'éditeur', {
+    fr: new LanguageStrings('langue', 'éditeur', 'noms-associés', {
       english: 'anglais',
       italian: 'italien',
       german: 'allemand',
       french: 'français',
       spanish: 'espagnol',
     }),
-    es: new LanguageStrings('idioma', 'editorial', {
+    es: new LanguageStrings('idioma', 'editorial', 'nombres-asociados', {
       english: 'inglés',
       italian: 'italiano',
       german: 'aleman',

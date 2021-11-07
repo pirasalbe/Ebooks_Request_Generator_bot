@@ -1,7 +1,9 @@
 import { AmazonCaptchaResolverService } from './resolver/amazon/amazon-captcha-resolver.service';
 import { AmazonFormatResolverService } from './resolver/amazon/amazon-format-resolver.service';
 import { AmazonResolverService } from './resolver/amazon/amazon-resolver.service';
+import { ArchiveResolverService } from './resolver/archive/archive-resolver.service';
 import { AudibleResolverService } from './resolver/audible/audible-resolver.service';
+import { OpenLibraryResolverService } from './resolver/openlibrary/open-library-resolver.service';
 import { Resolver } from './resolver/resolver';
 import { ResolverService } from './resolver/resolver.service';
 import { ScribdResolverService } from './resolver/scribd/scribd-resolver.service';
@@ -25,6 +27,8 @@ export class ApplicationContext {
       1: new AudibleResolverService(),
       2: new ScribdResolverService(),
       3: new StorytelResolverService(),
+      4: new ArchiveResolverService(),
+      5: new OpenLibraryResolverService(),
     };
 
     const resolverService: ResolverService = new ResolverService(resolvers);

@@ -3,4 +3,6 @@ export enum SiteResolver {
   AUDIBLE,
   SCRIBD,
   STORYTEL,
+  ARCHIVE,
+  OPENBOOKS,
 }

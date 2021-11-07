@@ -68,15 +68,27 @@ It always add the _#scribd_ tag. If it is an audiobook, it also add the _#audiob
 
 ### Extract message from Storytel
 
-Given a Storytel link of an audiobook, it returns the request message.
+Given a Storytel link of either an ebook or an audiobook, it returns the request message.
 
-It always add the _#storytel_ and _#audiobook_ tags.
+It always add the _#storytel_ tag. If it is an audiobook, it also add the _#audiobook_ tag.
+
+### Extract message from Archive
+
+Given a Archive link of an ebook, it returns the request message.
+
+It always add the _#archive_ tag.
+
+### Extract message from OpenLibrary
+
+Given a OpenLibrary link of an ebook, it returns the request message.
+
+It always add the _#archive_ tag.
 
 # Known bugs
 
 - Cannot get language information from Scribd links
 
-- Cannot get informations from some Storytel url ([example](https://www.storytel.com/in/en/books/770401-Pradnyavant-2---Pardeshi))
+- Cannot get informations from some Storytel links ([example](https://www.storytel.com/in/en/books/770401-Pradnyavant-2---Pardeshi))
 
 # Instructions
 
