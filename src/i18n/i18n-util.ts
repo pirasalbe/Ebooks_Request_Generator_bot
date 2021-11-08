@@ -4,41 +4,81 @@ export class I18nUtil {
   public static readonly ENGLISH: string = 'english';
 
   private static readonly LANGUAGES: Record<string, LanguageStrings> = {
-    en: new LanguageStrings('language', 'publisher', 'associated-names', {
-      english: I18nUtil.ENGLISH,
-      italian: 'italian',
-      german: 'german',
-      french: 'french',
-      spanish: 'spanish',
-    }),
-    it: new LanguageStrings('lingua', 'editore', 'nomi-associati', {
-      english: 'inglese',
-      italian: 'italiano',
-      german: 'tedesco',
-      french: 'francese',
-      spanish: 'spagnolo',
-    }),
-    de: new LanguageStrings('sprache', 'herausgeber', 'assoziierte-namen', {
-      english: 'englisch',
-      italian: 'italienisch',
-      german: 'deutsch',
-      french: 'französisch',
-      spanish: 'spanisch',
-    }),
-    fr: new LanguageStrings('langue', 'éditeur', 'noms-associés', {
-      english: 'anglais',
-      italian: 'italien',
-      german: 'allemand',
-      french: 'français',
-      spanish: 'espagnol',
-    }),
-    es: new LanguageStrings('idioma', 'editorial', 'nombres-asociados', {
-      english: 'inglés',
-      italian: 'italiano',
-      german: 'aleman',
-      french: 'francés',
-      spanish: 'español',
-    }),
+    en: new LanguageStrings(
+      {
+        language: 'language',
+        publisher: 'publisher',
+        associatedNames: 'associated-names',
+        asin: 'asin',
+      },
+      {
+        english: I18nUtil.ENGLISH,
+        italian: 'italian',
+        german: 'german',
+        french: 'french',
+        spanish: 'spanish',
+      }
+    ),
+    it: new LanguageStrings(
+      {
+        language: 'lingua',
+        publisher: 'editore',
+        associatedNames: 'nomi-associati',
+        asin: 'asin',
+      },
+      {
+        english: 'inglese',
+        italian: 'italiano',
+        german: 'tedesco',
+        french: 'francese',
+        spanish: 'spagnolo',
+      }
+    ),
+    de: new LanguageStrings(
+      {
+        language: 'sprache',
+        publisher: 'herausgeber',
+        associatedNames: 'assoziierte-namen',
+        asin: 'asin',
+      },
+      {
+        english: 'englisch',
+        italian: 'italienisch',
+        german: 'deutsch',
+        french: 'französisch',
+        spanish: 'spanisch',
+      }
+    ),
+    fr: new LanguageStrings(
+      {
+        language: 'langue',
+        publisher: 'éditeur',
+        associatedNames: 'noms-associés',
+        asin: 'asin',
+      },
+      {
+        english: 'anglais',
+        italian: 'italien',
+        german: 'allemand',
+        french: 'français',
+        spanish: 'espagnol',
+      }
+    ),
+    es: new LanguageStrings(
+      {
+        language: 'idioma',
+        publisher: 'editorial',
+        associatedNames: 'nombres-asociados',
+        asin: 'asin',
+      },
+      {
+        english: 'inglés',
+        italian: 'italiano',
+        german: 'aleman',
+        french: 'francés',
+        spanish: 'español',
+      }
+    ),
   };
 
   private constructor() {

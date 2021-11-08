@@ -10,6 +10,7 @@ import { NullableHtmlElement } from './../html/nullable-html-element';
 import { Message } from './../message';
 import { SiteResolver } from './../site-resolver.enum';
 import { AmazonCaptchaResolverService } from './amazon-captcha-resolver.service';
+import { AmazonDetails } from './amazon-details';
 import { AmazonFormatResolverService } from './amazon-format-resolver.service';
 
 export class AmazonResolverService extends AbstractResolver {
@@ -77,10 +78,24 @@ export class AmazonResolverService extends AbstractResolver {
       // main info
       message.setTitle(HtmlUtil.getTextContent(title as HTMLElement));
       message.setAuthor(HtmlUtil.getTextContent(author as HTMLElement));
-      this.setDetails(message, siteLanguage, details as HTMLElement);
+
+      const amazonDetails: AmazonDetails = this.getDetails(
+        siteLanguage,
+        details as HTMLElement
+      );
+
+      message.setPublisher(amazonDetails.getPublisher());
 
       // tags
-      const asin: string = this.getAsin(url);
+      if (amazonDetails.hasLanguage()) {
+        this.addLanguageTag(
+          message,
+          siteLanguage,
+          amazonDetails.getLanguage() as string
+        );
+      }
+
+      const asin: string = this.getAsin(url, amazonDetails.getAsin());
       message.setUrl(this.getAmazonAsinUrl(url, asin));
 
       this.addKindleUnlimitedTag(message, asin, html)
@@ -141,15 +156,21 @@ export class AmazonResolverService extends AbstractResolver {
     return author;
   }
 
-  private getAsin(url: URL): string {
+  private getAsin(url: URL, asin: string | null): string {
+    let result: string | null = null;
+
     const path: string = url.pathname;
 
     const index: number = path.indexOf(AmazonResolverService.URL_PREFIX);
-    if (index < 0) {
+    if (index > -1) {
+      result = path.substr(index + AmazonResolverService.URL_PREFIX.length, 10);
+    } else if (asin != null) {
+      result = asin;
+    } else {
       throw 'Cannot parse the url properly.';
     }
 
-    return path.substr(index + AmazonResolverService.URL_PREFIX.length, 10);
+    return result;
   }
 
   private addKindleUnlimitedTag(
@@ -173,17 +194,15 @@ export class AmazonResolverService extends AbstractResolver {
     });
   }
 
-  private setDetails(
-    message: Message,
+  private getDetails(
     siteLanguage: string,
     details: HTMLElement
-  ): void {
+  ): AmazonDetails {
+    const amazonDetails: AmazonDetails = new AmazonDetails();
+
     const li: HTMLElement[] = details.getElementsByTagName('li');
 
-    let language = false;
-    let publisher = false;
-
-    for (let i = 0; i < li.length && (!language || !publisher); i++) {
+    for (let i = 0; i < li.length && !amazonDetails.isComplete(); i++) {
       const element = li[i];
       const entry: Entry<string, string> = this.getDetailElement(element);
       const key: string | null = I18nUtil.getKey(siteLanguage, entry.getKey());
@@ -191,18 +210,21 @@ export class AmazonResolverService extends AbstractResolver {
       if (key != null) {
         switch (key) {
           case LanguageStrings.LANGUAGE_KEY:
-            language = true;
-            this.addLanguageTag(message, siteLanguage, entry.getValue());
+            amazonDetails.setLanguage(entry.getValue());
             break;
           case LanguageStrings.PUBLISHER_KEY:
-            publisher = true;
-            message.setPublisher(entry.getValue());
+            amazonDetails.setPublisher(entry.getValue());
+            break;
+          case LanguageStrings.ASIN_KEY:
+            amazonDetails.setAsin(entry.getValue());
             break;
           default:
             break;
         }
       }
     }
+
+    return amazonDetails;
   }
 
   /**
@@ -272,6 +294,7 @@ export class AmazonResolverService extends AbstractResolver {
   private getAmazonAsinUrl(url: URL, asin: string): URL {
     const newUrl: URL = new URL(url.toString());
     newUrl.pathname = AmazonResolverService.URL_PREFIX + asin;
+    newUrl.search = '';
     return newUrl;
   }
 }

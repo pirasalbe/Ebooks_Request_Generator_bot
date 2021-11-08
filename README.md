@@ -21,6 +21,7 @@ The available tags are:
 - audiobook tag **#audiobook**
 - Scribd tag **#scribd** for requests from Scribd
 - Storytel tag **#storytel** for requests from Storytel
+- Archive tag **#archive** for requests from Archive and OpenLibrary
 
 The tags are automatically added based on the url provided.
 
