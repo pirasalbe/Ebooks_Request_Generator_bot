@@ -77,10 +77,14 @@ export class AmazonResolverService extends AbstractResolver {
       // main info
       message.setTitle(HtmlUtil.getTextContent(title as HTMLElement));
       message.setAuthor(HtmlUtil.getTextContent(author as HTMLElement));
-      this.setDetails(message, siteLanguage, details as HTMLElement);
+      const asinFromDetails: string | null = this.setDetails(
+        message,
+        siteLanguage,
+        details as HTMLElement
+      );
 
       // tags
-      const asin: string = this.getAsin(url);
+      const asin: string = this.getAsin(url, asinFromDetails);
       message.setUrl(this.getAmazonAsinUrl(url, asin));
 
       this.addKindleUnlimitedTag(message, asin, html)
@@ -141,15 +145,21 @@ export class AmazonResolverService extends AbstractResolver {
     return author;
   }
 
-  private getAsin(url: URL): string {
+  private getAsin(url: URL, asin: string | null): string {
+    let result: string | null = null;
+
     const path: string = url.pathname;
 
     const index: number = path.indexOf(AmazonResolverService.URL_PREFIX);
-    if (index < 0) {
+    if (index > -1) {
+      result = path.substr(index + AmazonResolverService.URL_PREFIX.length, 10);
+    } else if (asin != null) {
+      result = asin;
+    } else {
       throw 'Cannot parse the url properly.';
     }
 
-    return path.substr(index + AmazonResolverService.URL_PREFIX.length, 10);
+    return result;
   }
 
   private addKindleUnlimitedTag(
@@ -177,13 +187,18 @@ export class AmazonResolverService extends AbstractResolver {
     message: Message,
     siteLanguage: string,
     details: HTMLElement
-  ): void {
+  ): string | null {
     const li: HTMLElement[] = details.getElementsByTagName('li');
 
     let language = false;
     let publisher = false;
+    let asin: string | null = null;
 
-    for (let i = 0; i < li.length && (!language || !publisher); i++) {
+    for (
+      let i = 0;
+      i < li.length && (asin == null || !language || !publisher);
+      i++
+    ) {
       const element = li[i];
       const entry: Entry<string, string> = this.getDetailElement(element);
       const key: string | null = I18nUtil.getKey(siteLanguage, entry.getKey());
@@ -198,11 +213,16 @@ export class AmazonResolverService extends AbstractResolver {
             publisher = true;
             message.setPublisher(entry.getValue());
             break;
+          case LanguageStrings.ASIN_KEY:
+            asin = entry.getValue();
+            break;
           default:
             break;
         }
       }
     }
+
+    return asin;
   }
 
   /**
@@ -272,6 +292,7 @@ export class AmazonResolverService extends AbstractResolver {
   private getAmazonAsinUrl(url: URL, asin: string): URL {
     const newUrl: URL = new URL(url.toString());
     newUrl.pathname = AmazonResolverService.URL_PREFIX + asin;
+    newUrl.search = '';
     return newUrl;
   }
 }
