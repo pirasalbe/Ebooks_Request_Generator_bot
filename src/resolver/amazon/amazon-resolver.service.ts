@@ -10,6 +10,7 @@ import { NullableHtmlElement } from './../html/nullable-html-element';
 import { Message } from './../message';
 import { SiteResolver } from './../site-resolver.enum';
 import { AmazonCaptchaResolverService } from './amazon-captcha-resolver.service';
+import { AmazonDetails } from './amazon-details';
 import { AmazonFormatResolverService } from './amazon-format-resolver.service';
 
 export class AmazonResolverService extends AbstractResolver {
@@ -77,14 +78,24 @@ export class AmazonResolverService extends AbstractResolver {
       // main info
       message.setTitle(HtmlUtil.getTextContent(title as HTMLElement));
       message.setAuthor(HtmlUtil.getTextContent(author as HTMLElement));
-      const asinFromDetails: string | null = this.setDetails(
-        message,
+
+      const amazonDetails: AmazonDetails = this.getDetails(
         siteLanguage,
         details as HTMLElement
       );
 
+      message.setPublisher(amazonDetails.getPublisher());
+
       // tags
-      const asin: string = this.getAsin(url, asinFromDetails);
+      if (amazonDetails.hasLanguage()) {
+        this.addLanguageTag(
+          message,
+          siteLanguage,
+          amazonDetails.getLanguage() as string
+        );
+      }
+
+      const asin: string = this.getAsin(url, amazonDetails.getAsin());
       message.setUrl(this.getAmazonAsinUrl(url, asin));
 
       this.addKindleUnlimitedTag(message, asin, html)
@@ -183,22 +194,15 @@ export class AmazonResolverService extends AbstractResolver {
     });
   }
 
-  private setDetails(
-    message: Message,
+  private getDetails(
     siteLanguage: string,
     details: HTMLElement
-  ): string | null {
+  ): AmazonDetails {
+    const amazonDetails: AmazonDetails = new AmazonDetails();
+
     const li: HTMLElement[] = details.getElementsByTagName('li');
 
-    let language = false;
-    let publisher = false;
-    let asin: string | null = null;
-
-    for (
-      let i = 0;
-      i < li.length && (asin == null || !language || !publisher);
-      i++
-    ) {
+    for (let i = 0; i < li.length && !amazonDetails.isComplete(); i++) {
       const element = li[i];
       const entry: Entry<string, string> = this.getDetailElement(element);
       const key: string | null = I18nUtil.getKey(siteLanguage, entry.getKey());
@@ -206,15 +210,13 @@ export class AmazonResolverService extends AbstractResolver {
       if (key != null) {
         switch (key) {
           case LanguageStrings.LANGUAGE_KEY:
-            language = true;
-            this.addLanguageTag(message, siteLanguage, entry.getValue());
+            amazonDetails.setLanguage(entry.getValue());
             break;
           case LanguageStrings.PUBLISHER_KEY:
-            publisher = true;
-            message.setPublisher(entry.getValue());
+            amazonDetails.setPublisher(entry.getValue());
             break;
           case LanguageStrings.ASIN_KEY:
-            asin = entry.getValue();
+            amazonDetails.setAsin(entry.getValue());
             break;
           default:
             break;
@@ -222,7 +224,7 @@ export class AmazonResolverService extends AbstractResolver {
       }
     }
 
-    return asin;
+    return amazonDetails;
   }
 
   /**
