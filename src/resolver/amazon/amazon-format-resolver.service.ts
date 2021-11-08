@@ -15,7 +15,7 @@ export class AmazonFormatResolverService {
     AmazonFormatResolverService.PLACEHOLDER +
     '"]';
 
-  private static readonly KINDLE_ID = 'div[data-a-name="kindle_meta_binding"]';
+  private static readonly CONTAINERS_ID = 'div[data-a-name]';
   private static readonly ASIN_ID =
     'input[type="hidden"][value="' +
     AmazonFormatResolverService.PLACEHOLDER +
@@ -139,11 +139,13 @@ export class AmazonFormatResolverService {
     let ebookElement: NullableHtmlElement = null;
     let asinElement: NullableHtmlElement = null;
 
-    const kindleElement: NullableHtmlElement = html.querySelector(
-      AmazonFormatResolverService.KINDLE_ID
+    const kindleElements: HTMLElement[] = html.querySelectorAll(
+      AmazonFormatResolverService.CONTAINERS_ID
     );
 
-    if (kindleElement != null) {
+    for (let i = 0; i < kindleElements.length && asinElement == null; i++) {
+      const kindleElement: HTMLElement = kindleElements[i];
+
       asinElement = kindleElement.querySelector(
         AmazonFormatResolverService.ASIN_ID.replace(
           AmazonFormatResolverService.PLACEHOLDER,
