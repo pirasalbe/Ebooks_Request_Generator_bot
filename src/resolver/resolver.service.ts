@@ -14,14 +14,40 @@ export class ResolverService {
   resolve(link: string): Promise<Message[]> {
     let result: Promise<Message[]>;
 
-    const url = new URL(link);
+    const url: URL | null = this.stringToUrl(link);
+
+    if (url != null) {
+      result = this.resolveMessages(url);
+    } else {
+      result = new Promise((resolve, reject) => {
+        reject('Invalid link.');
+      });
+    }
+
+    return result;
+  }
+
+  private stringToUrl(link: string): URL | null {
+    let url: URL | null = null;
+
+    try {
+      url = new URL(link);
+    } catch (error) {
+      console.error('Invalid link', error);
+    }
+
+    return url;
+  }
+
+  private resolveMessages(url: URL): Promise<Message[]> {
+    let result: Promise<Message[]>;
 
     const resolver: Resolver | null = this.getResolver(url);
-    if (resolver) {
+    if (resolver != null) {
       result = resolver.resolve(url);
     } else {
       result = new Promise((resolve, reject) => {
-        reject('Invalid URL');
+        reject('URL not supported.');
       });
     }
 
