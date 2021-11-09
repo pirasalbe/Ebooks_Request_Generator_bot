@@ -123,7 +123,7 @@ export class Message {
     message += '<code>' + this.title + '</code>' + '\n';
     message += '<code>' + this.author + '</code>' + '\n';
     message += '<i>' + this.publisher + '</i> ';
-    message += '(' + this.getPublicationDate() + ')\n\n';
+    message += '(' + this.getPublicationDate() + ')' + '\n\n';
     message +=
       '<a href="' +
       this.url.toString() +
