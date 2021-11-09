@@ -90,7 +90,12 @@ export abstract class AbstractResolver implements Resolver {
       return new Promise<Message[]>((resolve, reject) => {
         this.processPage(url, data)
           .then((messages: Message[]) => resolve(messages))
-          .catch((error) => reject(error));
+          .catch((error) =>
+            reject({
+              message: error,
+              html: data,
+            })
+          );
       });
     });
   }
@@ -117,6 +122,12 @@ export abstract class AbstractResolver implements Resolver {
    */
   abstract extractMessages(url: URL, html: HTMLElement): Promise<Message[]>;
 
+  /**
+   * Checks that the array has elements and that all elements are not null
+   *
+   * @param elements Elements to check
+   * @param customMessage Custom error message
+   */
   protected checkRequiredElements(
     elements: NullableHtmlElement[],
     customMessage = 'Missing required elements.'

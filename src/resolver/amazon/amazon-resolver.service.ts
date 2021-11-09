@@ -127,6 +127,10 @@ export class AmazonResolverService extends AbstractResolver {
   }
 
   private checkKindleFormat(format: NullableHtmlElement): void {
+    if (format == null || format.textContent == null) {
+      throw 'Cannot find product information.';
+    }
+
     if (
       format == null ||
       format.textContent == null ||
