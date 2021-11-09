@@ -6,6 +6,7 @@ import { URL } from 'url';
 import { I18nUtil } from './../i18n/i18n-util';
 import { HtmlUtil } from './html/html-util';
 import { NullableHtmlElement } from './html/nullable-html-element';
+import { Cookies } from './http/cookies';
 import { HttpUtil } from './http/http-util';
 import { Message } from './message';
 import { Resolver } from './resolver';
@@ -13,19 +14,12 @@ import { Resolver } from './resolver';
 export abstract class AbstractResolver implements Resolver {
   /**
    * key: hostname
-   * value: map of cookies
+   * value: cookies
    */
-  protected cookies: Map<string, Map<string, string>>;
-
-  /**
-   * key: hostname
-   * value: cookieString
-   */
-  protected cookiesHeaders: Map<string, string>;
+  protected cookies: Map<string, Cookies>;
 
   protected constructor() {
-    this.cookies = new Map<string, Map<string, string>>();
-    this.cookiesHeaders = new Map<string, string>();
+    this.cookies = new Map<string, Cookies>();
   }
 
   resolve(url: URL): Promise<Message[]> {
@@ -37,7 +31,7 @@ export abstract class AbstractResolver implements Resolver {
             'User-Agent': HttpUtil.USER_AGENT_VALUE,
             'Accept-Encoding': HttpUtil.ACCEPT_ENCODING,
             'Accept-Language': 'en-US,en;q=0.9',
-            Cookie: this.getHostCookiesHeader(url.hostname),
+            Cookie: this.getCookies(url.hostname),
           },
         },
         (response: http.IncomingMessage) => {
@@ -50,42 +44,20 @@ export abstract class AbstractResolver implements Resolver {
     });
   }
 
-  private getHostCookiesHeader(host: string): string {
-    let header: string | undefined = this.cookiesHeaders.get(host);
-
-    if (header == undefined) {
-      header = '';
-    }
-
-    return header;
-  }
-
-  private getHostCookies(host: string): Map<string, string> {
+  private getCookies(host: string): string {
     if (!this.cookies.has(host)) {
-      this.cookies.set(host, new Map<string, string>());
+      this.cookies.set(host, new Cookies());
     }
 
-    return this.cookies.get(host) as Map<string, string>;
+    const hostCookies: Cookies = this.cookies.get(host) as Cookies;
+
+    return hostCookies.get();
   }
 
   private updateCookies(host: string, headers: http.IncomingHttpHeaders): void {
-    const hostCookies: Map<string, string> = this.getHostCookies(host);
-    const setCookie: string[] | undefined = headers['set-cookie'];
+    const hostCookies: Cookies = this.cookies.get(host) as Cookies;
 
-    if (setCookie != undefined && setCookie.length > 0) {
-      for (const cookies of setCookie) {
-        const cookieInfo: string = cookies.split(';')[0];
-        const cookiePart: string[] = cookieInfo.split('=');
-
-        hostCookies.set(cookiePart[0], cookiePart[1]);
-      }
-
-      const cookiesArray: string[] = [];
-      hostCookies.forEach((value: string, key: string) => {
-        cookiesArray.push(key + '=' + value);
-      });
-      this.cookiesHeaders.set(host, cookiesArray.join('; '));
-    }
+    hostCookies.update(headers);
   }
 
   private processResponse(
@@ -118,7 +90,12 @@ export abstract class AbstractResolver implements Resolver {
       return new Promise<Message[]>((resolve, reject) => {
         this.processPage(url, data)
           .then((messages: Message[]) => resolve(messages))
-          .catch((error) => reject(error));
+          .catch((error) =>
+            reject({
+              message: error,
+              html: data,
+            })
+          );
       });
     });
   }
@@ -145,6 +122,12 @@ export abstract class AbstractResolver implements Resolver {
    */
   abstract extractMessages(url: URL, html: HTMLElement): Promise<Message[]>;
 
+  /**
+   * Checks that the array has elements and that all elements are not null
+   *
+   * @param elements Elements to check
+   * @param customMessage Custom error message
+   */
   protected checkRequiredElements(
     elements: NullableHtmlElement[],
     customMessage = 'Missing required elements.'

@@ -45,7 +45,7 @@ export class AmazonResolverService extends AbstractResolver {
   extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {
     return new Promise<Message[]>((resolve) => {
       // captcha
-      this.amazonCaptchaResolverService.checkCaptcha(html, this.cookiesHeaders);
+      this.amazonCaptchaResolverService.checkCaptcha(html, this.cookies);
 
       // checks
       const kindleFormat: NullableHtmlElement = html.querySelector(
@@ -127,9 +127,11 @@ export class AmazonResolverService extends AbstractResolver {
   }
 
   private checkKindleFormat(format: NullableHtmlElement): void {
+    if (format == null || format.textContent == null) {
+      throw 'Cannot find product information.';
+    }
+
     if (
-      format == null ||
-      format.textContent == null ||
       !format.textContent
         .toLocaleLowerCase()
         .includes(AmazonResolverService.KINDLE)

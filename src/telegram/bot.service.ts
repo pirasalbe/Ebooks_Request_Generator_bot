@@ -11,10 +11,15 @@ import {
   UserFromGetMe,
 } from 'typegram';
 
+import { Exception } from '../error/exception';
 import { Message } from '../resolver/message';
 import { ResolverService } from '../resolver/resolver.service';
+import { ResolverException } from './../error/resolver-exception';
+import { DocumentResponse } from './telegram-responses';
 
 export class BotService {
+  private static readonly REPORT: string = '/report';
+
   private static readonly SUCCESSFULL_THUMB_URL =
     'https://telegra.ph/file/5b2fad22d5b296b843acf.jpg';
   private static readonly INVALID_THUMB_URL =
@@ -78,11 +83,12 @@ export class BotService {
               ctx.answerInlineQuery(inlineResults);
             })
             .catch((error: string) => {
+              const errorResponse: string = this.getErrorMessage(error);
               ctx.answerInlineQuery([
                 this.inlineResult(
                   'Error!',
-                  String(error),
-                  String(error),
+                  errorResponse,
+                  errorResponse,
                   BotService.INVALID_THUMB_URL
                 ),
               ]);
@@ -102,15 +108,19 @@ export class BotService {
 
     this.bot.on('text', (ctx) => {
       this.safeHandling(() => {
+        const report: boolean = ctx.message.text.startsWith(BotService.REPORT);
+
         // avoid messages from the bot
         if (!this.isMessageFromBot(ctx.message.via_bot, ctx.botInfo)) {
           const extra: ExtraReplyMessage = {
             reply_to_message_id: ctx.message.message_id,
           };
 
+          // send placeholder
           ctx
             .reply('Processing...', extra)
             .then((loader: TelegramMessage.TextMessage) => {
+              // resolve message from url
               this.resolve(
                 this.extractUrl(ctx.message.text, ctx.message.entities)
               )
@@ -127,9 +137,21 @@ export class BotService {
                     });
                   }
                 })
-                .catch((error: string) => {
+                .catch((error: unknown) => {
                   ctx.deleteMessage(loader.message_id);
-                  ctx.reply(error, extra);
+                  if (report && this.isResolverException(error)) {
+                    const documentResponse: DocumentResponse =
+                      this.getReportResponse(
+                        error as ResolverException,
+                        ctx.message.message_id
+                      );
+                    ctx.replyWithDocument(
+                      documentResponse.document,
+                      documentResponse.extra
+                    );
+                  } else {
+                    ctx.reply(this.getErrorMessage(error), extra);
+                  }
                 });
             })
             .catch((error: string) => {
@@ -226,7 +248,11 @@ export class BotService {
             resolve(messages);
           })
           .catch((error: string) => {
-            console.error('Error resolving message', text, error);
+            console.error(
+              'Error resolving message',
+              text,
+              this.getErrorMessage(error)
+            );
             reject(error);
           });
       } catch (error) {
@@ -271,5 +297,38 @@ export class BotService {
       thumb_url: thumb_url,
     };
     return result;
+  }
+
+  private isResolverException(error: unknown): boolean {
+    const exception: ResolverException = error as ResolverException;
+
+    return exception != undefined && exception.html != undefined;
+  }
+
+  private getErrorMessage(error: unknown): string {
+    let result = String(error);
+    const exception: Exception = error as Exception;
+
+    if (exception != undefined && exception.message != undefined) {
+      result = exception.message;
+    }
+
+    return result;
+  }
+
+  private getReportResponse(
+    exception: ResolverException,
+    messageId: number
+  ): DocumentResponse {
+    return {
+      document: {
+        filename: 'report.html',
+        source: Buffer.from(exception.html, 'utf8'),
+      },
+      extra: {
+        caption: exception.message,
+        reply_to_message_id: messageId,
+      },
+    };
   }
 }
