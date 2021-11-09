@@ -132,8 +132,6 @@ export class AmazonResolverService extends AbstractResolver {
     }
 
     if (
-      format == null ||
-      format.textContent == null ||
       !format.textContent
         .toLocaleLowerCase()
         .includes(AmazonResolverService.KINDLE)
