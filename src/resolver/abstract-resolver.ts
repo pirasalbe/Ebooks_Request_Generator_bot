@@ -25,7 +25,7 @@ export abstract class AbstractResolver implements Resolver {
   resolve(url: URL): Promise<Message[]> {
     return new Promise<Message[]>((resolve, reject) => {
       https.get(
-        url,
+        this.prepareUrl(url),
         {
           headers: {
             'User-Agent': HttpUtil.USER_AGENT_VALUE,
@@ -42,6 +42,10 @@ export abstract class AbstractResolver implements Resolver {
         }
       );
     });
+  }
+
+  protected prepareUrl(url: URL): URL {
+    return url;
   }
 
   private getCookies(host: string): string {
