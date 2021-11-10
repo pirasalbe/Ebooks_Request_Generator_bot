@@ -17,11 +17,11 @@ export class AudibleResolverService extends AbstractResolver {
     super();
   }
 
-  resolve(url: URL): Promise<Message[]> {
+  getUrl(url: URL): URL {
     // add override to avoid redirection
     url.searchParams.set(AudibleResolverService.OVERRIDE_LANGUAGE, 'true');
 
-    return super.resolve(url);
+    return url;
   }
 
   extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {

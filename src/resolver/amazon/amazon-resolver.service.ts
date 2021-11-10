@@ -14,6 +14,8 @@ import { AmazonDetails } from './amazon-details';
 import { AmazonFormatResolverService } from './amazon-format-resolver.service';
 
 export class AmazonResolverService extends AbstractResolver {
+  private static readonly LANGUAGE_PATH_PARAM: RegExp = /^\/-\/[a-zA-Z]{2}\//g;
+
   private static readonly SITE_LANGUAGE_ID = 'script[type="text/javascript"]';
   private static readonly SITE_LANGUAGE_PROPERTY =
     "window.$Nav && $Nav.declare('config.languageCode','";
@@ -40,6 +42,20 @@ export class AmazonResolverService extends AbstractResolver {
     super();
     this.amazonFormatResolverService = amazonFormatResolverService;
     this.amazonCaptchaResolverService = amazonCaptchaResolverService;
+  }
+
+  getUrl(url: URL): URL {
+    // remove language from path
+    while (
+      url.pathname.match(AmazonResolverService.LANGUAGE_PATH_PARAM) != null
+    ) {
+      url.pathname = url.pathname.replace(
+        AmazonResolverService.LANGUAGE_PATH_PARAM,
+        '/'
+      );
+    }
+
+    return url;
   }
 
   extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {
