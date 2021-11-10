@@ -17,7 +17,7 @@ export class AudibleResolverService extends AbstractResolver {
     super();
   }
 
-  getUrl(url: URL): URL {
+  prepareUrl(url: URL): URL {
     // add override to avoid redirection
     url.searchParams.set(AudibleResolverService.OVERRIDE_LANGUAGE, 'true');
 

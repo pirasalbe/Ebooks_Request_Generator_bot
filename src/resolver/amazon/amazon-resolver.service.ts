@@ -44,7 +44,7 @@ export class AmazonResolverService extends AbstractResolver {
     this.amazonCaptchaResolverService = amazonCaptchaResolverService;
   }
 
-  getUrl(url: URL): URL {
+  prepareUrl(url: URL): URL {
     // remove language from path
     while (
       url.pathname.match(AmazonResolverService.LANGUAGE_PATH_PARAM) != null
