@@ -4,6 +4,13 @@ Telegram bot that creates a text message from the link address of an ebook or an
 
 [Open on Telegram.](http://t.me/ebooks_request_generator_bot)
 
+## Commands
+
+- /start and /help: show an help message.
+- text: given a link or a text containing a link, it returns the request message.
+- /report text: works the same way it does with _text_, but it returns a _report.html_ file when errors occur.
+- inline: the bot works inline the same way it does with _text_.
+
 ## Message format
 
 ```
