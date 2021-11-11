@@ -18,6 +18,13 @@ export class HttpUtil {
     });
   }
 
+  /**
+   * Extract the response body as string and call the callback function with it
+   *
+   * @param response Response received
+   * @param callback Function to call with the body
+   * @returns Promise
+   */
   static processSuccessfulResponse<T>(
     response: http.IncomingMessage,
     callback: (data: string) => Promise<T>

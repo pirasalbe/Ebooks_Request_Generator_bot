@@ -24,7 +24,11 @@ export class AmazonResolverService extends AbstractResolver {
   private static readonly AUTHOR_ID = '.contributorNameID';
   private static readonly AUTHOR_ALTERNATIVE_ID = '.author';
   private static readonly KINDLE_FORMAT_ID = '#productSubtitle';
-  private static readonly DETAILS_ID = '.detail-bullet-list';
+
+  private static readonly DETAILS_LIST_ID = '.detail-bullet-list';
+  private static readonly DETAILS_CAROUSEL_ID =
+    '.a-carousel-card.rpi-carousel-attribute-card';
+  private static readonly SPAN = 'span';
 
   private static readonly LINK_CLASS = '.a-link-normal';
 
@@ -82,11 +86,40 @@ export class AmazonResolverService extends AbstractResolver {
 
       const author: NullableHtmlElement = this.getAuthorElement(html);
 
-      const details: NullableHtmlElement = html.querySelector(
-        AmazonResolverService.DETAILS_ID
+      const nullableDetailsList: NullableHtmlElement = html.querySelector(
+        AmazonResolverService.DETAILS_LIST_ID
       );
 
-      this.checkRequiredElements([title, author, details]);
+      this.checkRequiredElements([title, author, nullableDetailsList]);
+
+      // details
+      const detailsList: NullableHtmlElement =
+        nullableDetailsList as HTMLElement;
+
+      const detailsCarousel: HTMLElement[] = html.querySelectorAll(
+        AmazonResolverService.DETAILS_CAROUSEL_ID
+      );
+
+      const detailsItems: HTMLElement[] =
+        detailsList.getElementsByTagName('li');
+
+      const amazonDetails: AmazonDetails = new AmazonDetails();
+
+      // read the list
+      this.getDetails(
+        amazonDetails,
+        siteLanguage,
+        detailsItems,
+        (element: HTMLElement) => this.getEntryFromListItem(element)
+      );
+
+      // read the carousel
+      this.getDetails(
+        amazonDetails,
+        siteLanguage,
+        detailsCarousel,
+        (element: HTMLElement) => this.getEntryFromCarouselItem(element)
+      );
 
       // prepare message
       const message: Message = new Message(SiteResolver.AMAZON, url);
@@ -94,11 +127,6 @@ export class AmazonResolverService extends AbstractResolver {
       // main info
       message.setTitle(HtmlUtil.getTextContent(title as HTMLElement));
       message.setAuthor(HtmlUtil.getTextContent(author as HTMLElement));
-
-      const amazonDetails: AmazonDetails = this.getDetails(
-        siteLanguage,
-        details as HTMLElement
-      );
 
       message.setPublisher(amazonDetails.getPublisher());
 
@@ -212,17 +240,23 @@ export class AmazonResolverService extends AbstractResolver {
     });
   }
 
+  /**
+   * Find the details of a book
+   * @param amazonDetails Existing details
+   * @param siteLanguage Language to parse the text
+   * @param details List of details elements
+   * @param getEntry Function to extract the key and value
+   * @returns AmazonDetails
+   */
   private getDetails(
+    amazonDetails: AmazonDetails,
     siteLanguage: string,
-    details: HTMLElement
-  ): AmazonDetails {
-    const amazonDetails: AmazonDetails = new AmazonDetails();
-
-    const li: HTMLElement[] = details.getElementsByTagName('li');
-
-    for (let i = 0; i < li.length && !amazonDetails.isComplete(); i++) {
-      const element = li[i];
-      const entry: Entry<string, string> = this.getDetailElement(element);
+    details: HTMLElement[],
+    getEntry: (element: HTMLElement) => Entry<string, string>
+  ): void {
+    for (let i = 0; i < details.length && !amazonDetails.isComplete(); i++) {
+      const element = details[i];
+      const entry: Entry<string, string> = getEntry(element);
       const key: string | null = I18nUtil.getKey(siteLanguage, entry.getKey());
 
       if (key != null) {
@@ -241,8 +275,6 @@ export class AmazonResolverService extends AbstractResolver {
         }
       }
     }
-
-    return amazonDetails;
   }
 
   /**
@@ -255,14 +287,16 @@ export class AmazonResolverService extends AbstractResolver {
    *    </span>
    * </li>
    *
-   * @param li A detail element
+   * @param item A detail element
    */
-  private getDetailElement(li: HTMLElement): Entry<string, string> {
-    const parentSpan: NullableHtmlElement = li.querySelector('.a-list-item');
+  private getEntryFromListItem(item: HTMLElement): Entry<string, string> {
+    const parentSpan: NullableHtmlElement = item.querySelector('.a-list-item');
     let entry: Entry<string, string>;
 
     if (parentSpan != null) {
-      const spans: HTMLElement[] = parentSpan.getElementsByTagName('span');
+      const spans: HTMLElement[] = parentSpan.getElementsByTagName(
+        AmazonResolverService.SPAN
+      );
 
       // span with info
       if (spans.length == 2) {
@@ -271,14 +305,63 @@ export class AmazonResolverService extends AbstractResolver {
         entry = new Entry<string, string>(key, value);
       } else {
         console.error(parentSpan.childNodes, spans);
-        throw 'Error parsing page. Cannot read product detail information.';
+        throw 'Error parsing page. Cannot read product detail information from list.';
       }
     } else {
-      console.error(li.childNodes, parentSpan);
-      throw 'Error parsing page. Cannot read a product detail.';
+      console.error(item.childNodes, parentSpan);
+      throw 'Error parsing page. Cannot read a product detail from list.';
     }
 
     return entry;
+  }
+
+  /**
+   * Extract detail information from the following html structure
+   *
+   * <div>
+   *   <div class="a-section a-spacing-small a-text-center rpi-attribute-label">
+   *     <span>Language</span>
+   *   </div>
+   *   <div class="a-section a-spacing-small a-text-center">
+   *     <span class="rpi-icon language"></span>
+   *   </div>
+   *   <div class="a-section a-spacing-none a-text-center rpi-attribute-value">
+   *     <span>English</span>
+   *   </div>
+   * </div>
+   *
+   * @param item A detail element
+   */
+  private getEntryFromCarouselItem(item: HTMLElement): Entry<string, string> {
+    const keyElement: NullableHtmlElement = item.querySelector(
+      '.rpi-attribute-label'
+    );
+    const valueElement: NullableHtmlElement = item.querySelector(
+      '.rpi-attribute-value'
+    );
+
+    let key = '';
+    let value = '';
+
+    if (keyElement != null && valueElement != null) {
+      key = HtmlUtil.getRawText(this.getSpan(keyElement));
+      value = HtmlUtil.getTextContent(this.getSpan(valueElement));
+    }
+
+    return new Entry<string, string>(key, value);
+  }
+
+  private getSpan(element: HTMLElement): HTMLElement {
+    const spans: HTMLElement[] = element.getElementsByTagName(
+      AmazonResolverService.SPAN
+    );
+
+    if (spans.length < 1) {
+      console.error(element, spans);
+      throw 'Error parsing page. Cannot read product detail information from carousel.';
+    }
+
+    return spans[0];
   }
 
   private sanitizeKey(key: HTMLElement): string {
