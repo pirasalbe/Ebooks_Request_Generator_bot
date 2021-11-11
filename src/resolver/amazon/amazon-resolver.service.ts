@@ -287,10 +287,10 @@ export class AmazonResolverService extends AbstractResolver {
    *    </span>
    * </li>
    *
-   * @param li A detail element
+   * @param item A detail element
    */
-  private getEntryFromListItem(li: HTMLElement): Entry<string, string> {
-    const parentSpan: NullableHtmlElement = li.querySelector('.a-list-item');
+  private getEntryFromListItem(item: HTMLElement): Entry<string, string> {
+    const parentSpan: NullableHtmlElement = item.querySelector('.a-list-item');
     let entry: Entry<string, string>;
 
     if (parentSpan != null) {
@@ -308,7 +308,7 @@ export class AmazonResolverService extends AbstractResolver {
         throw 'Error parsing page. Cannot read product detail information from list.';
       }
     } else {
-      console.error(li.childNodes, parentSpan);
+      console.error(item.childNodes, parentSpan);
       throw 'Error parsing page. Cannot read a product detail from list.';
     }
 
@@ -330,27 +330,25 @@ export class AmazonResolverService extends AbstractResolver {
    *   </div>
    * </div>
    *
-   * @param li A detail element
+   * @param item A detail element
    */
-  private getEntryFromCarouselItem(li: HTMLElement): Entry<string, string> {
-    const keyElement: NullableHtmlElement = li.querySelector(
+  private getEntryFromCarouselItem(item: HTMLElement): Entry<string, string> {
+    const keyElement: NullableHtmlElement = item.querySelector(
       '.rpi-attribute-label'
     );
-    const valueElement: NullableHtmlElement = li.querySelector(
+    const valueElement: NullableHtmlElement = item.querySelector(
       '.rpi-attribute-value'
     );
-    let entry: Entry<string, string>;
+
+    let key = '';
+    let value = '';
 
     if (keyElement != null && valueElement != null) {
-      const key = HtmlUtil.getRawText(this.getSpan(keyElement));
-      const value = HtmlUtil.getTextContent(this.getSpan(valueElement));
-      entry = new Entry<string, string>(key, value);
-    } else {
-      console.error(keyElement, valueElement);
-      throw 'Error parsing page. Cannot read a product detail from carousel.';
+      key = HtmlUtil.getRawText(this.getSpan(keyElement));
+      value = HtmlUtil.getTextContent(this.getSpan(valueElement));
     }
 
-    return entry;
+    return new Entry<string, string>(key, value);
   }
 
   private getSpan(element: HTMLElement): HTMLElement {
@@ -358,7 +356,7 @@ export class AmazonResolverService extends AbstractResolver {
       AmazonResolverService.SPAN
     );
 
-    if (spans.length != 1) {
+    if (spans.length < 1) {
       console.error(element, spans);
       throw 'Error parsing page. Cannot read product detail information from carousel.';
     }
