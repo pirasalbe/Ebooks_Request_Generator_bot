@@ -1,5 +1,5 @@
 import { Context, Markup, Telegraf, Telegram } from 'telegraf';
-import { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
+import { ExtraAnswerInlineQuery, ExtraReplyMessage } from 'telegraf/typings/telegram-types';
 import {
   InlineQueryResult,
   InlineQueryResultArticle,
@@ -62,6 +62,8 @@ export class BotService {
     this.bot.on('inline_query', (ctx) => {
       this.safeHandling(() => {
         if (ctx.inlineQuery.query != '') {
+          const extra: ExtraAnswerInlineQuery = { cache_time: 60 };
+
           this.resolve(this.extractUrlFromText(ctx.inlineQuery.query))
             .then((messages: Message[]) => {
               const inlineResults: InlineQueryResult[] = [];
@@ -80,18 +82,21 @@ export class BotService {
                 );
               }
 
-              ctx.answerInlineQuery(inlineResults);
+              ctx.answerInlineQuery(inlineResults, extra);
             })
             .catch((error: string) => {
               const errorResponse: string = this.getErrorMessage(error);
-              ctx.answerInlineQuery([
-                this.inlineResult(
-                  'Error!',
-                  errorResponse,
-                  errorResponse,
-                  BotService.INVALID_THUMB_URL
-                ),
-              ]);
+              ctx.answerInlineQuery(
+                [
+                  this.inlineResult(
+                    'Error!',
+                    errorResponse,
+                    errorResponse,
+                    BotService.INVALID_THUMB_URL
+                  ),
+                ],
+                extra
+              );
             });
         } else {
           ctx.answerInlineQuery([
