@@ -44,10 +44,20 @@ export abstract class AbstractResolver implements Resolver {
     });
   }
 
+  /**
+   * Prepare the URL for the call
+   * @param url Url to edit
+   * @returns Url ready for call
+   */
   protected prepareUrl(url: URL): URL {
     return url;
   }
 
+  /**
+   * Retrieve the cookies of the host
+   * @param host Host to call
+   * @returns Cookies
+   */
   private getCookies(host: string): string {
     if (!this.cookies.has(host)) {
       this.cookies.set(host, new Cookies());
@@ -58,12 +68,24 @@ export abstract class AbstractResolver implements Resolver {
     return hostCookies.get();
   }
 
+  /**
+   * Updates the cookies of the host
+   * @param host Host called
+   * @param headers Headers from the response
+   */
   private updateCookies(host: string, headers: http.IncomingHttpHeaders): void {
     const hostCookies: Cookies = this.cookies.get(host) as Cookies;
 
     hostCookies.update(headers);
   }
 
+  /**
+   * Process the response based on the status code
+   *
+   * @param url URL of the call
+   * @param response Call response
+   * @returns Promise with messages extracted
+   */
   private processResponse(
     url: URL,
     response: http.IncomingMessage
@@ -86,12 +108,19 @@ export abstract class AbstractResolver implements Resolver {
     });
   }
 
+  /**
+   * Process a response with status 200
+   *
+   * @param url URL of the call
+   * @param response Call response
+   * @returns Promise with messages extracted
+   */
   private processSuccessfulResponse(
     url: URL,
     response: http.IncomingMessage
   ): Promise<Message[]> {
     return HttpUtil.processSuccessfulResponse(response, (data: string) => {
-      return new Promise<Message[]>((resolve, reject) => {
+      return new Promise<Message[]>((resolve, reject) =>
         this.processPage(url, data)
           .then((messages: Message[]) => resolve(messages))
           .catch((error) =>
@@ -99,11 +128,18 @@ export abstract class AbstractResolver implements Resolver {
               message: error,
               html: data,
             })
-          );
-      });
+          )
+      );
     });
   }
 
+  /**
+   * Process the body, which is an html page, to extract the messages
+   *
+   * @param url URL of the call
+   * @param data The HTML page
+   * @returns Promise with messages extracted
+   */
   private processPage(url: URL, data: string): Promise<Message[]> {
     return new Promise<Message[]>((resolve, reject) => {
       try {
