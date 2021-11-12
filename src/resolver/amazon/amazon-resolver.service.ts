@@ -446,10 +446,10 @@ export class AmazonResolverService extends AbstractResolver {
           .toLowerCase()
           .trim();
 
-        if (part.match(/[0-9]{2}/g)) {
+        if (part.match(/^[0-9]{1,2}$/g)) {
           // days
           days = Number(part);
-        } else if (part.match(/[0-9]{4}/g)) {
+        } else if (part.match(/^[0-9]{4}$/g)) {
           // year
           year = Number(part);
         } else if (part.match(/[a-z]*/g)) {
@@ -459,7 +459,12 @@ export class AmazonResolverService extends AbstractResolver {
       }
 
       // transform to date object
-      // TODO
+      if (days != null && month != null && year != null) {
+        const date: Date = new Date();
+        date.setFullYear(year, Number(month), days);
+        date.setUTCHours(0, 0, 0, 0);
+        message.setPublicationDate(date);
+      }
     }
   }
 }
