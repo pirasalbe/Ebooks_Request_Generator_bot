@@ -164,8 +164,40 @@ export class ScribdResolverService extends AbstractResolver {
     if (languageFound != undefined) {
       const language: string = languageFound.name.toLowerCase();
       if (this.isLanguageTagRequired(language)) {
-        message.addTag(language);
+        message.addTag(this.getLanguageTag(language));
       }
     }
+  }
+
+  private getLanguageTag(language: string): string {
+    let result: string = language;
+    switch (result) {
+      case 'español':
+        result = 'spanish';
+        break;
+      case 'português':
+        result = 'portuguese';
+        break;
+      case 'Deutsch':
+        result = 'german';
+        break;
+      case 'français':
+        result = 'french';
+        break;
+      case 'pусский':
+        result = 'russian';
+        break;
+      case 'italiano':
+        result = 'italian';
+        break;
+      case 'română':
+        result = 'romanian';
+        break;
+      case 'bahasa indonesia':
+        result = 'indonesian';
+        break;
+    }
+
+    return language;
   }
 }
