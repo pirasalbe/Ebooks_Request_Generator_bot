@@ -267,6 +267,9 @@ export class AmazonResolverService extends AbstractResolver {
           case LanguageStrings.PUBLISHER_KEY:
             amazonDetails.setPublisher(entry.getValue());
             break;
+          case LanguageStrings.PUBLICATION_DATE_KEY:
+            amazonDetails.setPublicationDate(entry.getValue());
+            break;
           case LanguageStrings.ASIN_KEY:
             amazonDetails.setAsin(entry.getValue());
             break;
