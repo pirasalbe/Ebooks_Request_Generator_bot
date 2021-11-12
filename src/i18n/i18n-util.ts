@@ -8,6 +8,7 @@ export class I18nUtil {
       {
         language: 'language',
         publisher: 'publisher',
+        publicationDate: 'Publication date',
         associatedNames: 'associated-names',
         asin: 'asin',
       },
@@ -23,6 +24,7 @@ export class I18nUtil {
       {
         language: 'lingua',
         publisher: 'editore',
+        publicationDate: 'data di pubblicazione',
         associatedNames: 'nomi-associati',
         asin: 'asin',
       },
@@ -38,6 +40,7 @@ export class I18nUtil {
       {
         language: 'sprache',
         publisher: 'herausgeber',
+        publicationDate: 'erscheinungstermin',
         associatedNames: 'assoziierte-namen',
         asin: 'asin',
       },
@@ -53,6 +56,7 @@ export class I18nUtil {
       {
         language: 'langue',
         publisher: 'éditeur',
+        publicationDate: 'date de publication',
         associatedNames: 'noms-associés',
         asin: 'asin',
       },
@@ -68,6 +72,7 @@ export class I18nUtil {
       {
         language: 'idioma',
         publisher: 'editorial',
+        publicationDate: 'fecha de publicación',
         associatedNames: 'nombres-asociados',
         asin: 'asin',
       },

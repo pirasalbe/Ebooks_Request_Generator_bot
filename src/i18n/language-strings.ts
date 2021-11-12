@@ -4,6 +4,7 @@ import { Strings } from './strings';
 export class LanguageStrings {
   public static readonly LANGUAGE_KEY = 'language';
   public static readonly PUBLISHER_KEY = 'publisher';
+  public static readonly PUBLICATION_DATE_KEY = 'publicationDate';
   public static readonly ASSOCIATED_NAMES_KEY = 'associated-names';
   public static readonly ASIN_KEY = 'asin';
 
@@ -26,6 +27,8 @@ export class LanguageStrings {
     this.strings = {};
     this.strings[LanguageStrings.LANGUAGE_KEY] = strings.language;
     this.strings[LanguageStrings.PUBLISHER_KEY] = strings.publisher;
+    this.strings[LanguageStrings.PUBLICATION_DATE_KEY] =
+      strings.publicationDate;
     this.strings[LanguageStrings.ASSOCIATED_NAMES_KEY] =
       strings.associatedNames;
     this.strings[LanguageStrings.ASIN_KEY] = strings.asin;
@@ -33,6 +36,8 @@ export class LanguageStrings {
     this.reverseStrings = {};
     this.reverseStrings[strings.language] = LanguageStrings.LANGUAGE_KEY;
     this.reverseStrings[strings.publisher] = LanguageStrings.PUBLISHER_KEY;
+    this.reverseStrings[strings.publicationDate] =
+      LanguageStrings.PUBLICATION_DATE_KEY;
     this.reverseStrings[strings.associatedNames] =
       LanguageStrings.ASSOCIATED_NAMES_KEY;
     this.reverseStrings[strings.asin] = LanguageStrings.ASIN_KEY;
