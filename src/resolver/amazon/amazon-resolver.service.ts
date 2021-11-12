@@ -129,6 +129,12 @@ export class AmazonResolverService extends AbstractResolver {
       message.setAuthor(HtmlUtil.getTextContent(author as HTMLElement));
 
       message.setPublisher(amazonDetails.getPublisher());
+      this.setPublicationDate(
+        message,
+        siteLanguage,
+        amazonDetails.getPublicationDate(),
+        amazonDetails.getPublisher()
+      );
 
       // tags
       if (amazonDetails.hasLanguage()) {
@@ -400,5 +406,60 @@ export class AmazonResolverService extends AbstractResolver {
     newUrl.pathname = AmazonResolverService.URL_PREFIX + asin;
     newUrl.search = '';
     return newUrl;
+  }
+
+  setPublicationDate(
+    message: Message,
+    siteLanguage: string,
+    publicationDate: string | null,
+    publisher: string | null
+  ): void {
+    let dateString: string | null = null;
+
+    // get the date
+    if (publicationDate != null) {
+      dateString = publicationDate;
+    } else if (publisher != null) {
+      const startIndex: number = publisher.indexOf('(');
+      const endIndex: number = publisher.indexOf(
+        ')',
+        startIndex > -1 ? startIndex : 0
+      );
+      if (startIndex > -1 && endIndex > -1) {
+        dateString = publisher.substring(startIndex, endIndex);
+      }
+    }
+
+    // transform date
+    if (dateString != null) {
+      const dateParts: string[] = dateString.split(' ');
+
+      let days: number | null = null;
+      let month: string | null = null;
+      let year: number | null = null;
+
+      // parse date
+      for (const datePart of dateParts) {
+        const part: string = datePart
+          .replace('.', '')
+          .replace(',', '')
+          .toLowerCase()
+          .trim();
+
+        if (part.match(/[0-9]{2}/g)) {
+          // days
+          days = Number(part);
+        } else if (part.match(/[0-9]{4}/g)) {
+          // year
+          year = Number(part);
+        } else if (part.match(/[a-z]*/g)) {
+          // month
+          month = I18nUtil.getKey(siteLanguage, part);
+        }
+      }
+
+      // transform to date object
+      // TODO
+    }
   }
 }

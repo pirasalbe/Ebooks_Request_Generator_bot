@@ -42,10 +42,16 @@ export class LanguageStrings {
       LanguageStrings.ASSOCIATED_NAMES_KEY;
     this.reverseStrings[strings.asin] = LanguageStrings.ASIN_KEY;
 
-    for (const languageKey of Object.keys(languages)) {
-      const value: string = (languages as any)[languageKey];
-      this.strings[languageKey] = value;
-      this.reverseStrings[value] = languageKey;
+    this.addValuesFromObject(languages);
+    this.addValuesFromObject(strings.shortMonths);
+    this.addValuesFromObject(strings.months);
+  }
+
+  private addValuesFromObject(object: any): void {
+    for (const key of Object.keys(object)) {
+      const value: string = (object as any)[key];
+      this.strings[key] = value;
+      this.reverseStrings[value] = key;
     }
   }
 
