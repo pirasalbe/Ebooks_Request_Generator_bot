@@ -45,6 +45,8 @@ export class ScribdResolverService extends AbstractResolver {
 
       message.setPublisher(information.publisher.name);
 
+      message.setPublicationDate(new Date(information.releaseDate));
+
       // tags
       message.addTag('scribd');
       if (information.contentType === 'audiobook') {
