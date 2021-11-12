@@ -157,16 +157,14 @@ export class ScribdResolverService extends AbstractResolver {
     inLanguage: string,
     languages: ScribdLanguage[]
   ): void {
-    if (inLanguage !== '') {
-      const languageFound: ScribdLanguage | undefined = languages.find(
-        (l: ScribdLanguage) => l.prefix === inLanguage
-      );
+    const languageFound: ScribdLanguage | undefined = languages.find(
+      (l: ScribdLanguage) => l.prefix === inLanguage
+    );
 
-      if (languageFound != undefined) {
-        const language: string = languageFound.name.toLowerCase();
-        if (this.isLanguageTagRequired(language)) {
-          message.addTag(language);
-        }
+    if (languageFound != undefined) {
+      const language: string = languageFound.name.toLowerCase();
+      if (this.isLanguageTagRequired(language)) {
+        message.addTag(language);
       }
     }
   }
