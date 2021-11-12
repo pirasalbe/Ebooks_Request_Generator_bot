@@ -31,11 +31,11 @@ export class ScribdResolverService extends AbstractResolver {
         ScribdResolverService.CONTENT_ID
       );
 
-      const alternativeContent: NullableHtmlElement = html.querySelector(
+      const additionalContent: NullableHtmlElement = html.querySelector(
         ScribdResolverService.ALTERNATIVE_CONTENT_ID
       );
 
-      this.checkRequiredElements([alternativeContent]);
+      this.checkRequiredElements([additionalContent]);
 
       let information: ScribdInformation | null = null;
 
@@ -46,7 +46,7 @@ export class ScribdResolverService extends AbstractResolver {
 
       // otherwise get from alternative
       const informationI18n: ScribdInformationI18n =
-        this.getScribdAlternativeInformation(alternativeContent as HTMLElement);
+        this.getScribdAdditionalInformation(additionalContent as HTMLElement);
 
       const languages: ScribdLanguage[] = informationI18n.languages;
 
@@ -107,7 +107,7 @@ export class ScribdResolverService extends AbstractResolver {
     return information;
   }
 
-  private getScribdAlternativeInformation(
+  private getScribdAdditionalInformation(
     contentElement: HTMLElement
   ): ScribdInformationI18n {
     let information: ScribdAlternativeInformation | null = null;
