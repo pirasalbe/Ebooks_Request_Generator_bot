@@ -5,7 +5,7 @@ import { SiteResolver } from './site-resolver.enum';
 
 export class Message {
   public static readonly AUDIOBOOK_TAG = 'audiobook';
-  private static readonly PUBLICATION_DATE_MINIMUM_AGE_DAYS = 14;
+  private static readonly PUBLICATION_DATE_MINIMUM_AGE_DAYS = 0;
 
   private site: SiteResolver;
   private tags: string[];
