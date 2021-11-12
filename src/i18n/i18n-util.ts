@@ -8,7 +8,7 @@ export class I18nUtil {
       {
         language: 'language',
         publisher: 'publisher',
-        publicationDate: 'Publication date',
+        publicationDate: 'publication date',
         associatedNames: 'associated-names',
         asin: 'asin',
         months: {
