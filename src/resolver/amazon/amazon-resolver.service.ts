@@ -128,13 +128,14 @@ export class AmazonResolverService extends AbstractResolver {
       message.setTitle(HtmlUtil.getTextContent(title as HTMLElement));
       message.setAuthor(HtmlUtil.getTextContent(author as HTMLElement));
 
-      message.setPublisher(amazonDetails.getPublisher());
       this.setPublicationDate(
         message,
         siteLanguage,
         amazonDetails.getPublicationDate(),
         amazonDetails.getPublisher()
       );
+
+      this.setPublisher(message, amazonDetails.getPublisher());
 
       // tags
       if (amazonDetails.hasLanguage()) {
@@ -408,7 +409,7 @@ export class AmazonResolverService extends AbstractResolver {
     return newUrl;
   }
 
-  setPublicationDate(
+  private setPublicationDate(
     message: Message,
     siteLanguage: string,
     publicationDate: string | null,
@@ -464,6 +465,17 @@ export class AmazonResolverService extends AbstractResolver {
         date.setFullYear(year, Number(month), days);
         date.setUTCHours(0, 0, 0, 0);
         message.setPublicationDate(date);
+      }
+    }
+  }
+
+  private setPublisher(message: Message, publisher: string | null): void {
+    if (publisher != null) {
+      const index: number = publisher.indexOf('(');
+      if (index > -1) {
+        message.setPublisher(publisher.substring(0, index));
+      } else {
+        message.setPublisher(publisher);
       }
     }
   }
