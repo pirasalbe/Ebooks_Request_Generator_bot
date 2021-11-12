@@ -36,6 +36,7 @@ export class Message {
     clone.title = this.title;
     clone.author = this.author;
     clone.publisher = this.publisher;
+    clone.publicationDate = this.publicationDate;
 
     return clone;
   }

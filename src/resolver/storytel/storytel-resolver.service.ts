@@ -78,6 +78,11 @@ export class StorytelResolverService extends AbstractResolver {
 
       message.setPublisher(information.getPublisher());
 
+      const publicationDate: string | null = information.getDatePublished();
+      if (publicationDate != null) {
+        message.setPublicationDate(new Date(publicationDate));
+      }
+
       // tags
       message.addTag('storytel');
 
@@ -96,16 +101,16 @@ export class StorytelResolverService extends AbstractResolver {
         case StorytelFormat.BOTH:
           messages.push(message.clone());
           message.addTag(Message.AUDIOBOOK_TAG);
-          messages.push(message);
           break;
         case StorytelFormat.AUDIOBOOK:
           message.addTag(Message.AUDIOBOOK_TAG);
-          messages.push(message);
           break;
         case StorytelFormat.EBOOK:
         default:
           break;
       }
+
+      messages.push(message);
 
       resolve(messages);
     });
