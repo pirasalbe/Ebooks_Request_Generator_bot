@@ -473,7 +473,7 @@ export class AmazonResolverService extends AbstractResolver {
     if (publisher != null) {
       const index: number = publisher.indexOf('(');
       if (index > -1) {
-        message.setPublisher(publisher.substring(0, index));
+        message.setPublisher(publisher.substring(0, index).trim());
       } else {
         message.setPublisher(publisher);
       }
