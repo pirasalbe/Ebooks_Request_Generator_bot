@@ -48,6 +48,8 @@ export class AudibleResolverService extends AbstractResolver {
 
       message.setPublisher(information.publisher);
 
+      message.setPublicationDate(new Date(information.datePublished));
+
       // tags
       message.addTag(Message.AUDIOBOOK_TAG);
 
