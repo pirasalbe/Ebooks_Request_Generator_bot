@@ -1,8 +1,15 @@
 # Ebooks Request Generator bot
 
-Telegram bot that creates a text message from the link address of an Ebook.
+Telegram bot that creates a text message from the link address of an ebook or an audio book.
 
 [Open on Telegram.](http://t.me/ebooks_request_generator_bot)
+
+## Commands
+
+- /start and /help: show an help message.
+- text: given a link or a text containing a link, it returns the request message.
+- /report text: works the same way it does with _text_, but it returns a _report.html_ file when errors occur.
+- inline: the bot works inline the same way it does with _text_.
 
 ## Message format
 
@@ -39,21 +46,19 @@ Link: https://www.amazon.com/His-Dark-Materials-Philip-Pullman-ebook/dp/B08CL2WJ
 
 # Features
 
+## Sources
+
 ### Extract message from Amazon
 
 Given an Amazon link of a Kindle book, it returns the request message.
 
-**Amazon supported links**:
+**Amazon languages supported**:
 
-- amazon.com
-- amazon.co.uk
-- amazon.ca
-- amazon.com.au
-- amazon.in
-- amazon.it
-- amazon.de
-- amazon.es
-- amazon.fr
+- en: English
+- it: Italian
+- de: German
+- es: Spanish
+- fr: French
 
 ### Extract message from Audible
 
@@ -84,6 +89,21 @@ It always add the _#archive_ tag.
 Given a OpenLibrary link of an ebook, it returns the request message.
 
 It always add the _#archive_ tag.
+
+## Filters
+
+### Format
+
+- Amazon: Kindle ebooks.
+- Audible: audiobooks.
+- Scribd: ebooks or audiobooks.
+- Storytel: ebooks or audiobooks.
+- Archive: ebooks.
+- OpenLibrary: ebooks.
+
+### Release Date
+
+The publication date of the given product cannot be in the future.
 
 # Known bugs
 

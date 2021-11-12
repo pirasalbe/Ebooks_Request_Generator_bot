@@ -128,7 +128,14 @@ export class AmazonResolverService extends AbstractResolver {
       message.setTitle(HtmlUtil.getTextContent(title as HTMLElement));
       message.setAuthor(HtmlUtil.getTextContent(author as HTMLElement));
 
-      message.setPublisher(amazonDetails.getPublisher());
+      this.setPublicationDate(
+        message,
+        siteLanguage,
+        amazonDetails.getPublicationDate(),
+        amazonDetails.getPublisher()
+      );
+
+      this.setPublisher(message, amazonDetails.getPublisher());
 
       // tags
       if (amazonDetails.hasLanguage()) {
@@ -267,6 +274,9 @@ export class AmazonResolverService extends AbstractResolver {
           case LanguageStrings.PUBLISHER_KEY:
             amazonDetails.setPublisher(entry.getValue());
             break;
+          case LanguageStrings.PUBLICATION_DATE_KEY:
+            amazonDetails.setPublicationDate(entry.getValue());
+            break;
           case LanguageStrings.ASIN_KEY:
             amazonDetails.setAsin(entry.getValue());
             break;
@@ -397,5 +407,76 @@ export class AmazonResolverService extends AbstractResolver {
     newUrl.pathname = AmazonResolverService.URL_PREFIX + asin;
     newUrl.search = '';
     return newUrl;
+  }
+
+  private setPublicationDate(
+    message: Message,
+    siteLanguage: string,
+    publicationDate: string | null,
+    publisher: string | null
+  ): void {
+    let dateString: string | null = null;
+
+    // get the date
+    if (publicationDate != null) {
+      dateString = publicationDate;
+    } else if (publisher != null) {
+      const startIndex: number = publisher.indexOf('(');
+      const endIndex: number = publisher.indexOf(
+        ')',
+        startIndex > -1 ? startIndex : 0
+      );
+      if (startIndex > -1 && endIndex > -1) {
+        dateString = publisher.substring(startIndex, endIndex);
+      }
+    }
+
+    // transform date
+    if (dateString != null) {
+      const dateParts: string[] = dateString.split(' ');
+
+      let days: number | null = null;
+      let month: string | null = null;
+      let year: number | null = null;
+
+      // parse date
+      for (const datePart of dateParts) {
+        const part: string = datePart
+          .replace('.', '')
+          .replace(',', '')
+          .toLowerCase()
+          .trim();
+
+        if (part.match(/^[0-9]{1,2}$/g)) {
+          // days
+          days = Number(part);
+        } else if (part.match(/^[0-9]{4}$/g)) {
+          // year
+          year = Number(part);
+        } else if (part.match(/[a-z]*/g)) {
+          // month
+          month = I18nUtil.getKey(siteLanguage, part);
+        }
+      }
+
+      // transform to date object
+      if (days != null && month != null && year != null) {
+        const date: Date = new Date();
+        date.setFullYear(year, Number(month), days);
+        date.setUTCHours(0, 0, 0, 0);
+        message.setPublicationDate(date);
+      }
+    }
+  }
+
+  private setPublisher(message: Message, publisher: string | null): void {
+    if (publisher != null) {
+      const index: number = publisher.indexOf('(');
+      if (index > -1) {
+        message.setPublisher(publisher.substring(0, index).trim());
+      } else {
+        message.setPublisher(publisher);
+      }
+    }
   }
 }

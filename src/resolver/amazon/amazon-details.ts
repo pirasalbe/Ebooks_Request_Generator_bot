@@ -1,16 +1,23 @@
 export class AmazonDetails {
   private publisher: string | null;
+  private publicationDate: string | null;
   private language: string | null;
   private asin: string | null;
 
   constructor() {
     this.publisher = null;
+    this.publicationDate = null;
     this.language = null;
     this.asin = null;
   }
 
   isComplete(): boolean {
-    return this.publisher != null && this.language != null && this.asin != null;
+    return (
+      this.publisher != null &&
+      this.publicationDate != null &&
+      this.language != null &&
+      this.asin != null
+    );
   }
 
   setPublisher(publisher: string | null | undefined) {
@@ -21,6 +28,14 @@ export class AmazonDetails {
 
   getPublisher(): string | null {
     return this.publisher;
+  }
+
+  setPublicationDate(publicationDate: string) {
+    this.publicationDate = publicationDate;
+  }
+
+  getPublicationDate(): string | null {
+    return this.publicationDate;
   }
 
   setLanguage(language: string): void {

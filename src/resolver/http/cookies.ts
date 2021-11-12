@@ -1,5 +1,7 @@
 import * as http from 'http';
 
+import { DateUtil } from './../../util/date-util';
+
 export class Cookies {
   private static readonly MAX_AGE_HOURS = 4;
 
@@ -17,13 +19,7 @@ export class Cookies {
   private resetCookies() {
     this.cookies = new Map<string, string>();
     this.cookiesHeader = '';
-    this.resetDate = this.calculateResetDate(Cookies.MAX_AGE_HOURS);
-  }
-
-  private calculateResetDate(hours: number): Date {
-    const now: Date = new Date();
-    now.setTime(now.getTime() + hours * 60 * 60 * 1000);
-    return now;
+    this.resetDate = DateUtil.addHours(new Date(), Cookies.MAX_AGE_HOURS);
   }
 
   /**
