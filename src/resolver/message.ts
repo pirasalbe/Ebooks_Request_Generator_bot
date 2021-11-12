@@ -78,7 +78,7 @@ export class Message {
       this.publicationDate = publicationDate;
     } else {
       throw (
-        'Cannot generate the request. Wait until ' +
+        'Unable to generate the request. This title is scheduled to be released on ' +
         DateUtil.dateToString(allowedRequestDate) +
         '.'
       );
