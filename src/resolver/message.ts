@@ -80,9 +80,18 @@ export class Message {
       throw (
         'Unable to generate the request. This title is scheduled to be released on ' +
         DateUtil.dateToString(allowedRequestDate) +
-        '.'
+        '.' +
+        this.getEasterEgg()
       );
     }
+  }
+
+  private getEasterEgg(): string {
+    const random: number = Math.floor(Math.random() * 6);
+
+    return random == 0
+      ? ' Wait until then or request now manually to get a free warning.'
+      : '';
   }
 
   private getPublicationDate(): string {
