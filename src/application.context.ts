@@ -18,7 +18,7 @@ export class ApplicationContext {
   private beans: Record<string, any> = {};
 
   constructor() {
-    this.logger('[Request Generator] Starting context');
+    this.log('[Request Generator] Starting context');
 
     const token: string = process.env.BOT_TOKEN as string;
 
@@ -41,7 +41,7 @@ export class ApplicationContext {
     const validatorService: ValidatorService = new ValidatorService(validators);
 
     validatorService.refresh().then(() => {
-      this.logger('Validators loaded');
+      this.log('Validators loaded');
     });
 
     const botService: BotService = new BotService(
@@ -52,10 +52,10 @@ export class ApplicationContext {
 
     this.beans[BotService.name] = botService;
 
-    this.logger('[Request Generator] Context started');
+    this.log('[Request Generator] Context started');
   }
 
-  private logger(message: string): void {
+  private log(message: string): void {
     console.debug(new Date().toISOString() + ' ' + message);
   }
 
