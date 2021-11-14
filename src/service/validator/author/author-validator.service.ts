@@ -2,7 +2,7 @@ import { Message } from '../../../model/telegram/message';
 import { Validation } from '../../../model/validator/validation';
 import { AbstractValidator } from '../abstract-validator';
 
-export class AuthorValidatorService extends AbstractValidator {
+export class AuthorValidatorService extends AbstractValidator<string> {
   constructor() {
     super();
   }

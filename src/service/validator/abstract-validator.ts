@@ -3,11 +3,11 @@ import { Validation } from '../../model/validator/validation';
 import { DateUtil } from './../../util/date-util';
 import { Validator } from './validator';
 
-export abstract class AbstractValidator implements Validator {
+export abstract class AbstractValidator<T> implements Validator {
   private static readonly REFRESH_TIMEOUT_HOURS = 12;
 
   private nextCheck: Date;
-  protected elements: string[];
+  protected elements: T[];
 
   protected constructor() {
     this.nextCheck = new Date();
