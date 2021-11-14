@@ -62,6 +62,10 @@ export class Message {
     this.author = author;
   }
 
+  getAuthor(): string | null {
+    return this.author;
+  }
+
   setPublisher(publisher: string | null | undefined) {
     if (publisher != null && publisher != undefined) {
       this.publisher = publisher;

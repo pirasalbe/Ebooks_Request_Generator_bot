@@ -10,6 +10,7 @@ import { ResolverService } from './service/resolver/resolver.service';
 import { ScribdResolverService } from './service/resolver/scribd/scribd-resolver.service';
 import { StorytelResolverService } from './service/resolver/storytel/storytel-resolver.service';
 import { BotService } from './service/telegram/bot.service';
+import { AuthorValidatorService } from './service/validator/author/author-validator.service';
 import { Validator } from './service/validator/validator';
 import { ValidatorService } from './service/validator/validator.service';
 
@@ -36,6 +37,7 @@ export class ApplicationContext {
     const resolverService: ResolverService = new ResolverService(resolvers);
 
     const validators: Validator[] = [];
+    validators.push(new AuthorValidatorService());
     const validatorService: ValidatorService = new ValidatorService(validators);
 
     validatorService.refresh().then(() => {
