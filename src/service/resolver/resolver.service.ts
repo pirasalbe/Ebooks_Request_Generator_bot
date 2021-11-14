@@ -19,9 +19,7 @@ export class ResolverService {
     if (url != null) {
       result = this.resolveMessages(url);
     } else {
-      result = new Promise((resolve, reject) => {
-        reject('Invalid link.');
-      });
+      result = Promise.reject('Invalid link.');
     }
 
     return result;
@@ -46,9 +44,7 @@ export class ResolverService {
     if (resolver != null) {
       result = resolver.resolve(url);
     } else {
-      result = new Promise((resolve, reject) => {
-        reject('URL not supported.');
-      });
+      result = Promise.reject('URL not supported.');
     }
 
     return result;
