@@ -1,12 +1,12 @@
 import { HTMLElement } from 'node-html-parser';
 import { URL } from 'url';
 
+import { NullableHtmlElement } from '../../../model/html/nullable-html-element';
+import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
+import { Message } from '../../../model/telegram/message';
+import { HtmlUtil } from '../../../util/html-util';
+import { I18nUtil } from '../../../util/i18n-util';
 import { AbstractResolver } from '../abstract-resolver';
-import { HtmlUtil } from '../html/html-util';
-import { NullableHtmlElement } from '../html/nullable-html-element';
-import { Message } from '../message';
-import { I18nUtil } from './../../i18n/i18n-util';
-import { SiteResolver } from './../site-resolver.enum';
 import {
   ScribdAdditionalInformationWrapper,
   ScribdAlternativeInformation,

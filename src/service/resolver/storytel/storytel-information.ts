@@ -1,4 +1,4 @@
-import { I18nUtil } from './../../i18n/i18n-util';
+import { I18nUtil } from '../../../util/i18n-util';
 
 export enum StorytelFormat {
   EBOOK,

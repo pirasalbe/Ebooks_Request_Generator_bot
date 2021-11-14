@@ -1,8 +1,8 @@
 import { URL } from 'url';
 
-import { Message } from './message';
+import { SiteResolver } from '../../model/resolver/site-resolver.enum';
+import { Message } from '../../model/telegram/message';
 import { Resolver } from './resolver';
-import { SiteResolver } from './site-resolver.enum';
 
 export class ResolverService {
   private resolvers: Record<SiteResolver, Resolver>;

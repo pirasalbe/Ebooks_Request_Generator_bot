@@ -1,7 +1,7 @@
 import { URL } from 'url';
 
-import { DateUtil } from './../util/date-util';
-import { SiteResolver } from './site-resolver.enum';
+import { DateUtil } from '../../util/date-util';
+import { SiteResolver } from '../resolver/site-resolver.enum';
 
 export class Message {
   public static readonly AUDIOBOOK_TAG = 'audiobook';

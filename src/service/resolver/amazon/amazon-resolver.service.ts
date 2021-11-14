@@ -1,14 +1,14 @@
 import { HTMLElement } from 'node-html-parser';
 import { URL } from 'url';
 
-import { LanguageStrings } from '../../i18n/language-strings';
+import { Entry } from '../../../model/entry';
+import { NullableHtmlElement } from '../../../model/html/nullable-html-element';
+import { LanguageStrings } from '../../../model/i18n/language-strings';
+import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
+import { Message } from '../../../model/telegram/message';
+import { HtmlUtil } from '../../../util/html-util';
+import { I18nUtil } from '../../../util/i18n-util';
 import { AbstractResolver } from '../abstract-resolver';
-import { HtmlUtil } from '../html/html-util';
-import { I18nUtil } from './../../i18n/i18n-util';
-import { Entry } from './../html/entry';
-import { NullableHtmlElement } from './../html/nullable-html-element';
-import { Message } from './../message';
-import { SiteResolver } from './../site-resolver.enum';
 import { AmazonCaptchaResolverService } from './amazon-captcha-resolver.service';
 import { AmazonDetails } from './amazon-details';
 import { AmazonFormatResolverService } from './amazon-format-resolver.service';

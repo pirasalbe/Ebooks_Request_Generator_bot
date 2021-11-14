@@ -1,11 +1,11 @@
 import { HTMLElement } from 'node-html-parser';
 import { URL } from 'url';
 
+import { NullableHtmlElement } from '../../../model/html/nullable-html-element';
+import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
+import { Message } from '../../../model/telegram/message';
+import { HtmlUtil } from '../../../util/html-util';
 import { AbstractResolver } from '../abstract-resolver';
-import { NullableHtmlElement } from '../html/nullable-html-element';
-import { Message } from '../message';
-import { SiteResolver } from '../site-resolver.enum';
-import { HtmlUtil } from './../html/html-util';
 
 export class OpenLibraryResolverService extends AbstractResolver {
   private static readonly TITLE_ID = '.work-title';

@@ -1,4 +1,4 @@
-import { LanguageStrings } from './language-strings';
+import { LanguageStrings } from '../model/i18n/language-strings';
 
 export class I18nUtil {
   public static readonly ENGLISH: string = 'english';

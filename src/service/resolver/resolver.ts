@@ -1,6 +1,6 @@
 import { URL } from 'url';
 
-import { Message } from './message';
+import { Message } from '../../model/telegram/message';
 
 export interface Resolver {
   /**

@@ -1,7 +1,7 @@
 import { HTMLElement } from 'node-html-parser';
 
-import { NullableHtmlElement } from './../html/nullable-html-element';
-import { Cookies } from './../http/cookies';
+import { NullableHtmlElement } from '../../../model/html/nullable-html-element';
+import { Cookies } from '../../../model/http/cookies';
 
 export class AmazonCaptchaResolverService {
   private static readonly CAPTCHA_FORM_ID =

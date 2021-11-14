@@ -3,12 +3,12 @@ import * as https from 'https';
 import { HTMLElement } from 'node-html-parser';
 import { URL } from 'url';
 
-import { I18nUtil } from './../i18n/i18n-util';
-import { HtmlUtil } from './html/html-util';
-import { NullableHtmlElement } from './html/nullable-html-element';
-import { Cookies } from './http/cookies';
-import { HttpUtil } from './http/http-util';
-import { Message } from './message';
+import { NullableHtmlElement } from '../../model/html/nullable-html-element';
+import { Cookies } from '../../model/http/cookies';
+import { Message } from '../../model/telegram/message';
+import { HtmlUtil } from '../../util/html-util';
+import { HttpUtil } from '../../util/http-util';
+import { I18nUtil } from '../../util/i18n-util';
 import { Resolver } from './resolver';
 
 export abstract class AbstractResolver implements Resolver {

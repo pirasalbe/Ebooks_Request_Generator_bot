@@ -11,11 +11,11 @@ import {
   UserFromGetMe,
 } from 'typegram';
 
-import { Exception } from '../error/exception';
-import { Message } from '../resolver/message';
+import { Exception } from '../../model/error/exception';
+import { ResolverException } from '../../model/error/resolver-exception';
+import { Message } from '../../model/telegram/message';
+import { DocumentResponse } from '../../model/telegram/telegram-responses';
 import { ResolverService } from '../resolver/resolver.service';
-import { ResolverException } from './../error/resolver-exception';
-import { DocumentResponse } from './telegram-responses';
 
 export class BotService {
   private static readonly REPORT: string = '/report';

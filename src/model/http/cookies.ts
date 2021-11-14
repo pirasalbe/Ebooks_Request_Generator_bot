@@ -1,6 +1,6 @@
 import * as http from 'http';
 
-import { DateUtil } from './../../util/date-util';
+import { DateUtil } from '../../util/date-util';
 
 export class Cookies {
   private static readonly MAX_AGE_HOURS = 4;
