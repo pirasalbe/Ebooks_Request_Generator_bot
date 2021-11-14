@@ -1,4 +1,5 @@
 import { Message } from '../../model/telegram/message';
+import { Validation } from '../../model/validator/validation';
 import { DateUtil } from './../../util/date-util';
 import { Validator } from './validator';
 
@@ -13,7 +14,7 @@ export abstract class AbstractValidator implements Validator {
     this.elements = [];
   }
 
-  abstract validate(messages: Message[]): void;
+  abstract validate(messages: Message[]): Validation;
 
   refresh(): Promise<void> {
     let result: Promise<void> = Promise.resolve();

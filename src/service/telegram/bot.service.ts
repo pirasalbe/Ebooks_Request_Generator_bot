@@ -16,6 +16,8 @@ import { ResolverException } from '../../model/error/resolver-exception';
 import { Message } from '../../model/telegram/message';
 import { DocumentResponse } from '../../model/telegram/telegram-responses';
 import { ResolverService } from '../resolver/resolver.service';
+import { Validation } from './../../model/validator/validation';
+import { ValidatorService } from './../validator/validator.service';
 
 export class BotService {
   private static readonly REPORT: string = '/report';
@@ -29,9 +31,15 @@ export class BotService {
   private bot: Telegraf<Context<Update>>;
 
   private resolverService: ResolverService;
+  private validatorService: ValidatorService;
 
-  constructor(resolverService: ResolverService, token: string) {
+  constructor(
+    resolverService: ResolverService,
+    validatorService: ValidatorService,
+    token: string
+  ) {
     this.resolverService = resolverService;
+    this.validatorService = validatorService;
 
     // init bot
     this.telegram = new Telegram(token);
@@ -64,7 +72,7 @@ export class BotService {
         if (ctx.inlineQuery.query != '') {
           const extra: ExtraAnswerInlineQuery = { cache_time: 60 };
 
-          this.resolve(this.extractUrlFromText(ctx.inlineQuery.query))
+          this.getMessages(this.extractUrlFromText(ctx.inlineQuery.query))
             .then((messages: Message[]) => {
               const inlineResults: InlineQueryResult[] = [];
 
@@ -126,7 +134,7 @@ export class BotService {
             .reply('Processing...', extra)
             .then((loader: TelegramMessage.TextMessage) => {
               // resolve message from url
-              this.resolve(
+              this.getMessages(
                 this.extractUrl(ctx.message.text, ctx.message.entities)
               )
                 .then((messages: Message[]) => {
@@ -244,13 +252,19 @@ export class BotService {
     return user != undefined && user.is_bot && user.id == bot.id;
   }
 
-  private resolve(text: string): Promise<Message[]> {
+  private getMessages(text: string): Promise<Message[]> {
     return new Promise<Message[]>((resolve, reject) => {
       try {
         this.resolverService
           .resolve(text)
           .then((messages: Message[]) => {
-            resolve(messages);
+            const validation: Validation = this.areMessagesValid(messages);
+            if (validation.isValid()) {
+              resolve(messages);
+            } else {
+              console.error('Invalid messages', validation.getError());
+              reject(validation.getError());
+            }
           })
           .catch((error: string) => {
             console.error(
@@ -265,6 +279,14 @@ export class BotService {
         reject('There was an error handling your request.');
       }
     });
+  }
+
+  private areMessagesValid(messages: Message[]): Validation {
+    // trigger refresh
+    this.validatorService.refresh();
+
+    // validate messages
+    return this.validatorService.validate(messages);
   }
 
   private smallHelpMessage(): string {
