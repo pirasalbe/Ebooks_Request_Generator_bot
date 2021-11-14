@@ -149,7 +149,7 @@ export class AmazonResolverService extends AbstractResolver {
       const asin: string = this.getAsin(url, amazonDetails.getAsin());
       message.setUrl(this.getAmazonAsinUrl(url, asin));
 
-      this.addKindleUnlimitedTag(message, asin, html)
+      this.addKindleUnlimitedTag(url, message, asin, html)
         .then(() => resolve([message]))
         .catch(() => resolve([message]));
     });
@@ -227,13 +227,14 @@ export class AmazonResolverService extends AbstractResolver {
   }
 
   private addKindleUnlimitedTag(
+    url: URL,
     message: Message,
     asin: string,
     html: HTMLElement
   ): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.amazonFormatResolverService
-        .isKindleUnlimited(asin, html)
+        .isKindleUnlimited(url, asin, html)
         .then((exists: boolean) => {
           if (exists) {
             message.addTag('KU');

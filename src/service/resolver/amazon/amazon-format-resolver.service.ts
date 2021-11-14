@@ -1,6 +1,7 @@
 import * as http from 'http';
 import * as https from 'https';
 import { HTMLElement } from 'node-html-parser';
+import { URL } from 'url';
 
 import { NullableHtmlElement } from '../../../model/html/nullable-html-element';
 import { HtmlUtil } from '../../../util/html-util';
@@ -21,11 +22,15 @@ export class AmazonFormatResolverService {
     AmazonFormatResolverService.PLACEHOLDER +
     '"]';
 
-  private static readonly FORMAT_URL =
-    'https://www.amazon.COM/acp/morpheus-popularity-rank-sidesheet-card/tmips-psvsypciab/getSidesheetHtml?';
   private static readonly ACP_PARAMS_ATTRIBUTE = 'data-acp-params';
+  private static readonly ACP_PATH_ATTRIBUTE = 'data-acp-path';
+  private static readonly FORMAT_RESOURCE = 'getSidesheetHtml';
 
-  isKindleUnlimited(asin: string, html: HTMLElement): Promise<boolean> {
+  isKindleUnlimited(
+    url: URL,
+    asin: string,
+    html: HTMLElement
+  ): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       if (this.existsKindleUnlimitedElement(html)) {
         resolve(true);
@@ -34,15 +39,20 @@ export class AmazonFormatResolverService {
         const formats: NullableHtmlElement = this.findFormatsWrapper(html);
 
         let acpParams: string | undefined = undefined;
+        let acpPath: string | undefined = undefined;
 
         if (formats != null) {
           acpParams = formats.getAttribute(
             AmazonFormatResolverService.ACP_PARAMS_ATTRIBUTE
           );
+
+          acpPath = formats.getAttribute(
+            AmazonFormatResolverService.ACP_PATH_ATTRIBUTE
+          );
         }
 
-        if (acpParams != undefined) {
-          this.getFormats(acpParams, asin)
+        if (acpParams != undefined && acpPath != undefined) {
+          this.getFormats(url, acpPath, acpParams, asin)
             .then((div: HTMLElement) => {
               const ebookElement: NullableHtmlElement = this.getEbookElement(
                 asin,
@@ -63,7 +73,7 @@ export class AmazonFormatResolverService {
               reject(error);
             });
         } else {
-          console.error(asin, acpParams);
+          console.error(asin, acpParams, acpPath);
           reject('Missing required elements.');
         }
       }
@@ -93,10 +103,19 @@ export class AmazonFormatResolverService {
     return formats;
   }
 
-  private getFormats(acpParams: string, asin: string): Promise<HTMLElement> {
+  private getFormats(
+    url: URL,
+    acpPath: string,
+    acpParams: string,
+    asin: string
+  ): Promise<HTMLElement> {
+    const requestUrl: URL = new URL(url.toString());
+    requestUrl.pathname = acpPath + AmazonFormatResolverService.FORMAT_RESOURCE;
+    requestUrl.search = '';
+
     return new Promise<HTMLElement>((resolve, reject) => {
       const request: http.ClientRequest = https.request(
-        AmazonFormatResolverService.FORMAT_URL,
+        requestUrl,
         {
           method: 'POST',
           headers: {
