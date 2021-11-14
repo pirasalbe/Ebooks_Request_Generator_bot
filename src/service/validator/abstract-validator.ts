@@ -14,7 +14,21 @@ export abstract class AbstractValidator<T> implements Validator {
     this.elements = [];
   }
 
-  abstract validate(messages: Message[]): Validation;
+  validate(messages: Message[]): Validation {
+    let result: Validation = Validation.valid();
+
+    for (let i = 0; i < messages.length && result.isValid(); i++) {
+      result = this.validateMessage(messages[i]);
+    }
+
+    return result;
+  }
+
+  /**
+   * Validate a single message
+   * @param message Message to validate
+   */
+  protected abstract validateMessage(message: Message): Validation;
 
   refresh(): Promise<void> {
     let result: Promise<void> = Promise.resolve();
@@ -26,8 +40,6 @@ export abstract class AbstractValidator<T> implements Validator {
         now,
         AbstractValidator.REFRESH_TIMEOUT_HOURS
       );
-      this.elements = [];
-
       result = this.updateElements();
     }
 
@@ -37,5 +49,22 @@ export abstract class AbstractValidator<T> implements Validator {
   /**
    * Resolve and update the elements for validations
    */
-  abstract updateElements(): Promise<void>;
+  private updateElements(): Promise<void> {
+    return new Promise<void>((resolve) => {
+      this.resolveElements()
+        .then((elements: T[]) => {
+          this.elements = elements;
+          resolve();
+        })
+        .catch((error) => {
+          console.error(
+            'There was an error resolving elements for validation',
+            error
+          );
+          resolve();
+        });
+    });
+  }
+
+  protected abstract resolveElements(): Promise<T[]>;
 }

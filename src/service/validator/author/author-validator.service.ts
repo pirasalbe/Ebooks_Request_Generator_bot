@@ -7,17 +7,7 @@ export class AuthorValidatorService extends AbstractValidator<string> {
     super();
   }
 
-  validate(messages: Message[]): Validation {
-    let result: Validation = Validation.valid();
-
-    for (let i = 0; i < messages.length && result.isValid(); i++) {
-      result = this.checkAuthor(messages[i]);
-    }
-
-    return result;
-  }
-
-  private checkAuthor(message: Message): Validation {
+  protected validateMessage(message: Message): Validation {
     let result: Validation = Validation.valid();
 
     const author: string | null = message.getAuthor();
@@ -30,8 +20,8 @@ export class AuthorValidatorService extends AbstractValidator<string> {
     return result;
   }
 
-  updateElements(): Promise<void> {
+  protected resolveElements(): Promise<string[]> {
     // TODO
-    return Promise.resolve();
+    return Promise.resolve([]);
   }
 }
