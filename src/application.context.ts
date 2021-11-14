@@ -1,21 +1,24 @@
-import { AmazonCaptchaResolverService } from './resolver/amazon/amazon-captcha-resolver.service';
-import { AmazonFormatResolverService } from './resolver/amazon/amazon-format-resolver.service';
-import { AmazonResolverService } from './resolver/amazon/amazon-resolver.service';
-import { ArchiveResolverService } from './resolver/archive/archive-resolver.service';
-import { AudibleResolverService } from './resolver/audible/audible-resolver.service';
-import { OpenLibraryResolverService } from './resolver/openlibrary/open-library-resolver.service';
-import { Resolver } from './resolver/resolver';
-import { ResolverService } from './resolver/resolver.service';
-import { ScribdResolverService } from './resolver/scribd/scribd-resolver.service';
-import { SiteResolver } from './resolver/site-resolver.enum';
-import { StorytelResolverService } from './resolver/storytel/storytel-resolver.service';
-import { BotService } from './telegram/bot.service';
+import { SiteResolver } from './model/resolver/site-resolver.enum';
+import { AmazonCaptchaResolverService } from './service/resolver/amazon/amazon-captcha-resolver.service';
+import { AmazonFormatResolverService } from './service/resolver/amazon/amazon-format-resolver.service';
+import { AmazonResolverService } from './service/resolver/amazon/amazon-resolver.service';
+import { ArchiveResolverService } from './service/resolver/archive/archive-resolver.service';
+import { AudibleResolverService } from './service/resolver/audible/audible-resolver.service';
+import { OpenLibraryResolverService } from './service/resolver/openlibrary/open-library-resolver.service';
+import { Resolver } from './service/resolver/resolver';
+import { ResolverService } from './service/resolver/resolver.service';
+import { ScribdResolverService } from './service/resolver/scribd/scribd-resolver.service';
+import { StorytelResolverService } from './service/resolver/storytel/storytel-resolver.service';
+import { BotService } from './service/telegram/bot.service';
+import { AuthorValidatorService } from './service/validator/author/author-validator.service';
+import { Validator } from './service/validator/validator';
+import { ValidatorService } from './service/validator/validator.service';
 
 export class ApplicationContext {
   private beans: Record<string, any> = {};
 
   constructor() {
-    console.debug('Starting context');
+    this.log('[Request Generator] Starting context');
 
     const token: string = process.env.BOT_TOKEN as string;
 
@@ -32,11 +35,28 @@ export class ApplicationContext {
     };
 
     const resolverService: ResolverService = new ResolverService(resolvers);
-    const botService: BotService = new BotService(resolverService, token);
+
+    const validators: Validator[] = [];
+    validators.push(new AuthorValidatorService());
+    const validatorService: ValidatorService = new ValidatorService(validators);
+
+    validatorService.refresh().then(() => {
+      this.log('Validators loaded');
+    });
+
+    const botService: BotService = new BotService(
+      resolverService,
+      validatorService,
+      token
+    );
 
     this.beans[BotService.name] = botService;
 
-    console.debug('Context started');
+    this.log('[Request Generator] Context started');
+  }
+
+  private log(message: string): void {
+    console.debug(new Date().toISOString() + ' ' + message);
   }
 
   getBean<T>(name: string): T {
