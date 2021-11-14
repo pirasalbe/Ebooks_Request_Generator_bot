@@ -10,12 +10,14 @@ import { ResolverService } from './service/resolver/resolver.service';
 import { ScribdResolverService } from './service/resolver/scribd/scribd-resolver.service';
 import { StorytelResolverService } from './service/resolver/storytel/storytel-resolver.service';
 import { BotService } from './service/telegram/bot.service';
+import { Validator } from './service/validator/validator';
+import { ValidatorService } from './service/validator/validator.service';
 
 export class ApplicationContext {
   private beans: Record<string, any> = {};
 
   constructor() {
-    console.debug('Starting context');
+    this.logger('[Request Generator] Starting context');
 
     const token: string = process.env.BOT_TOKEN as string;
 
@@ -32,11 +34,27 @@ export class ApplicationContext {
     };
 
     const resolverService: ResolverService = new ResolverService(resolvers);
-    const botService: BotService = new BotService(resolverService, token);
+
+    const validators: Validator[] = [];
+    const validatorService: ValidatorService = new ValidatorService(validators);
+
+    validatorService.refresh().then(() => {
+      this.logger('Validators loaded');
+    });
+
+    const botService: BotService = new BotService(
+      resolverService,
+      validatorService,
+      token
+    );
 
     this.beans[BotService.name] = botService;
 
-    console.debug('Context started');
+    this.logger('[Request Generator] Context started');
+  }
+
+  private logger(message: string): void {
+    console.debug(new Date().toISOString() + ' ' + message);
   }
 
   getBean<T>(name: string): T {
