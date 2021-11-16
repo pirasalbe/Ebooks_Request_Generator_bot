@@ -7,6 +7,8 @@ import { Cookies } from '../../../model/http/cookies';
 export class AmazonCaptchaResolverService {
   private static readonly CAPTCHA_FORM_ID =
     'form[action="/errors/validateCaptcha"]';
+  static readonly CAPTCHA_ERROR =
+    'Amazon requested a captcha. Try again later or change locale (for example, amazon.co.uk instead of amazon.com).';
 
   checkCaptcha(
     url: URL,
@@ -23,7 +25,7 @@ export class AmazonCaptchaResolverService {
         url.hostname,
         hostCookies != undefined ? hostCookies.toString() : ''
       );
-      throw 'Amazon requested a captcha. Try again later or change locale (for example, amazon.co.uk instead of amazon.com).';
+      throw AmazonCaptchaResolverService.CAPTCHA_ERROR;
     }
   }
 }

@@ -9,6 +9,7 @@ import { Message } from '../../model/telegram/message';
 import { HtmlUtil } from '../../util/html-util';
 import { HttpUtil } from '../../util/http-util';
 import { I18nUtil } from '../../util/i18n-util';
+import { ResolverException } from './../../model/error/resolver-exception';
 import { Resolver } from './resolver';
 
 export abstract class AbstractResolver implements Resolver {
@@ -142,7 +143,7 @@ export abstract class AbstractResolver implements Resolver {
    * @param response Call response
    * @returns Promise with messages extracted
    */
-  private processSuccessfulResponse(
+  protected processSuccessfulResponse(
     url: URL,
     response: http.IncomingMessage
   ): Promise<Message[]> {
@@ -150,12 +151,13 @@ export abstract class AbstractResolver implements Resolver {
       return new Promise<Message[]>((resolve, reject) =>
         this.processPage(url, data)
           .then((messages: Message[]) => resolve(messages))
-          .catch((error) =>
-            reject({
+          .catch((error) => {
+            const exception: ResolverException = {
               message: error,
               html: data,
-            })
-          )
+            };
+            reject(exception);
+          })
       );
     });
   }
