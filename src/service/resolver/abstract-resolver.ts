@@ -114,11 +114,13 @@ export abstract class AbstractResolver implements Resolver {
 
     if (statusCode == 404) {
       // Not found
-      error = 'Error 404: Page not found';
+      error += ': Page not found';
     } else if (statusCode == 503) {
       // Service unavailable
-      error =
-        url.hostname + ' is unavailable. Wait a few seconds and try again.';
+      error +=
+        ': ' +
+        url.hostname +
+        ' is unavailable. Wait a few seconds and try again.';
     }
 
     return error;
