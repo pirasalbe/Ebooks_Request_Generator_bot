@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as http from 'http';
 
 export class HttpUtil {
-  static readonly USER_AGENT_VALUE =
+  static readonly USER_AGENT =
     'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:94.0) Gecko/20100101 Firefox/94.0';
   static readonly ACCEPT =
     'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8';

@@ -29,7 +29,7 @@ export abstract class AbstractResolver implements Resolver {
         this.prepareUrl(url),
         {
           headers: {
-            'User-Agent': HttpUtil.USER_AGENT_VALUE,
+            'User-Agent': HttpUtil.USER_AGENT,
             Accept: HttpUtil.ACCEPT,
             'Accept-Encoding': HttpUtil.ACCEPT_ENCODING,
             'Accept-Language': 'en-US,en;q=0.5',
