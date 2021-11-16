@@ -101,19 +101,29 @@ export abstract class AbstractResolver implements Resolver {
         this.resolve(new URL(response.headers.location as string))
           .then((messages: Message[]) => resolve(messages))
           .catch((error) => reject(error));
-      } else if (response.statusCode == 404) {
-        // Not found
-        reject('Error 404: Page not found');
-      } else if (response.statusCode == 503) {
-        // Not found
-        reject(
-          url.hostname + 'is unavailable. Wait a few seconds and try again.'
-        );
       } else {
         // something went wrong
-        reject('Error ' + response.statusCode);
+        console.error(response.statusCode, response);
+        reject(this.getErrorResponse(url, response.statusCode));
       }
     });
+  }
+
+  private getErrorResponse(url: URL, statusCode: number | undefined): string {
+    let error = 'Error ' + statusCode;
+
+    if (statusCode == 404) {
+      // Not found
+      error += ': Page not found';
+    } else if (statusCode == 503) {
+      // Service unavailable
+      error +=
+        ': ' +
+        url.hostname +
+        ' is unavailable. Wait a few seconds and try again.';
+    }
+
+    return error;
   }
 
   /**
