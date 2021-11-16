@@ -3,8 +3,11 @@ import * as http from 'http';
 
 export class HttpUtil {
   static readonly USER_AGENT_VALUE =
-    'Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0';
+    'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:94.0) Gecko/20100101 Firefox/94.0';
+  static readonly ACCEPT =
+    'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8';
   static readonly ACCEPT_ENCODING = 'compress';
+  static readonly CONNECTION = 'keep-alive';
 
   private constructor() {
     // util class

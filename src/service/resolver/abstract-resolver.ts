@@ -29,8 +29,17 @@ export abstract class AbstractResolver implements Resolver {
         {
           headers: {
             'User-Agent': HttpUtil.USER_AGENT_VALUE,
+            Accept: HttpUtil.ACCEPT,
             'Accept-Encoding': HttpUtil.ACCEPT_ENCODING,
-            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept-Language': 'en-US,en;q=0.5',
+            Host: url.host,
+            DNT: 1,
+            Connection: HttpUtil.CONNECTION,
+            'Upgrade-Insecure-Requests': 1,
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
             Cookie: this.getCookies(url.hostname),
           },
         },
