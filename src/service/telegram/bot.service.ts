@@ -64,6 +64,21 @@ export class BotService {
 
     // start bot
     this.bot.launch();
+
+    // error handling
+    // https://telegraf.js.org/index.html#error-handling
+    this.bot.catch((err: unknown) => {
+      console.error('There was an error with the bot', err);
+      try {
+        this.bot.stop('SIGTERM');
+      } catch (e) {
+        console.error('Cannot stop bot', e);
+      }
+
+      setTimeout(() => {
+        this.initializeBot();
+      }, 5000);
+    });
   }
 
   /**
