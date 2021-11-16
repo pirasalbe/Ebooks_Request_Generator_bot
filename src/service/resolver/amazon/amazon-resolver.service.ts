@@ -77,7 +77,11 @@ export class AmazonResolverService extends AbstractResolver {
         .then((messages: Message[]) => resolve(messages))
         .catch((error: ResolverException) => {
           // when there are errors related to the captcha reroute
-          if (error.message == AmazonCaptchaResolverService.CAPTCHA_ERROR) {
+          if (
+            error != undefined &&
+            error.message == AmazonCaptchaResolverService.CAPTCHA_ERROR
+          ) {
+            console.error(error);
             this.resolve(this.changeHost(url))
               .then((messages: Message[]) => resolve(messages))
               .catch((newError) => reject(newError));
@@ -106,7 +110,8 @@ export class AmazonResolverService extends AbstractResolver {
         .then((messages: Message[]) => resolve(messages))
         .catch((error: string) => {
           // when there are errors related to the 503 error
-          if (error.includes('503')) {
+          if (String(error).includes('503')) {
+            console.error(error);
             this.resolve(this.changeHost(url))
               .then((messages: Message[]) => resolve(messages))
               .catch((newError) => reject(newError));
