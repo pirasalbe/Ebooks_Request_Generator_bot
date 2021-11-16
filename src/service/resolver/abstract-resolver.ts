@@ -96,7 +96,7 @@ export abstract class AbstractResolver implements Resolver {
    * @param response Call response
    * @returns Promise with messages extracted
    */
-  private processResponse(
+  protected processResponse(
     url: URL,
     response: http.IncomingMessage
   ): Promise<Message[]> {
@@ -113,7 +113,7 @@ export abstract class AbstractResolver implements Resolver {
           .catch((error) => reject(error));
       } else {
         // something went wrong
-        console.error(response.statusCode, response);
+        console.error(response.statusCode, response.headers);
         reject(this.getErrorResponse(url, response.statusCode));
       }
     });
