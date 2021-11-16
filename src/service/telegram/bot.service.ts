@@ -27,6 +27,7 @@ export class BotService {
   private static readonly INVALID_THUMB_URL =
     'https://www.downloadclipart.net/large/14121-warning-icon-design.png';
 
+  private token: string;
   private telegram: Telegram;
   private bot: Telegraf<Context<Update>>;
 
@@ -42,18 +43,27 @@ export class BotService {
     this.validatorService = validatorService;
 
     // init bot
-    this.telegram = new Telegram(token);
-    this.bot = new Telegraf(token);
+    this.token = token;
+    this.telegram = new Telegram(this.token);
+    this.bot = new Telegraf(this.token);
+
+    // start bot
+    this.initializeBot();
+
+    // Enable graceful stop
+    process.once('SIGINT', () => this.bot.stop('SIGINT'));
+    process.once('SIGTERM', () => this.bot.stop('SIGTERM'));
+  }
+
+  private initializeBot(): void {
+    this.telegram = new Telegram(this.token);
+    this.bot = new Telegraf(this.token);
 
     // init handlers
     this.initializeHandlers();
 
     // start bot
     this.bot.launch();
-
-    // Enable graceful stop
-    process.once('SIGINT', () => this.bot.stop('SIGINT'));
-    process.once('SIGTERM', () => this.bot.stop('SIGTERM'));
   }
 
   /**
