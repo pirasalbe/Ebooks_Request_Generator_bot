@@ -1,3 +1,4 @@
+import * as http from 'http';
 import { HTMLElement } from 'node-html-parser';
 import { URL } from 'url';
 
@@ -9,6 +10,7 @@ import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
 import { I18nUtil } from '../../../util/i18n-util';
 import { AbstractResolver } from '../abstract-resolver';
+import { ResolverException } from './../../../model/error/resolver-exception';
 import { AmazonCaptchaResolverService } from './amazon-captcha-resolver.service';
 import { AmazonDetails } from './amazon-details';
 import { AmazonFormatResolverService } from './amazon-format-resolver.service';
@@ -35,6 +37,16 @@ export class AmazonResolverService extends AbstractResolver {
   private static readonly KINDLE = 'kindle';
 
   private static readonly URL_PREFIX = '/dp/';
+  private static readonly AMAZON_HOSTS: string[] = [
+    'www.amazon.com',
+    'www.amazon.co.uk',
+    'www.amazon.ca',
+    'www.amazon.com.au',
+    'www.amazon.it',
+    'www.amazon.de',
+    'www.amazon.es',
+    'www.amazon.fr',
+  ];
 
   private amazonFormatResolverService: AmazonFormatResolverService;
   private amazonCaptchaResolverService: AmazonCaptchaResolverService;
@@ -48,6 +60,84 @@ export class AmazonResolverService extends AbstractResolver {
     this.amazonCaptchaResolverService = amazonCaptchaResolverService;
   }
 
+  /**
+   * Override processSuccessfulResponse
+   * Manage the captcha exceptions to redirect to another host
+   *
+   * @param url Original url
+   * @param response Original response
+   */
+  protected processSuccessfulResponse(
+    url: URL,
+    response: http.IncomingMessage
+  ): Promise<Message[]> {
+    return new Promise<Message[]>((resolve, reject) =>
+      super
+        .processSuccessfulResponse(url, response)
+        .then((messages: Message[]) => resolve(messages))
+        .catch((error: ResolverException) => {
+          // when there are errors related to the captcha reroute
+          if (error.message == AmazonCaptchaResolverService.CAPTCHA_ERROR) {
+            this.resolve(this.changeHost(url))
+              .then((messages: Message[]) => resolve(messages))
+              .catch((newError) => reject(newError));
+          } else {
+            // reject as always
+            reject(error);
+          }
+        })
+    );
+  }
+
+  /**
+   * Override processResponse
+   * Manage the 503 exception
+   *
+   * @param url Original url
+   * @param response Original response
+   */
+  protected processResponse(
+    url: URL,
+    response: http.IncomingMessage
+  ): Promise<Message[]> {
+    return new Promise<Message[]>((resolve, reject) =>
+      super
+        .processResponse(url, response)
+        .then((messages: Message[]) => resolve(messages))
+        .catch((error: string) => {
+          // when there are errors related to the 503 error
+          if (error.includes('503')) {
+            this.resolve(this.changeHost(url))
+              .then((messages: Message[]) => resolve(messages))
+              .catch((newError) => reject(newError));
+          } else {
+            // reject as always
+            reject(error);
+          }
+        })
+    );
+  }
+
+  private changeHost(url: URL): URL {
+    const currentHost: string = url.host;
+
+    const alternativeHosts: string[] = [];
+    for (const host of AmazonResolverService.AMAZON_HOSTS) {
+      if (host != currentHost) {
+        alternativeHosts.push(host);
+      }
+    }
+
+    const random: number = Math.floor(Math.random() * alternativeHosts.length);
+
+    const newUrl: URL = new URL(url.toString());
+    newUrl.host = alternativeHosts[random];
+
+    console.debug('Rerouting', url, newUrl);
+
+    return newUrl;
+  }
+
   prepareUrl(url: URL): URL {
     // remove language from path
     while (
@@ -58,6 +148,8 @@ export class AmazonResolverService extends AbstractResolver {
         '/'
       );
     }
+
+    url.search = '';
 
     return url;
   }
