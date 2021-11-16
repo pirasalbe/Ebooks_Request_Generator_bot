@@ -10,6 +10,7 @@ Telegram bot that creates a text message from the link address of an ebook or an
 - text: given a link or a text containing a link, it returns the request message.
 - /report text: works the same way it does with _text_, but it returns a _report.html_ file when errors occur.
 - inline: the bot works inline the same way it does with _text_.
+- /stats: sends information about the number of request received.
 
 ## Message format
 

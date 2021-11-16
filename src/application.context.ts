@@ -9,6 +9,7 @@ import { Resolver } from './service/resolver/resolver';
 import { ResolverService } from './service/resolver/resolver.service';
 import { ScribdResolverService } from './service/resolver/scribd/scribd-resolver.service';
 import { StorytelResolverService } from './service/resolver/storytel/storytel-resolver.service';
+import { StatisticsService } from './service/statistics/statistic.service';
 import { BotService } from './service/telegram/bot.service';
 import { AuthorValidatorService } from './service/validator/author/author-validator.service';
 import { Validator } from './service/validator/validator';
@@ -22,6 +23,8 @@ export class ApplicationContext {
 
     const token: string = process.env.BOT_TOKEN as string;
 
+    const statisticsService: StatisticsService = new StatisticsService();
+
     const resolvers: Record<SiteResolver, Resolver> = {
       0: new AmazonResolverService(
         new AmazonFormatResolverService(),
@@ -34,7 +37,10 @@ export class ApplicationContext {
       5: new OpenLibraryResolverService(),
     };
 
-    const resolverService: ResolverService = new ResolverService(resolvers);
+    const resolverService: ResolverService = new ResolverService(
+      resolvers,
+      statisticsService
+    );
 
     const validators: Validator[] = [];
     validators.push(new AuthorValidatorService());
@@ -47,6 +53,7 @@ export class ApplicationContext {
     const botService: BotService = new BotService(
       resolverService,
       validatorService,
+      statisticsService,
       token
     );
 
