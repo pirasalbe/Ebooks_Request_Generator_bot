@@ -72,6 +72,9 @@ export class AmazonRerouteService {
     newUrl.host = alternativeHosts[random];
 
     console.debug('Rerouting', url.toString(), newUrl.toString());
+    this.statisticsService
+      .getStats()
+      .increaseErrorCount('Reroute from ' + url.host + ' to ' + newUrl.host);
 
     return newUrl;
   }
