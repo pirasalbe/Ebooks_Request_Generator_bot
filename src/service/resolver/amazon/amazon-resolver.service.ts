@@ -58,6 +58,28 @@ export class AmazonResolverService extends AbstractResolver {
   }
 
   /**
+   * Override resolve
+   * Update reroute information
+   *
+   * @param url Url to resolve
+   * @returns Messages
+   */
+  resolve(url: URL): Promise<Message[]> {
+    return new Promise<Message[]>((resolve, reject) =>
+      super
+        .resolve(url)
+        .then((messages: Message[]) => {
+          this.amazonRerouteService.markRequestResolved(url);
+          resolve(messages);
+        })
+        .catch((error: unknown) => {
+          this.amazonRerouteService.markRequestResolved(url);
+          reject(error);
+        })
+    );
+  }
+
+  /**
    * Override processSuccessfulResponse
    * Manage the captcha exceptions to redirect to another host
    *
@@ -79,6 +101,7 @@ export class AmazonResolverService extends AbstractResolver {
             error
           );
           if (reroute.shouldReroute()) {
+            // reroute
             this.resolve(reroute.getUrl())
               .then((messages: Message[]) => resolve(messages))
               .catch((newError) => reject(newError));
@@ -110,6 +133,7 @@ export class AmazonResolverService extends AbstractResolver {
           const reroute: AmazonReroute =
             this.amazonRerouteService.checkServiceUnavailable(url, error);
           if (reroute.shouldReroute()) {
+            // reroute
             this.resolve(reroute.getUrl())
               .then((messages: Message[]) => resolve(messages))
               .catch((newError) => reject(newError));
