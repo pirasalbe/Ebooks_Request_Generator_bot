@@ -1,5 +1,6 @@
 import { URL } from 'url';
 
+import { RandomUtil } from '../../../util/random-util';
 import { ResolverException } from './../../../model/error/resolver-exception';
 import { AmazonReroute } from './../../../model/resolver/amazon-reroute';
 import { StatisticsService } from './../../statistics/statistic.service';
@@ -70,9 +71,7 @@ export class AmazonRerouteService {
 
     // if hosts found, build new url
     if (alternativeHosts.length > 0) {
-      const random: number = Math.floor(
-        Math.random() * alternativeHosts.length
-      );
+      const random: number = RandomUtil.getRandom(alternativeHosts.length);
 
       const newUrl: URL = new URL(url.toString());
       newUrl.host = alternativeHosts[random];

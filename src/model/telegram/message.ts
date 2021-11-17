@@ -2,6 +2,7 @@ import { URL } from 'url';
 
 import { DateUtil } from '../../util/date-util';
 import { SiteResolver } from '../resolver/site-resolver.enum';
+import { RandomUtil } from './../../util/random-util';
 
 export class Message {
   public static readonly AUDIOBOOK_TAG = 'audiobook';
@@ -91,7 +92,7 @@ export class Message {
   }
 
   private getEasterEgg(): string {
-    const random: number = Math.floor(Math.random() * 6);
+    const random: number = RandomUtil.getRandom(6);
 
     return random == 0
       ? ' Wait until then or request now manually to get a free warning.'
