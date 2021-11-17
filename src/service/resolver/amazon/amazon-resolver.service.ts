@@ -5,16 +5,18 @@ import { URL } from 'url';
 import { Entry } from '../../../model/entry';
 import { NullableHtmlElement } from '../../../model/html/nullable-html-element';
 import { LanguageStrings } from '../../../model/i18n/language-strings';
+import { AmazonDetails } from '../../../model/resolver/amazon-details';
 import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
 import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
 import { I18nUtil } from '../../../util/i18n-util';
 import { AbstractResolver } from '../abstract-resolver';
 import { ResolverException } from './../../../model/error/resolver-exception';
+import { AmazonReroute } from './../../../model/resolver/amazon-reroute';
 import { StatisticsService } from './../../statistics/statistic.service';
 import { AmazonCaptchaResolverService } from './amazon-captcha-resolver.service';
-import { AmazonDetails } from './amazon-details';
 import { AmazonFormatResolverService } from './amazon-format-resolver.service';
+import { AmazonRerouteService } from './amazon-reroute.service';
 
 export class AmazonResolverService extends AbstractResolver {
   private static readonly LANGUAGE_PATH_PARAM: RegExp = /^\/-\/[a-zA-Z]{2}\//g;
@@ -38,28 +40,21 @@ export class AmazonResolverService extends AbstractResolver {
   private static readonly KINDLE = 'kindle';
 
   private static readonly URL_PREFIX = '/dp/';
-  private static readonly AMAZON_HOSTS: string[] = [
-    'www.amazon.com',
-    'www.amazon.co.uk',
-    'www.amazon.ca',
-    'www.amazon.com.au',
-    'www.amazon.it',
-    'www.amazon.de',
-    'www.amazon.es',
-    'www.amazon.fr',
-  ];
 
   private amazonFormatResolverService: AmazonFormatResolverService;
   private amazonCaptchaResolverService: AmazonCaptchaResolverService;
+  private amazonRerouteService: AmazonRerouteService;
 
   constructor(
     statisticsService: StatisticsService,
     amazonFormatResolverService: AmazonFormatResolverService,
-    amazonCaptchaResolverService: AmazonCaptchaResolverService
+    amazonCaptchaResolverService: AmazonCaptchaResolverService,
+    amazonRerouteService: AmazonRerouteService
   ) {
     super(statisticsService);
     this.amazonFormatResolverService = amazonFormatResolverService;
     this.amazonCaptchaResolverService = amazonCaptchaResolverService;
+    this.amazonRerouteService = amazonRerouteService;
   }
 
   /**
@@ -79,12 +74,12 @@ export class AmazonResolverService extends AbstractResolver {
         .then((messages: Message[]) => resolve(messages))
         .catch((error: ResolverException) => {
           // when there are errors related to the captcha reroute
-          if (
-            error != undefined &&
-            error.message == AmazonCaptchaResolverService.CAPTCHA_ERROR
-          ) {
-            console.error(error.message);
-            this.resolve(this.changeHost(url))
+          const reroute: AmazonReroute = this.amazonRerouteService.checkCaptcha(
+            url,
+            error
+          );
+          if (reroute.shouldReroute()) {
+            this.resolve(reroute.getUrl())
               .then((messages: Message[]) => resolve(messages))
               .catch((newError) => reject(newError));
           } else {
@@ -112,9 +107,10 @@ export class AmazonResolverService extends AbstractResolver {
         .then((messages: Message[]) => resolve(messages))
         .catch((error: string) => {
           // when there are errors related to the 503 error
-          if (String(error).includes('503')) {
-            console.error(error);
-            this.resolve(this.changeHost(url))
+          const reroute: AmazonReroute =
+            this.amazonRerouteService.checkServiceUnavailable(url, error);
+          if (reroute.shouldReroute()) {
+            this.resolve(reroute.getUrl())
               .then((messages: Message[]) => resolve(messages))
               .catch((newError) => reject(newError));
           } else {
@@ -123,26 +119,6 @@ export class AmazonResolverService extends AbstractResolver {
           }
         })
     );
-  }
-
-  private changeHost(url: URL): URL {
-    const currentHost: string = url.host;
-
-    const alternativeHosts: string[] = [];
-    for (const host of AmazonResolverService.AMAZON_HOSTS) {
-      if (host != currentHost) {
-        alternativeHosts.push(host);
-      }
-    }
-
-    const random: number = Math.floor(Math.random() * alternativeHosts.length);
-
-    const newUrl: URL = new URL(url.toString());
-    newUrl.host = alternativeHosts[random];
-
-    console.debug('Rerouting', url.toString(), newUrl.toString());
-
-    return newUrl;
   }
 
   prepareUrl(url: URL): URL {
