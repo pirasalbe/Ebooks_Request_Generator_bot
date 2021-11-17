@@ -109,13 +109,12 @@ export class AmazonRerouteService {
   }
 
   private getAlternativeHosts(url: URL): string[] {
-    const currentHost: string = url.host;
     const path: string = url.pathname;
     const hosts: string[] = this.reroutedRequests.get(path) as string[];
 
     const alternativeHosts: string[] = [];
     for (const host of AmazonRerouteService.AMAZON_HOSTS) {
-      const index: number = hosts.findIndex((h: string) => h == currentHost);
+      const index: number = hosts.findIndex((h: string) => h == host);
       if (index < 0) {
         alternativeHosts.push(host);
       }
@@ -124,7 +123,6 @@ export class AmazonRerouteService {
     return alternativeHosts;
   }
 
-  // TODO call this method and tests
   markRequestResolved(url: URL): void {
     const path: string = url.pathname;
 
