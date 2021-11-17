@@ -1,15 +1,85 @@
+import { CounterStatistics } from './counter-statistics';
+import { HostStatistics } from './host-statistics';
+
 export class Statistics {
-  private requests: number;
+  private static readonly SEPARATOR = '--------------\n';
+
+  private inlineRequests: CounterStatistics;
+  private textRequests: CounterStatistics;
+  private hostStats: Map<string, HostStatistics>;
+  private errors: Map<string, CounterStatistics>;
 
   constructor() {
-    this.requests = 0;
+    this.inlineRequests = new CounterStatistics();
+    this.textRequests = new CounterStatistics();
+    this.hostStats = new Map<string, HostStatistics>();
+    this.errors = new Map<string, CounterStatistics>();
   }
 
-  incrementRequestCount(): void {
-    this.requests += 1;
+  increaseInlineRequestCount(): void {
+    this.inlineRequests.incrementCount();
+  }
+
+  increaseTextRequestCount(): void {
+    this.textRequests.incrementCount();
+  }
+
+  increaseHostRequestCount(host: string): void {
+    if (!this.hostStats.has(host)) {
+      this.hostStats.set(host, new HostStatistics());
+    }
+
+    const stats: HostStatistics = this.hostStats.get(host) as HostStatistics;
+    stats.incrementRequestCount();
+  }
+
+  increaseHostErrorCount(host: string): void {
+    if (!this.hostStats.has(host)) {
+      this.hostStats.set(host, new HostStatistics());
+    }
+
+    const stats: HostStatistics = this.hostStats.get(host) as HostStatistics;
+    stats.incrementRequestCount();
+  }
+
+  increaseErrorCount(error: string): void {
+    if (!this.errors.has(error)) {
+      this.errors.set(error, new CounterStatistics());
+    }
+
+    const stats: CounterStatistics = this.errors.get(
+      error
+    ) as CounterStatistics;
+    stats.incrementCount();
   }
 
   toString(): string {
-    return '<b>Requests</b>: ' + this.requests;
+    let result: string = Statistics.SEPARATOR;
+    result += '<b>Requests</b>:\n\n';
+
+    result += 'Inline: ' + this.inlineRequests.toString() + '\n';
+    result += 'Text: ' + this.textRequests.toString() + '\n';
+
+    // host requests
+    result += Statistics.SEPARATOR;
+    result += '<b>Requests received</b>:\n\n';
+
+    this.hostStats.forEach((stats: HostStatistics, host: string) => {
+      result += 'Host: <code>' + host + '</code>\n';
+      result += stats.toString();
+      result += '\n\n';
+    });
+
+    // errors
+    result += Statistics.SEPARATOR;
+    result += '<b>Errors thrown</b>:\n\n';
+
+    this.errors.forEach((stats: CounterStatistics, error: string) => {
+      result += 'Error: <code>' + error + '</code>\n';
+      result += 'Count: ' + stats.toString();
+      result += '\n\n';
+    });
+
+    return result;
   }
 }
