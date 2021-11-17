@@ -6,6 +6,7 @@ import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
 import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
 import { AbstractResolver } from '../abstract-resolver';
+import { StatisticsService } from './../../statistics/statistic.service';
 import { AudibleAuthor, AudibleInformation } from './audible-information';
 
 export class AudibleResolverService extends AbstractResolver {
@@ -13,8 +14,8 @@ export class AudibleResolverService extends AbstractResolver {
   private static readonly BOTTOM_ID = '#bottom-0';
   private static readonly SCRIPT_ID = 'script';
 
-  constructor() {
-    super();
+  constructor(statisticsService: StatisticsService) {
+    super(statisticsService);
   }
 
   prepareUrl(url: URL): URL {

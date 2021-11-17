@@ -27,14 +27,15 @@ export class ApplicationContext {
 
     const resolvers: Record<SiteResolver, Resolver> = {
       0: new AmazonResolverService(
+        statisticsService,
         new AmazonFormatResolverService(),
         new AmazonCaptchaResolverService()
       ),
-      1: new AudibleResolverService(),
-      2: new ScribdResolverService(),
-      3: new StorytelResolverService(),
-      4: new ArchiveResolverService(),
-      5: new OpenLibraryResolverService(),
+      1: new AudibleResolverService(statisticsService),
+      2: new ScribdResolverService(statisticsService),
+      3: new StorytelResolverService(statisticsService),
+      4: new ArchiveResolverService(statisticsService),
+      5: new OpenLibraryResolverService(statisticsService),
     };
 
     const resolverService: ResolverService = new ResolverService(

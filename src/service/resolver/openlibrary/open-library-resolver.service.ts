@@ -6,6 +6,7 @@ import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
 import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
 import { AbstractResolver } from '../abstract-resolver';
+import { StatisticsService } from './../../statistics/statistic.service';
 
 export class OpenLibraryResolverService extends AbstractResolver {
   private static readonly TITLE_ID = '.work-title';
@@ -14,8 +15,8 @@ export class OpenLibraryResolverService extends AbstractResolver {
   private static readonly PUBLISHER_ID = '[itemprop="publisher"]';
   private static readonly LANGUAGE_ID = '[itemprop="inLanguage"]';
 
-  constructor() {
-    super();
+  constructor(statisticsService: StatisticsService) {
+    super(statisticsService);
   }
 
   extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {

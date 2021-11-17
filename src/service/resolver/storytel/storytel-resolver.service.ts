@@ -7,6 +7,7 @@ import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
 import { I18nUtil } from '../../../util/i18n-util';
 import { AbstractResolver } from '../abstract-resolver';
+import { StatisticsService } from './../../statistics/statistic.service';
 import {
   StorytelDetails,
   StorytelDetailsWrapper,
@@ -29,8 +30,8 @@ export class StorytelResolverService extends AbstractResolver {
   private static readonly BOOK_ID = '.icon-glasses';
   private static readonly AUDIOBOOK_ID = '.icon-headphones';
 
-  constructor() {
-    super();
+  constructor(statisticsService: StatisticsService) {
+    super(statisticsService);
   }
 
   extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {

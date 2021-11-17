@@ -11,6 +11,7 @@ import { HtmlUtil } from '../../../util/html-util';
 import { I18nUtil } from '../../../util/i18n-util';
 import { AbstractResolver } from '../abstract-resolver';
 import { ResolverException } from './../../../model/error/resolver-exception';
+import { StatisticsService } from './../../statistics/statistic.service';
 import { AmazonCaptchaResolverService } from './amazon-captcha-resolver.service';
 import { AmazonDetails } from './amazon-details';
 import { AmazonFormatResolverService } from './amazon-format-resolver.service';
@@ -52,10 +53,11 @@ export class AmazonResolverService extends AbstractResolver {
   private amazonCaptchaResolverService: AmazonCaptchaResolverService;
 
   constructor(
+    statisticsService: StatisticsService,
     amazonFormatResolverService: AmazonFormatResolverService,
     amazonCaptchaResolverService: AmazonCaptchaResolverService
   ) {
-    super();
+    super(statisticsService);
     this.amazonFormatResolverService = amazonFormatResolverService;
     this.amazonCaptchaResolverService = amazonCaptchaResolverService;
   }

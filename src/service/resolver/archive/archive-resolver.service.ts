@@ -9,6 +9,7 @@ import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
 import { I18nUtil } from '../../../util/i18n-util';
 import { AbstractResolver } from '../abstract-resolver';
+import { StatisticsService } from './../../statistics/statistic.service';
 import { ArchiveInformation } from './archive-information';
 
 export class ArchiveResolverService extends AbstractResolver {
@@ -24,8 +25,8 @@ export class ArchiveResolverService extends AbstractResolver {
   private static readonly DETAILS_ID = 'dl.metadata-definition';
   private static readonly PUBLISHER_ID = 'span[itemprop="publisher"]';
 
-  constructor() {
-    super();
+  constructor(statisticsService: StatisticsService) {
+    super(statisticsService);
   }
 
   extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {

@@ -7,6 +7,7 @@ import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
 import { I18nUtil } from '../../../util/i18n-util';
 import { AbstractResolver } from '../abstract-resolver';
+import { StatisticsService } from './../../statistics/statistic.service';
 import {
   ScribdAdditionalInformationWrapper,
   ScribdAlternativeInformation,
@@ -21,8 +22,8 @@ export class ScribdResolverService extends AbstractResolver {
   private static readonly ALTERNATIVE_CONTENT_ID =
     'script[data-hypernova-key="contentpreview"]';
 
-  constructor() {
-    super();
+  constructor(statisticsService: StatisticsService) {
+    super(statisticsService);
   }
 
   extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {

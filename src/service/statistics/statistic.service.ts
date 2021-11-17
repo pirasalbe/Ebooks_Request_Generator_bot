@@ -2,6 +2,8 @@ import { Statistics } from './../../model/statistics/statistics';
 import { DateUtil } from './../../util/date-util';
 
 export class StatisticsService {
+  private static readonly SEPARATOR = '<code>=====================</code>\n';
+
   private startup: Date;
   private hostStatsNextRoll: Date;
 
@@ -36,6 +38,8 @@ export class StatisticsService {
   toString(): string {
     let result = '<b>Startup</b>: ' + this.startup.toISOString() + '\n';
     result += this.stats.toString();
+    result += StatisticsService.SEPARATOR;
+    result += '<b>Yesterday stats</b>\n\n';
     result += this.yesterdayStats.toString();
 
     return result;

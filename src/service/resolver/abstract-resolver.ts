@@ -10,17 +10,21 @@ import { HtmlUtil } from '../../util/html-util';
 import { HttpUtil } from '../../util/http-util';
 import { I18nUtil } from '../../util/i18n-util';
 import { ResolverException } from './../../model/error/resolver-exception';
+import { StatisticsService } from './../statistics/statistic.service';
 import { Resolver } from './resolver';
 
 export abstract class AbstractResolver implements Resolver {
+  protected statisticsService: StatisticsService;
+
   /**
    * key: hostname
    * value: cookies
    */
   protected cookies: Map<string, Cookies>;
 
-  protected constructor() {
+  protected constructor(statisticsService: StatisticsService) {
     this.cookies = new Map<string, Cookies>();
+    this.statisticsService = statisticsService;
   }
 
   resolve(url: URL): Promise<Message[]> {
@@ -48,7 +52,12 @@ export abstract class AbstractResolver implements Resolver {
           this.updateCookies(url.hostname, response.headers);
           this.processResponse(url, response)
             .then((messages: Message[]) => resolve(messages))
-            .catch((error) => reject(error));
+            .catch((error) => {
+              this.statisticsService
+                .getStats()
+                .increaseHostErrorCount(url.host);
+              reject(error);
+            });
         }
       );
     });

@@ -39,7 +39,7 @@ export class Statistics {
     }
 
     const stats: HostStatistics = this.hostStats.get(host) as HostStatistics;
-    stats.incrementRequestCount();
+    stats.incrementErrorCount();
   }
 
   increaseErrorCount(error: string): void {
