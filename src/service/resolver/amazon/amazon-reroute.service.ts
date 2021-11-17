@@ -19,8 +19,11 @@ export class AmazonRerouteService {
 
   private statisticsService: StatisticsService;
 
+  private reroutedRequests: Map<string, string[]>;
+
   constructor(statisticsService: StatisticsService) {
     this.statisticsService = statisticsService;
+    this.reroutedRequests = new Map<string, string[]>();
   }
 
   /**
@@ -57,14 +60,10 @@ export class AmazonRerouteService {
   }
 
   private changeHost(url: URL): URL {
-    const currentHost: string = url.host;
+    // track the requested hosts
+    this.addReroutedRequest(url);
 
-    const alternativeHosts: string[] = [];
-    for (const host of AmazonRerouteService.AMAZON_HOSTS) {
-      if (host != currentHost) {
-        alternativeHosts.push(host);
-      }
-    }
+    const alternativeHosts: string[] = this.getAlternativeHosts(url);
 
     const random: number = Math.floor(Math.random() * alternativeHosts.length);
 
@@ -78,5 +77,43 @@ export class AmazonRerouteService {
     this.statisticsService.getStats().increaseHostRequestCount(newUrl.host);
 
     return newUrl;
+  }
+
+  private addReroutedRequest(url: URL): void {
+    const path: string = url.pathname;
+    let hosts: string[] = [];
+
+    if (this.reroutedRequests.has(path)) {
+      hosts = this.reroutedRequests.get(path) as string[];
+    } else {
+      this.reroutedRequests.set(path, hosts);
+    }
+
+    hosts.push(url.host);
+  }
+
+  private getAlternativeHosts(url: URL): string[] {
+    const currentHost: string = url.host;
+    const path: string = url.pathname;
+    const hosts: string[] = this.reroutedRequests.get(path) as string[];
+
+    const alternativeHosts: string[] = [];
+    for (const host of AmazonRerouteService.AMAZON_HOSTS) {
+      const index: number = hosts.findIndex((h: string) => h == currentHost);
+      if (index < 0) {
+        alternativeHosts.push(host);
+      }
+    }
+
+    return alternativeHosts;
+  }
+
+  // TODO call this method and tests
+  markRequestResolved(url: URL): void {
+    const path: string = url.pathname;
+
+    if (this.reroutedRequests.has(path)) {
+      this.reroutedRequests.delete(path);
+    }
   }
 }
