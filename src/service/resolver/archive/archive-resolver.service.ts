@@ -4,13 +4,13 @@ import { URL } from 'url';
 import { Entry } from '../../../model/entry';
 import { NullableHtmlElement } from '../../../model/html/nullable-html-element';
 import { LanguageStrings } from '../../../model/i18n/language-strings';
+import { ArchiveInformation } from '../../../model/resolver/archive-information';
 import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
 import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
 import { I18nUtil } from '../../../util/i18n-util';
 import { AbstractResolver } from '../abstract-resolver';
 import { StatisticsService } from './../../statistics/statistic.service';
-import { ArchiveInformation } from './archive-information';
 
 export class ArchiveResolverService extends AbstractResolver {
   private static readonly SITE_LANGUAGE = 'en';

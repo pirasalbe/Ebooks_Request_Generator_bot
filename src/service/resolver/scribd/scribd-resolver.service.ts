@@ -2,12 +2,6 @@ import { HTMLElement } from 'node-html-parser';
 import { URL } from 'url';
 
 import { NullableHtmlElement } from '../../../model/html/nullable-html-element';
-import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
-import { Message } from '../../../model/telegram/message';
-import { HtmlUtil } from '../../../util/html-util';
-import { I18nUtil } from '../../../util/i18n-util';
-import { AbstractResolver } from '../abstract-resolver';
-import { StatisticsService } from './../../statistics/statistic.service';
 import {
   ScribdAdditionalInformationWrapper,
   ScribdAlternativeInformation,
@@ -15,7 +9,13 @@ import {
   ScribdInformationI18n,
   ScribdInformationWrapper,
   ScribdLanguage,
-} from './scribd-information';
+} from '../../../model/resolver/scribd-information';
+import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
+import { Message } from '../../../model/telegram/message';
+import { HtmlUtil } from '../../../util/html-util';
+import { I18nUtil } from '../../../util/i18n-util';
+import { AbstractResolver } from '../abstract-resolver';
+import { StatisticsService } from './../../statistics/statistic.service';
 
 export class ScribdResolverService extends AbstractResolver {
   private static readonly CONTENT_ID = 'script[type="application/ld+json"]';
