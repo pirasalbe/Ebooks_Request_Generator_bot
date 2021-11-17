@@ -5,27 +5,27 @@ export class StatisticsService {
   private static readonly SEPARATOR = '<code>=====================</code>\n';
 
   private startup: Date;
-  private hostStatsNextRoll: Date;
+  private nextStatsRoll: Date;
 
   private yesterdayStats: Statistics;
   private stats: Statistics;
 
   constructor() {
     this.startup = new Date();
-    this.hostStatsNextRoll = new Date();
+    this.nextStatsRoll = new Date();
     this.yesterdayStats = new Statistics();
     this.stats = new Statistics();
   }
 
   private checkStats(): void {
     const now = new Date();
-    if (now.getTime() >= this.hostStatsNextRoll.getTime()) {
+    if (now.getTime() >= this.nextStatsRoll.getTime()) {
       this.yesterdayStats = this.stats;
       this.stats = new Statistics();
 
       const newDate = DateUtil.addDays(now, 1);
       newDate.setUTCHours(0, 0, 0, 0);
-      this.hostStatsNextRoll = newDate;
+      this.nextStatsRoll = newDate;
     }
   }
 

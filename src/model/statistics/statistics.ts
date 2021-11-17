@@ -24,22 +24,20 @@ export class Statistics {
     this.textRequests.incrementCount();
   }
 
-  increaseHostRequestCount(host: string): void {
+  private getHostStats(host: string): HostStatistics {
     if (!this.hostStats.has(host)) {
       this.hostStats.set(host, new HostStatistics());
     }
 
-    const stats: HostStatistics = this.hostStats.get(host) as HostStatistics;
-    stats.incrementRequestCount();
+    return this.hostStats.get(host) as HostStatistics;
+  }
+
+  increaseHostRequestCount(host: string): void {
+    this.getHostStats(host).incrementRequestCount();
   }
 
   increaseHostErrorCount(host: string): void {
-    if (!this.hostStats.has(host)) {
-      this.hostStats.set(host, new HostStatistics());
-    }
-
-    const stats: HostStatistics = this.hostStats.get(host) as HostStatistics;
-    stats.incrementErrorCount();
+    this.getHostStats(host).incrementErrorCount();
   }
 
   increaseErrorCount(error: string): void {

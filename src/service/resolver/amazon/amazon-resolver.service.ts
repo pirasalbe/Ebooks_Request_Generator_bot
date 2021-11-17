@@ -83,7 +83,7 @@ export class AmazonResolverService extends AbstractResolver {
             error != undefined &&
             error.message == AmazonCaptchaResolverService.CAPTCHA_ERROR
           ) {
-            console.error(error);
+            console.error(error.message);
             this.resolve(this.changeHost(url))
               .then((messages: Message[]) => resolve(messages))
               .catch((newError) => reject(newError));
@@ -140,7 +140,7 @@ export class AmazonResolverService extends AbstractResolver {
     const newUrl: URL = new URL(url.toString());
     newUrl.host = alternativeHosts[random];
 
-    console.debug('Rerouting', url, newUrl);
+    console.debug('Rerouting', url.toString(), newUrl.toString());
 
     return newUrl;
   }
