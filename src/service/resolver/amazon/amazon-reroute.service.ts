@@ -19,6 +19,10 @@ export class AmazonRerouteService {
 
   private statisticsService: StatisticsService;
 
+  /**
+   * Key: path
+   * Value: array of host tried
+   */
   private reroutedRequests: Map<string, string[]>;
 
   constructor(statisticsService: StatisticsService) {
@@ -39,9 +43,7 @@ export class AmazonRerouteService {
       error != undefined &&
       error.message == AmazonCaptchaResolverService.CAPTCHA_ERROR
     ) {
-      console.error(error.message);
-      this.statisticsService.getStats().increaseErrorCount(error.message);
-      result = AmazonReroute.reroute(this.changeHost(url));
+      result = this.getReroute(url, error.message);
     }
 
     return result;
@@ -51,32 +53,46 @@ export class AmazonRerouteService {
     let result: AmazonReroute = AmazonReroute.noReroute();
 
     if (String(error).includes('503')) {
-      console.error(error);
-      this.statisticsService.getStats().increaseErrorCount(String(error));
-      result = AmazonReroute.reroute(this.changeHost(url));
+      result = this.getReroute(url, String(error));
     }
 
     return result;
   }
 
-  private changeHost(url: URL): URL {
+  private getReroute(url: URL, error: string): AmazonReroute {
+    let result: AmazonReroute = AmazonReroute.noReroute();
+
     // track the requested hosts
     this.addReroutedRequest(url);
 
+    // find alternative hosts
     const alternativeHosts: string[] = this.getAlternativeHosts(url);
 
-    const random: number = Math.floor(Math.random() * alternativeHosts.length);
+    // if hosts found, build new url
+    if (alternativeHosts.length > 0) {
+      const random: number = Math.floor(
+        Math.random() * alternativeHosts.length
+      );
 
-    const newUrl: URL = new URL(url.toString());
-    newUrl.host = alternativeHosts[random];
+      const newUrl: URL = new URL(url.toString());
+      newUrl.host = alternativeHosts[random];
 
-    console.debug('Rerouting', url.toString(), newUrl.toString());
-    this.statisticsService
-      .getStats()
-      .increaseErrorCount('Reroute from ' + url.host + ' to ' + newUrl.host);
-    this.statisticsService.getStats().increaseHostRequestCount(newUrl.host);
+      // log info
+      console.error(error);
+      console.debug('Rerouting', url.toString(), newUrl.toString());
 
-    return newUrl;
+      // track errors
+      this.statisticsService.getStats().increaseErrorCount(error);
+      this.statisticsService
+        .getStats()
+        .increaseErrorCount('Reroute from ' + url.host + ' to ' + newUrl.host);
+      // track the new host request
+      this.statisticsService.getStats().increaseHostRequestCount(newUrl.host);
+
+      result = AmazonReroute.reroute(newUrl);
+    }
+
+    return result;
   }
 
   private addReroutedRequest(url: URL): void {
