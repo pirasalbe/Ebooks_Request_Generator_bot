@@ -16,9 +16,9 @@ export class HostStatistics {
   }
 
   toString(): string {
-    let result = '<b>Requests</b>: ' + this.requests;
+    let result = 'Requests: ' + this.requests;
     result += '\n';
-    result += '<b>Errors</b>: ' + this.errors;
+    result += 'Errors: ' + this.errors;
     return result;
   }
 }
