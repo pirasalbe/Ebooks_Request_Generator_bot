@@ -75,6 +75,7 @@ export class AmazonRerouteService {
     this.statisticsService
       .getStats()
       .increaseErrorCount('Reroute from ' + url.host + ' to ' + newUrl.host);
+    this.statisticsService.getStats().increaseHostRequestCount(newUrl.host);
 
     return newUrl;
   }
