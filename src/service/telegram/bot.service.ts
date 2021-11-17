@@ -90,6 +90,7 @@ export class BotService {
     this.bot.on('inline_query', (ctx) => {
       this.safeHandling(() => {
         if (ctx.inlineQuery.query != '') {
+          this.statisticsService.getStats().increaseInlineRequestCount();
           const extra: ExtraAnswerInlineQuery = { cache_time: 60 };
 
           this.getMessages(this.extractUrlFromText(ctx.inlineQuery.query))
@@ -114,6 +115,9 @@ export class BotService {
             })
             .catch((error: string) => {
               const errorResponse: string = this.getErrorMessage(error);
+              this.statisticsService
+                .getStats()
+                .increaseErrorCount(errorResponse);
               ctx.answerInlineQuery(
                 [
                   this.inlineResult(
@@ -141,10 +145,12 @@ export class BotService {
 
     this.bot.on('text', (ctx) => {
       this.safeHandling(() => {
-        const report: boolean = ctx.message.text.startsWith(BotService.REPORT);
-
         // avoid messages from the bot
         if (!this.isMessageFromBot(ctx.message.via_bot, ctx.botInfo)) {
+          const report: boolean = ctx.message.text.startsWith(
+            BotService.REPORT
+          );
+          this.statisticsService.getStats().increaseTextRequestCount();
           const extra: ExtraReplyMessage = {
             reply_to_message_id: ctx.message.message_id,
           };
@@ -172,6 +178,9 @@ export class BotService {
                 })
                 .catch((error: unknown) => {
                   ctx.deleteMessage(loader.message_id);
+                  this.statisticsService
+                    .getStats()
+                    .increaseErrorCount(this.getErrorMessage(error));
                   if (report && this.isResolverException(error)) {
                     const documentResponse: DocumentResponse =
                       this.getReportResponse(

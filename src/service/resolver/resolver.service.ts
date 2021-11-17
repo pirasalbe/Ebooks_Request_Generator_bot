@@ -23,7 +23,7 @@ export class ResolverService {
     const url: URL | null = this.stringToUrl(link);
 
     if (url != null) {
-      this.statisticsService.increaseHostRequestCount(url.host);
+      this.statisticsService.getStats().increaseHostRequestCount(url.host);
       result = this.resolveMessages(url);
     } else {
       result = Promise.reject('Invalid link.');

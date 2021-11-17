@@ -58,7 +58,7 @@ export class Statistics {
     result += '<b>Requests</b>:\n\n';
 
     result += 'Inline: ' + this.inlineRequests.toString() + '\n';
-    result += 'Text: ' + this.textRequests.toString() + '\n';
+    result += 'Text: ' + this.textRequests.toString() + '\n\n';
 
     // host requests
     result += Statistics.SEPARATOR;
