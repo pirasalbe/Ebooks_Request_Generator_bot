@@ -119,7 +119,7 @@ export class AmazonFormatResolverService {
         {
           method: 'POST',
           headers: {
-            'User-Agent': HttpUtil.USER_AGENT_VALUE,
+            'User-Agent': HttpUtil.USER_AGENT,
             'Content-Type': 'application/json',
             Accept: '*/*',
             'Accept-Encoding': HttpUtil.ACCEPT_ENCODING,

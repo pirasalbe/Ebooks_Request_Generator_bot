@@ -1,17 +1,22 @@
+import * as http from 'http';
 import { HTMLElement } from 'node-html-parser';
 import { URL } from 'url';
 
 import { Entry } from '../../../model/entry';
 import { NullableHtmlElement } from '../../../model/html/nullable-html-element';
 import { LanguageStrings } from '../../../model/i18n/language-strings';
+import { AmazonDetails } from '../../../model/resolver/amazon-details';
 import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
 import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
 import { I18nUtil } from '../../../util/i18n-util';
 import { AbstractResolver } from '../abstract-resolver';
+import { ResolverException } from './../../../model/error/resolver-exception';
+import { AmazonReroute } from './../../../model/resolver/amazon-reroute';
+import { StatisticsService } from './../../statistics/statistic.service';
 import { AmazonCaptchaResolverService } from './amazon-captcha-resolver.service';
-import { AmazonDetails } from './amazon-details';
 import { AmazonFormatResolverService } from './amazon-format-resolver.service';
+import { AmazonRerouteService } from './amazon-reroute.service';
 
 export class AmazonResolverService extends AbstractResolver {
   private static readonly LANGUAGE_PATH_PARAM: RegExp = /^\/-\/[a-zA-Z]{2}\//g;
@@ -38,14 +43,106 @@ export class AmazonResolverService extends AbstractResolver {
 
   private amazonFormatResolverService: AmazonFormatResolverService;
   private amazonCaptchaResolverService: AmazonCaptchaResolverService;
+  private amazonRerouteService: AmazonRerouteService;
 
   constructor(
+    statisticsService: StatisticsService,
     amazonFormatResolverService: AmazonFormatResolverService,
-    amazonCaptchaResolverService: AmazonCaptchaResolverService
+    amazonCaptchaResolverService: AmazonCaptchaResolverService,
+    amazonRerouteService: AmazonRerouteService
   ) {
-    super();
+    super(statisticsService);
     this.amazonFormatResolverService = amazonFormatResolverService;
     this.amazonCaptchaResolverService = amazonCaptchaResolverService;
+    this.amazonRerouteService = amazonRerouteService;
+  }
+
+  /**
+   * Override resolve
+   * Update reroute information
+   *
+   * @param url Url to resolve
+   * @returns Messages
+   */
+  resolve(url: URL): Promise<Message[]> {
+    return new Promise<Message[]>((resolve, reject) =>
+      super
+        .resolve(url)
+        .then((messages: Message[]) => {
+          this.amazonRerouteService.markRequestResolved(url);
+          resolve(messages);
+        })
+        .catch((error: unknown) => {
+          this.amazonRerouteService.markRequestResolved(url);
+          reject(error);
+        })
+    );
+  }
+
+  /**
+   * Override processSuccessfulResponse
+   * Manage the captcha exceptions to redirect to another host
+   *
+   * @param url Original url
+   * @param response Original response
+   */
+  protected processSuccessfulResponse(
+    url: URL,
+    response: http.IncomingMessage
+  ): Promise<Message[]> {
+    return new Promise<Message[]>((resolve, reject) =>
+      super
+        .processSuccessfulResponse(url, response)
+        .then((messages: Message[]) => resolve(messages))
+        .catch((error: ResolverException) => {
+          // when there are errors related to the captcha reroute
+          const reroute: AmazonReroute = this.amazonRerouteService.checkCaptcha(
+            url,
+            error
+          );
+          if (reroute.shouldReroute()) {
+            // reroute
+            this.resolve(reroute.getUrl())
+              .then((messages: Message[]) => resolve(messages))
+              .catch((newError) => reject(newError));
+          } else {
+            // reject as always
+            reject(error);
+          }
+        })
+    );
+  }
+
+  /**
+   * Override processResponse
+   * Manage the 503 exception
+   *
+   * @param url Original url
+   * @param response Original response
+   */
+  protected processResponse(
+    url: URL,
+    response: http.IncomingMessage
+  ): Promise<Message[]> {
+    return new Promise<Message[]>((resolve, reject) =>
+      super
+        .processResponse(url, response)
+        .then((messages: Message[]) => resolve(messages))
+        .catch((error: string) => {
+          // when there are errors related to the 503 error
+          const reroute: AmazonReroute =
+            this.amazonRerouteService.checkServiceUnavailable(url, error);
+          if (reroute.shouldReroute()) {
+            // reroute
+            this.resolve(reroute.getUrl())
+              .then((messages: Message[]) => resolve(messages))
+              .catch((newError) => reject(newError));
+          } else {
+            // reject as always
+            reject(error);
+          }
+        })
+    );
   }
 
   prepareUrl(url: URL): URL {
@@ -58,6 +155,8 @@ export class AmazonResolverService extends AbstractResolver {
         '/'
       );
     }
+
+    url.search = '';
 
     return url;
   }

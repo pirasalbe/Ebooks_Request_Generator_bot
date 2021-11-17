@@ -2,13 +2,19 @@ import { URL } from 'url';
 
 import { SiteResolver } from '../../model/resolver/site-resolver.enum';
 import { Message } from '../../model/telegram/message';
+import { StatisticsService } from './../statistics/statistic.service';
 import { Resolver } from './resolver';
 
 export class ResolverService {
   private resolvers: Record<SiteResolver, Resolver>;
+  private statisticsService: StatisticsService;
 
-  constructor(resolvers: Record<SiteResolver, Resolver>) {
+  constructor(
+    resolvers: Record<SiteResolver, Resolver>,
+    statisticsService: StatisticsService
+  ) {
     this.resolvers = resolvers;
+    this.statisticsService = statisticsService;
   }
 
   resolve(link: string): Promise<Message[]> {
@@ -17,6 +23,7 @@ export class ResolverService {
     const url: URL | null = this.stringToUrl(link);
 
     if (url != null) {
+      this.statisticsService.getStats().increaseHostRequestCount(url.host);
       result = this.resolveMessages(url);
     } else {
       result = Promise.reject('Invalid link.');

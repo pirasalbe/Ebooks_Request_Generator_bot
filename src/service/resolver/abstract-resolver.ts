@@ -9,17 +9,22 @@ import { Message } from '../../model/telegram/message';
 import { HtmlUtil } from '../../util/html-util';
 import { HttpUtil } from '../../util/http-util';
 import { I18nUtil } from '../../util/i18n-util';
+import { ResolverException } from './../../model/error/resolver-exception';
+import { StatisticsService } from './../statistics/statistic.service';
 import { Resolver } from './resolver';
 
 export abstract class AbstractResolver implements Resolver {
+  protected statisticsService: StatisticsService;
+
   /**
    * key: hostname
    * value: cookies
    */
   protected cookies: Map<string, Cookies>;
 
-  protected constructor() {
+  protected constructor(statisticsService: StatisticsService) {
     this.cookies = new Map<string, Cookies>();
+    this.statisticsService = statisticsService;
   }
 
   resolve(url: URL): Promise<Message[]> {
@@ -28,9 +33,18 @@ export abstract class AbstractResolver implements Resolver {
         this.prepareUrl(url),
         {
           headers: {
-            'User-Agent': HttpUtil.USER_AGENT_VALUE,
+            'User-Agent': HttpUtil.USER_AGENT,
+            Accept: HttpUtil.ACCEPT,
             'Accept-Encoding': HttpUtil.ACCEPT_ENCODING,
-            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept-Language': 'en-US,en;q=0.5',
+            Host: url.host,
+            DNT: 1,
+            Connection: HttpUtil.CONNECTION,
+            'Upgrade-Insecure-Requests': 1,
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
             Cookie: this.getCookies(url.hostname),
           },
         },
@@ -38,7 +52,12 @@ export abstract class AbstractResolver implements Resolver {
           this.updateCookies(url.hostname, response.headers);
           this.processResponse(url, response)
             .then((messages: Message[]) => resolve(messages))
-            .catch((error) => reject(error));
+            .catch((error) => {
+              this.statisticsService
+                .getStats()
+                .increaseHostErrorCount(url.host);
+              reject(error);
+            });
         }
       );
     });
@@ -86,7 +105,7 @@ export abstract class AbstractResolver implements Resolver {
    * @param response Call response
    * @returns Promise with messages extracted
    */
-  private processResponse(
+  protected processResponse(
     url: URL,
     response: http.IncomingMessage
   ): Promise<Message[]> {
@@ -103,7 +122,7 @@ export abstract class AbstractResolver implements Resolver {
           .catch((error) => reject(error));
       } else {
         // something went wrong
-        console.error(response.statusCode, response);
+        console.error(response.statusCode, response.headers);
         reject(this.getErrorResponse(url, response.statusCode));
       }
     });
@@ -133,7 +152,7 @@ export abstract class AbstractResolver implements Resolver {
    * @param response Call response
    * @returns Promise with messages extracted
    */
-  private processSuccessfulResponse(
+  protected processSuccessfulResponse(
     url: URL,
     response: http.IncomingMessage
   ): Promise<Message[]> {
@@ -141,12 +160,13 @@ export abstract class AbstractResolver implements Resolver {
       return new Promise<Message[]>((resolve, reject) =>
         this.processPage(url, data)
           .then((messages: Message[]) => resolve(messages))
-          .catch((error) =>
-            reject({
+          .catch((error) => {
+            const exception: ResolverException = {
               message: error,
               html: data,
-            })
-          )
+            };
+            reject(exception);
+          })
       );
     });
   }

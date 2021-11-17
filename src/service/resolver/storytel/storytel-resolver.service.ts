@@ -3,10 +3,6 @@ import { URL } from 'url';
 
 import { NullableHtmlElement } from '../../../model/html/nullable-html-element';
 import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
-import { Message } from '../../../model/telegram/message';
-import { HtmlUtil } from '../../../util/html-util';
-import { I18nUtil } from '../../../util/i18n-util';
-import { AbstractResolver } from '../abstract-resolver';
 import {
   StorytelDetails,
   StorytelDetailsWrapper,
@@ -15,7 +11,12 @@ import {
   StorytelInformation,
   StorytelInformationWrapper,
   StorytelOrganization,
-} from './storytel-information';
+} from '../../../model/resolver/storytel-information';
+import { Message } from '../../../model/telegram/message';
+import { HtmlUtil } from '../../../util/html-util';
+import { I18nUtil } from '../../../util/i18n-util';
+import { AbstractResolver } from '../abstract-resolver';
+import { StatisticsService } from './../../statistics/statistic.service';
 
 export class StorytelResolverService extends AbstractResolver {
   private static readonly CONTENT_ID = 'script[type="application/ld+json"]';
@@ -29,8 +30,8 @@ export class StorytelResolverService extends AbstractResolver {
   private static readonly BOOK_ID = '.icon-glasses';
   private static readonly AUDIOBOOK_ID = '.icon-headphones';
 
-  constructor() {
-    super();
+  constructor(statisticsService: StatisticsService) {
+    super(statisticsService);
   }
 
   extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {
