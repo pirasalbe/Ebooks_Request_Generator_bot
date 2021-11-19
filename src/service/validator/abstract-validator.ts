@@ -54,12 +54,12 @@ export abstract class AbstractValidator<T> implements Validator {
    */
   protected abstract validateMessage(message: Message): Validation;
 
-  refresh(): Promise<void> {
+  refresh(force: boolean): Promise<void> {
     let result: Promise<void> = Promise.resolve();
 
     const now: Date = new Date();
 
-    if (now.getTime() >= this.nextCheck.getTime()) {
+    if (force || now.getTime() >= this.nextCheck.getTime()) {
       this.nextCheck = DateUtil.addHours(
         now,
         AbstractValidator.REFRESH_TIMEOUT_HOURS

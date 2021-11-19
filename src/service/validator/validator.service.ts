@@ -20,11 +20,11 @@ export class ValidatorService implements Validator {
     return result;
   }
 
-  refresh(): Promise<void[]> {
+  refresh(force = false): Promise<void[]> {
     const promises: Promise<void>[] = [];
 
     for (const validator of this.validators) {
-      promises.push(validator.refresh() as Promise<void>);
+      promises.push(validator.refresh(force) as Promise<void>);
     }
 
     return Promise.all(promises);
