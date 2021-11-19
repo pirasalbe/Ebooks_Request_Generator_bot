@@ -1,6 +1,12 @@
+import * as http from 'http';
+import * as https from 'https';
+import { HTMLElement } from 'node-html-parser';
+
 import { Message } from '../../model/telegram/message';
 import { Validation } from '../../model/validator/validation';
+import { HttpUtil } from '../../util/http-util';
 import { DateUtil } from './../../util/date-util';
+import { HtmlUtil } from './../../util/html-util';
 import { Validator } from './validator';
 
 export abstract class AbstractValidator<T> implements Validator {
@@ -51,20 +57,61 @@ export abstract class AbstractValidator<T> implements Validator {
    */
   private updateElements(): Promise<void> {
     return new Promise<void>((resolve) => {
-      this.resolveElements()
-        .then((elements: T[]) => {
-          this.elements = elements;
-          resolve();
-        })
-        .catch((error) => {
-          console.error(
-            'There was an error resolving elements for validation',
-            error
-          );
-          resolve();
-        });
+      https.get(this.getElementsLink(), (response: http.IncomingMessage) => {
+        this.processResponse(response)
+          .then(() => resolve())
+          .catch((error) => {
+            console.error(
+              'There was an error resolving elements for validation',
+              error
+            );
+            resolve();
+          });
+      });
     });
   }
 
-  protected abstract resolveElements(): Promise<T[]>;
+  protected abstract getElementsLink():
+    | string
+    | https.RequestOptions
+    | import('url').URL;
+
+  /**
+   * Process the response based on the status code
+   *
+   * @param response Call response
+   * @returns Promise
+   */
+  protected processResponse(response: http.IncomingMessage): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      if (response.statusCode == 200) {
+        // success
+        this.processSuccessfulResponse(response)
+          .then(() => resolve())
+          .catch((error) => reject(error));
+      } else {
+        // something went wrong
+        reject('Error: ' + response.statusCode);
+      }
+    });
+  }
+
+  /**
+   * Process a response with status 200
+   *
+   * @param response Call response
+   * @returns Promise
+   */
+  protected processSuccessfulResponse(
+    response: http.IncomingMessage
+  ): Promise<void> {
+    return HttpUtil.processSuccessfulResponse(response, (data: string) => {
+      return new Promise<void>((resolve) => {
+        this.elements = this.parseElements(HtmlUtil.parseHTML(data));
+        resolve();
+      });
+    });
+  }
+
+  protected abstract parseElements(html: HTMLElement): T[];
 }
