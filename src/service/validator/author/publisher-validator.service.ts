@@ -28,7 +28,7 @@ export class PublisherValidatorService extends AbstractValidator<string> {
       if (academicPublisher != undefined) {
         result = Validation.invalid(
           'The publisher of your #request, ' +
-            this.mask(publisher) +
+            this.mask(publisher, 'Publisher') +
             ", is academic and can't be displayed here."
         );
       }

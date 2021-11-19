@@ -24,7 +24,7 @@ export class AuthorValidatorService extends AbstractValidator<string> {
     if (author != null && this.elements.includes(author.toLowerCase())) {
       result = Validation.invalid(
         'The author of your #request, ' +
-          this.mask(author) +
+          this.mask(author, 'Author') +
           ", is either academic or protected by DMCA and can't be displayed here."
       );
     }

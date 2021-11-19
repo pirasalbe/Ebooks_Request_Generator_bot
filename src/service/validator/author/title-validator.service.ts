@@ -33,9 +33,10 @@ export class TitleValidatorService extends AbstractValidator<Title> {
       if (protectedTitle != undefined) {
         result = Validation.invalid(
           'Your #request of ' +
-            this.mask(protectedTitle.title) +
-            ' by ' +
-            this.mask(protectedTitle.author) +
+            this.mask(
+              protectedTitle.title + ' by ' + protectedTitle.author,
+              'Book'
+            ) +
             " is protected by DMCA and can't be displayed here."
         );
       }

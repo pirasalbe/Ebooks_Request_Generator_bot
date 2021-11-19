@@ -31,35 +31,21 @@ export abstract class AbstractValidator<T> implements Validator {
   }
 
   /**
-   * Mask string, replacing half with *
+   * Mask string
    *
    * @param s String to mask
+   * @param placeholder String to add with just one word
    * @returns Masked string
    */
-  protected mask(s: string): string {
-    const parts: string[] = s.split(' ');
-    for (let i = 0; i < parts.length; i++) {
-      parts[i] = this.replace(parts[i], parts[i].length / 2);
+  protected mask(s: string, placeholder: string): string {
+    const parts: string[] = s.replace("'", '_').replace(';', '').split(' ');
+
+    if (parts.length == 1) {
+      parts.push(parts[0]);
+      parts[0] = placeholder;
     }
 
-    return parts.join(' ');
-  }
-
-  /**
-   * Replace [length] letters of [s] with [newChar]
-   *
-   * @param s String
-   * @param length Hidden letters count
-   * @param newChar Char to hide the letters
-   * @returns String with letters replaced
-   */
-  private replace(s: string, length: number, newChar = '*'): string {
-    let newString = '';
-    for (let i = 0; i < s.length; i++) {
-      newString += i < Math.round(length) ? s[i] : newChar;
-    }
-
-    return newString;
+    return parts.join('_');
   }
 
   /**
