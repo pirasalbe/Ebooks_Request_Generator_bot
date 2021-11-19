@@ -106,6 +106,10 @@ It always add the _#archive_ tag.
 
 The publication date of the given product cannot be in the future.
 
+### Authors, Titles, Publishers
+
+The book or the author must not be protected by DMCA and the publisher must not be academic.
+
 # Known bugs
 
 - Cannot get language information from Scribd links
