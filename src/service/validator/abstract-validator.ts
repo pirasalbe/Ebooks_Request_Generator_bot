@@ -132,4 +132,24 @@ export abstract class AbstractValidator<T> implements Validator {
   }
 
   protected abstract parseElements(html: HTMLElement): T[];
+
+  /**
+   * Detect if the list has beginned
+   *
+   * @param isList The previous value
+   * @param content Content to check
+   * @param beginPhrase The characters to find when the list begin
+   * @returns True if the list has beginned
+   */
+  protected isListBegin(
+    isList: boolean,
+    content: string,
+    beginPhrase: string
+  ): boolean {
+    if (!isList && content.includes(beginPhrase)) {
+      isList = true;
+    }
+
+    return isList;
+  }
 }

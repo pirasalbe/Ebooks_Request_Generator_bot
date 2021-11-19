@@ -92,17 +92,13 @@ export class TitleValidatorService extends AbstractValidator<Title> {
       }
 
       // the following elements are in the list
-      isList = this.isListBegin(isList, content);
+      isList = this.isListBegin(
+        isList,
+        content,
+        TitleValidatorService.BEGIN_LIST
+      );
     }
 
     return elements;
-  }
-
-  private isListBegin(isList: boolean, content: string): boolean {
-    if (!isList && content.includes(TitleValidatorService.BEGIN_LIST)) {
-      isList = true;
-    }
-
-    return isList;
   }
 }
