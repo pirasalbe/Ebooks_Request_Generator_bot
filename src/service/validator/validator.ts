@@ -11,5 +11,5 @@ export interface Validator {
   /**
    * Refresh cache of elements
    */
-  refresh(): Promise<void | void[]>;
+  refresh(force: boolean): Promise<void | void[]>;
 }

@@ -4,14 +4,14 @@ import { URL } from 'url';
 
 import { Message } from '../../../model/telegram/message';
 import { Validation } from '../../../model/validator/validation';
+import { HtmlUtil } from '../../../util/html-util';
 import { AbstractValidator } from '../abstract-validator';
-import { HtmlUtil } from './../../../util/html-util';
 
-export class AuthorValidatorService extends AbstractValidator<string> {
-  private static readonly AUTHORS =
-    'https://telegra.ph/Copyright--Authors-04-15';
+export class PublisherValidatorService extends AbstractValidator<string> {
+  private static readonly PUBLISHERS =
+    'https://telegra.ph/DMCA-Publishers-List-09-21-3';
   private static readonly BEGIN_LIST = '𝙼𝚎𝚖𝚋𝚎𝚛𝚜 𝚙𝚕𝚎𝚊𝚜𝚎 𝚝𝚊𝚔𝚎 𝚗𝚘𝚝𝚎';
-  private static readonly LIST_ELEMENT_START = '▫︎ ';
+  private static readonly LIST_ELEMENT_START = '· ';
 
   constructor() {
     super();
@@ -20,20 +20,25 @@ export class AuthorValidatorService extends AbstractValidator<string> {
   protected validateMessage(message: Message): Validation {
     let result: Validation = Validation.valid();
 
-    const author: string | null = message.getAuthor();
-    if (author != null && this.elements.includes(author.toLowerCase())) {
-      result = Validation.invalid(
-        'The author of your #request, ' +
-          this.mask(author, 'Author') +
-          ", is either academic or protected by DMCA and can't be displayed here."
+    const publisher: string | null = message.getPublisher();
+    if (publisher != null) {
+      const academicPublisher: string | undefined = this.elements.find(
+        (p: string) => publisher.toLowerCase().startsWith(p)
       );
+      if (academicPublisher != undefined) {
+        result = Validation.invalid(
+          'The publisher of your #request, ' +
+            this.mask(publisher, 'Publisher') +
+            ", is academic and can't be displayed here."
+        );
+      }
     }
 
     return result;
   }
 
   protected getElementsLink(): string | RequestOptions | URL {
-    return AuthorValidatorService.AUTHORS;
+    return PublisherValidatorService.PUBLISHERS;
   }
 
   protected parseElements(html: HTMLElement): string[] {
@@ -45,11 +50,11 @@ export class AuthorValidatorService extends AbstractValidator<string> {
       const content: string = HtmlUtil.getTextContent(htmlElement).trim();
       if (
         isList &&
-        content.startsWith(AuthorValidatorService.LIST_ELEMENT_START)
+        content.startsWith(PublisherValidatorService.LIST_ELEMENT_START)
       ) {
         elements.push(
           content
-            .substring(AuthorValidatorService.LIST_ELEMENT_START.length)
+            .substring(PublisherValidatorService.LIST_ELEMENT_START.length)
             .toLowerCase()
         );
       }
@@ -58,7 +63,7 @@ export class AuthorValidatorService extends AbstractValidator<string> {
       isList = this.isListBegin(
         isList,
         content,
-        AuthorValidatorService.BEGIN_LIST
+        PublisherValidatorService.BEGIN_LIST
       );
     }
 

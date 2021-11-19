@@ -86,6 +86,16 @@ export class BotService {
         reply_to_message_id: ctx.message.message_id,
       });
     });
+    this.bot.command('refresh', (ctx) => {
+      ctx.reply('Refresh in progress').then((loading: TelegramMessage) => {
+        this.validatorService.refresh(true).then(() => {
+          ctx.deleteMessage(loading.message_id);
+          ctx.reply('Refresh completed', {
+            reply_to_message_id: ctx.message.message_id,
+          });
+        });
+      });
+    });
 
     this.bot.on('inline_query', (ctx) => {
       this.safeHandling(() => {

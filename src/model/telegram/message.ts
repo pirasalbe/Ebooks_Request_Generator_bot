@@ -55,11 +55,15 @@ export class Message {
     this.tags.push(tag);
   }
 
-  setTitle(title: string) {
+  setTitle(title: string): void {
     this.title = title;
   }
 
-  setAuthor(author: string) {
+  getTitle(): string | null {
+    return this.title;
+  }
+
+  setAuthor(author: string): void {
     this.author = author;
   }
 
@@ -67,10 +71,14 @@ export class Message {
     return this.author;
   }
 
-  setPublisher(publisher: string | null | undefined) {
+  setPublisher(publisher: string | null | undefined): void {
     if (publisher != null && publisher != undefined) {
       this.publisher = publisher;
     }
+  }
+
+  getPublisher(): string | null {
+    return this.publisher;
   }
 
   setPublicationDate(publicationDate: Date): void {
@@ -109,7 +117,7 @@ export class Message {
     return result;
   }
 
-  setUrl(url: URL) {
+  setUrl(url: URL): void {
     this.url = url;
   }
 
