@@ -13,6 +13,7 @@ import { StorytelResolverService } from './service/resolver/storytel/storytel-re
 import { StatisticsService } from './service/statistics/statistic.service';
 import { BotService } from './service/telegram/bot.service';
 import { AuthorValidatorService } from './service/validator/author/author-validator.service';
+import { PublisherValidatorService } from './service/validator/author/publisher-validator.service';
 import { TitleValidatorService } from './service/validator/author/title-validator.service';
 import { Validator } from './service/validator/validator';
 import { ValidatorService } from './service/validator/validator.service';
@@ -49,6 +50,7 @@ export class ApplicationContext {
     const validators: Validator[] = [
       new AuthorValidatorService(),
       new TitleValidatorService(),
+      new PublisherValidatorService(),
     ];
     const validatorService: ValidatorService = new ValidatorService(validators);
 

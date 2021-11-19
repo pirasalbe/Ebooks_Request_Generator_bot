@@ -26,7 +26,9 @@ export class TitleValidatorService extends AbstractValidator<Title> {
     const author: string | null = message.getAuthor();
     if (title != null && author != null) {
       const protectedTitle: Title | undefined = this.elements.find(
-        (t: Title) => title.startsWith(t.title) && author == t.author
+        (t: Title) =>
+          title.toLowerCase().startsWith(t.title.toLowerCase()) &&
+          author.toLowerCase() == t.author.toLowerCase()
       );
       if (protectedTitle != undefined) {
         result = Validation.invalid(

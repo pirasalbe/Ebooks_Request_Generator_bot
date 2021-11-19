@@ -77,6 +77,10 @@ export class Message {
     }
   }
 
+  getPublisher(): string | null {
+    return this.publisher;
+  }
+
   setPublicationDate(publicationDate: Date): void {
     const now: Date = new Date();
     const allowedRequestDate: Date = DateUtil.addDays(
