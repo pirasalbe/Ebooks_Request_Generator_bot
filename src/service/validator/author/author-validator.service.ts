@@ -23,7 +23,9 @@ export class AuthorValidatorService extends AbstractValidator<string> {
     const author: string | null = message.getAuthor();
     if (author != null && this.elements.includes(author)) {
       result = Validation.invalid(
-        author + ' is either an academic author or protected by DMCA.'
+        'The author of your #request, ' +
+          this.mask(author) +
+          ", is either academic or protected by DMCA and can't be displayed here."
       );
     }
 

@@ -31,6 +31,38 @@ export abstract class AbstractValidator<T> implements Validator {
   }
 
   /**
+   * Mask string, replacing half with *
+   *
+   * @param s String to mask
+   * @returns Masked string
+   */
+  protected mask(s: string): string {
+    const parts: string[] = s.split(' ');
+    for (let i = 0; i < parts.length; i++) {
+      parts[i] = this.replace(parts[i], parts[i].length / 2);
+    }
+
+    return parts.join(' ');
+  }
+
+  /**
+   * Replace [length] letters of [s] with [newChar]
+   *
+   * @param s String
+   * @param length Hidden letters count
+   * @param newChar Char to hide the letters
+   * @returns String with letters replaced
+   */
+  private replace(s: string, length: number, newChar = '*'): string {
+    let newString = '';
+    for (let i = 0; i < s.length; i++) {
+      newString += i < Math.round(length) ? s[i] : newChar;
+    }
+
+    return newString;
+  }
+
+  /**
    * Validate a single message
    * @param message Message to validate
    */
