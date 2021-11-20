@@ -52,7 +52,7 @@ export class Message {
   }
 
   addTag(tag: string): void {
-    if (this.tags[0] == 'ebook' && tag == Message.AUDIOBOOK_TAG) {
+    if (this.tags[0] == 'ebook') {
       this.tags.pop();
     }
     this.tags.push(tag);
@@ -172,5 +172,9 @@ export class Message {
 
   toDetailsString(): string {
     return this.title as string;
+  }
+
+  toTagString(): string {
+    return this.tags[0] as string;
   }
 }

@@ -24,7 +24,7 @@ export class BotService {
   private static readonly REPORT: string = '/report';
 
   private static readonly SUCCESSFULL_THUMB_URL =
-    'https://telegra.ph/file/5b2fad22d5b296b843acf.jpg';
+    'https://telegra.ph/file/06d1f7c944004bb0dcef1.jpg';
   private static readonly INVALID_THUMB_URL =
     'https://www.downloadclipart.net/large/14121-warning-icon-design.png';
 
@@ -128,7 +128,7 @@ export class BotService {
 
                 inlineResults.push(
                   this.inlineResult(
-                    'Request ' + message.toTileString(),
+                    'Request ' + message.toTagString(),
                     message.toString(),
                     message.toDetailsString(),
                     BotService.SUCCESSFULL_THUMB_URL,
@@ -345,7 +345,7 @@ export class BotService {
   }
 
   private smallHelpMessage(): string {
-    return 'Send me an Amazon/Audible/Scribd/Storytel/Archive link to get a well-formatted request ready to be posted in groups.';
+    return 'Send me an Amazon/Audible/Scribd/Storytel/Archive link to get a well-formatted request ready to be posted in <b>BookCrush: Requests or @BooksHelpClub</b> groups.';
   }
 
   private helpMessage(): string {
@@ -353,7 +353,7 @@ export class BotService {
       this.smallHelpMessage() +
       ' You can then forward the same request to the group.' +
       '\n\n' +
-      'You can use me inline as well. Just click on the button below or send <code>@ebooks_request_generator_bot link</code>.'
+      'You can use me inline as well. Just click on the button below or send <code>@bkcrushreqbot link</code>.'
     );
   }
 
