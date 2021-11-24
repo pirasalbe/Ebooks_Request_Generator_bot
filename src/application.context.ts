@@ -1,4 +1,5 @@
 import { SiteResolver } from './model/resolver/site-resolver.enum';
+import { MessageService } from './service/message/message.service';
 import { AmazonCaptchaResolverService } from './service/resolver/amazon/amazon-captcha-resolver.service';
 import { AmazonFormatResolverService } from './service/resolver/amazon/amazon-format-resolver.service';
 import { AmazonRerouteService } from './service/resolver/amazon/amazon-reroute.service';
@@ -58,8 +59,13 @@ export class ApplicationContext {
       this.log('Validators loaded');
     });
 
-    const botService: BotService = new BotService(
+    const messageService: MessageService = new MessageService(
       resolverService,
+      validatorService
+    );
+
+    const botService: BotService = new BotService(
+      messageService,
       validatorService,
       statisticsService,
       token
