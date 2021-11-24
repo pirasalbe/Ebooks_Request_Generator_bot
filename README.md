@@ -142,3 +142,13 @@ BOT_TOKEN="110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw" npm start
 ```
 
 _Replace the token in the command, which is **invalid**, with your own._
+
+### Twitter service
+
+The bot can send a tweet for each request.
+
+Define the following variables and run the project
+
+```
+BOT_TOKEN="110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw" TWITTER_APP_KEY="twitter_variable" TWITTER_APP_SECRET="twitter_variable" TWITTER_ACCESS_TOKEN="twitter_variable" TWITTER_ACCESS_SECRET="twitter_variable" npm start
+```
