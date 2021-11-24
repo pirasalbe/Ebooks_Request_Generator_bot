@@ -69,6 +69,7 @@ export abstract class AbstractResolver implements Resolver {
    * @returns Url ready for call
    */
   protected prepareUrl(url: URL): URL {
+    url.search = '';
     return url;
   }
 
