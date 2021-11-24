@@ -156,9 +156,7 @@ export class AmazonResolverService extends AbstractResolver {
       );
     }
 
-    url.search = '';
-
-    return url;
+    return super.prepareUrl(url);
   }
 
   extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {

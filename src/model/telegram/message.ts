@@ -42,7 +42,7 @@ export class Message {
     return clone;
   }
 
-  private getSiteName(): string {
+  getSiteName(): string {
     const name: string = SiteResolver[this.site];
 
     const firstLetter = name[0].toUpperCase();
@@ -132,6 +132,10 @@ export class Message {
     }
 
     return tags;
+  }
+
+  getLink(): string {
+    return this.url.toString();
   }
 
   toString(): string {
