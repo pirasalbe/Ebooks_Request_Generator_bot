@@ -61,6 +61,7 @@ Given an Amazon link of a Kindle book, it returns the request message.
 - it: Italian
 - de: German
 - es: Spanish
+- pt: Portuguese
 - fr: French
 
 ### Extract message from Audible

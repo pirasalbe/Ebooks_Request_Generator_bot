@@ -71,6 +71,10 @@ export class Message {
     this.language = language;
   }
 
+  getLanguage(): string | null {
+    return this.language;
+  }
+
   setTitle(title: string): void {
     this.title = title;
   }
