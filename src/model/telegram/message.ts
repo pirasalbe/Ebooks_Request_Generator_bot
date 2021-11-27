@@ -147,6 +147,8 @@ export class Message {
     // request
     if (addRequest) {
       tags.push('#request');
+    } else {
+      tags.push('');
     }
 
     // source
