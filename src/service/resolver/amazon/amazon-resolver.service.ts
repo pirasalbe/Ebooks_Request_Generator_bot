@@ -13,6 +13,7 @@ import { I18nUtil } from '../../../util/i18n-util';
 import { AbstractResolver } from '../abstract-resolver';
 import { ResolverException } from './../../../model/error/resolver-exception';
 import { AmazonReroute } from './../../../model/resolver/amazon-reroute';
+import { Source } from './../../../model/telegram/source.enum';
 import { StatisticsService } from './../../statistics/statistic.service';
 import { AmazonCaptchaResolverService } from './amazon-captcha-resolver.service';
 import { AmazonFormatResolverService } from './amazon-format-resolver.service';
@@ -334,7 +335,7 @@ export class AmazonResolverService extends AbstractResolver {
         .isKindleUnlimited(url, asin, html)
         .then((exists: boolean) => {
           if (exists) {
-            message.addTag('KU');
+            message.setSource(Source.KU);
           }
           resolve();
         })
@@ -493,10 +494,10 @@ export class AmazonResolverService extends AbstractResolver {
 
     if (!this.isLanguageDefined(languageLowerCase)) {
       // add language when it cannot be translated
-      message.addTag(language.toLowerCase());
+      message.setLanguage(language.toLowerCase());
     } else if (this.isLanguageTagRequired(languageLowerCase)) {
       // add language if it is not english
-      message.addTag(languageLowerCase as string);
+      message.setLanguage(languageLowerCase as string);
     }
   }
 
