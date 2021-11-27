@@ -113,6 +113,10 @@ The publication date of the given product cannot be in the future.
 
 The book or the author must not be protected by DMCA and the publisher must not be academic.
 
+### Languages
+
+Malayalam is not allowed.
+
 # Known bugs
 
 - Cannot get language information from Scribd links
