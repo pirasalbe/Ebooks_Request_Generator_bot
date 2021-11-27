@@ -7,7 +7,7 @@ Telegram bot that creates a text message from the link address of an ebook or an
 ## Commands
 
 - `/start` and `/help`: show an help message.
-- `/inline`: show an help message for inline mode.
+- `/inline`: shows an help message for inline mode.
 - text: given a link or a text containing a link, it returns the request message.
 - `/report` text: works the same way it does with _text_, but it returns a _report.html_ file when errors occur.
 - inline: the bot works inline the same way it does with _text_.
