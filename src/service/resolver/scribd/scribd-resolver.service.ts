@@ -201,6 +201,6 @@ export class ScribdResolverService extends AbstractResolver {
         break;
     }
 
-    return language;
+    return result;
   }
 }
