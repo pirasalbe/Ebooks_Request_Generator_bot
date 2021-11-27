@@ -10,6 +10,7 @@ import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
 import { I18nUtil } from '../../../util/i18n-util';
 import { AbstractResolver } from '../abstract-resolver';
+import { Source } from './../../../model/telegram/source.enum';
 import { StatisticsService } from './../../statistics/statistic.service';
 
 export class ArchiveResolverService extends AbstractResolver {
@@ -60,7 +61,7 @@ export class ArchiveResolverService extends AbstractResolver {
       message.setTitle(HtmlUtil.getTextContent(information.header.title));
 
       // tags
-      message.addTag('archive');
+      message.setSource(Source.ARCHIVE);
 
       this.setDetails(message, author, information.body);
 
@@ -189,7 +190,7 @@ export class ArchiveResolverService extends AbstractResolver {
   private addLanguageTag(message: Message, language: string): void {
     const languageLowerCase: string = language.toLowerCase();
     if (this.isLanguageTagRequired(languageLowerCase)) {
-      message.addTag(languageLowerCase);
+      message.setLanguage(languageLowerCase);
     }
   }
 }

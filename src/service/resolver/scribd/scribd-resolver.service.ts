@@ -15,6 +15,8 @@ import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
 import { I18nUtil } from '../../../util/i18n-util';
 import { AbstractResolver } from '../abstract-resolver';
+import { Format } from './../../../model/telegram/format.enum';
+import { Source } from './../../../model/telegram/source.enum';
 import { StatisticsService } from './../../statistics/statistic.service';
 
 export class ScribdResolverService extends AbstractResolver {
@@ -69,9 +71,9 @@ export class ScribdResolverService extends AbstractResolver {
       message.setPublicationDate(new Date(information.datePublished));
 
       // tags
-      message.addTag('scribd');
+      message.setSource(Source.SCRIBD);
       if (information['@type'] === 'Audiobook') {
-        message.addTag(Message.AUDIOBOOK_TAG);
+        message.setFormat(Format.AUDIOBOOK);
       }
 
       this.setLanguage(message, information.inLanguage, languages);
@@ -165,7 +167,7 @@ export class ScribdResolverService extends AbstractResolver {
     if (languageFound != undefined) {
       const language: string = languageFound.name.toLowerCase();
       if (this.isLanguageTagRequired(language)) {
-        message.addTag(this.getLanguageTag(language));
+        message.setLanguage(this.getLanguageTag(language));
       }
     }
   }
@@ -199,6 +201,6 @@ export class ScribdResolverService extends AbstractResolver {
         break;
     }
 
-    return language;
+    return result;
   }
 }

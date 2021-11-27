@@ -7,6 +7,7 @@ import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
 import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
 import { AbstractResolver } from '../abstract-resolver';
+import { Format } from './../../../model/telegram/format.enum';
 import { StatisticsService } from './../../statistics/statistic.service';
 
 export class AudibleResolverService extends AbstractResolver {
@@ -54,10 +55,10 @@ export class AudibleResolverService extends AbstractResolver {
       message.setPublicationDate(new Date(information.datePublished));
 
       // tags
-      message.addTag(Message.AUDIOBOOK_TAG);
+      message.setFormat(Format.AUDIOBOOK);
 
       if (this.isLanguageTagRequired(information.inLanguage)) {
-        message.addTag(information.inLanguage);
+        message.setLanguage(information.inLanguage);
       }
 
       resolve([message]);

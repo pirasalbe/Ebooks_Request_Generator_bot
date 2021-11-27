@@ -26,6 +26,9 @@ export class BotService {
   private static readonly INVALID_THUMB_URL =
     'https://www.downloadclipart.net/large/14121-warning-icon-design.png';
 
+  private static readonly INLINE_TUTORIAL_LINK =
+    'https://telegra.ph/file/d07ad72c3b67903162280.mp4';
+
   private token: string;
   private telegram: Telegram;
   private bot: Telegraf<Context<Update>>;
@@ -77,6 +80,18 @@ export class BotService {
     });
     this.bot.help((ctx) => {
       ctx.replyWithHTML(this.helpMessage());
+    });
+    this.bot.command('inline', (ctx) => {
+      ctx.replyWithAnimation(
+        {
+          url: BotService.INLINE_TUTORIAL_LINK,
+        },
+        {
+          reply_to_message_id: ctx.message.message_id,
+          caption: this.inlineHelp(),
+          parse_mode: 'HTML',
+        }
+      );
     });
     this.bot.command('stats', (ctx) => {
       ctx.reply(this.statisticsService.toString(), {
@@ -300,8 +315,16 @@ export class BotService {
     return user != undefined && user.is_bot && user.id == bot.id;
   }
 
+  private supportedSites(): string {
+    return 'Amazon/Audible/Scribd/Storytel/Archive';
+  }
+
   private smallHelpMessage(): string {
-    return 'Send me an Amazon/Audible/Scribd/Storytel/Archive link to get a well-formatted request ready to be posted in groups.';
+    return (
+      'Send me an ' +
+      this.supportedSites() +
+      ' link to get a well-formatted request ready to be posted in groups.'
+    );
   }
 
   private helpMessage(): string {
@@ -309,8 +332,34 @@ export class BotService {
       this.smallHelpMessage() +
       ' You can then forward the same request to the group.' +
       '\n\n' +
-      'You can use me inline as well. Just click on the button below or send <code>@ebooks_request_generator_bot link</code>.'
+      'You can use me inline as well. Send /inline for more information.'
     );
+  }
+
+  private inlineHelp(): string {
+    let help = '<b>How to use the bot inline</b>';
+    help += '\n\n';
+
+    help +=
+      '1) Write the bot name <code>@ebooks_request_generator_bot</code> and add <b>1 space</b>.';
+    help += '\n\n';
+
+    help += '2) Copy and paste ' + this.supportedSites() + ' link.';
+    help += '\n\n';
+
+    help +=
+      '✅ <code>@ebooks_request_generator_bot https://www.amazon.com/dp/B07NYBL322</code>\n';
+    help +=
+      '❌ <code>@ebooks_request_generator_bothttps://www.amazon.com/dp/B07NYBL322</code>';
+    help += '\n\n';
+
+    help +=
+      '3) <b>Wait</b> until the bot shows a popup with the book information.';
+    help += '\n\n';
+
+    help += '4) Click the popup.';
+
+    return help;
   }
 
   private inlineResult(

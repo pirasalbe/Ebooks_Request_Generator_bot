@@ -3,13 +3,20 @@ import { URL } from 'url';
 import { DateUtil } from '../../util/date-util';
 import { SiteResolver } from '../resolver/site-resolver.enum';
 import { RandomUtil } from './../../util/random-util';
+import { Format } from './format.enum';
+import { Source } from './source.enum';
 
 export class Message {
-  public static readonly AUDIOBOOK_TAG = 'audiobook';
   private static readonly PUBLICATION_DATE_MINIMUM_AGE_DAYS = 0;
 
   private site: SiteResolver;
-  private tags: string[];
+
+  // tags
+  private source: Source | null;
+  private format: Format;
+  private language: string | null;
+
+  // information
   private title: string | null;
   private author: string | null;
   private publisher: string;
@@ -18,7 +25,9 @@ export class Message {
 
   constructor(site: SiteResolver, url: URL) {
     this.site = site;
-    this.tags = ['request'];
+    this.source = null;
+    this.format = Format.EBOOK;
+    this.language = null;
     this.title = null;
     this.author = null;
     this.publisher = 'Self-Published';
@@ -29,10 +38,9 @@ export class Message {
   clone(): Message {
     const clone: Message = new Message(this.site, this.url);
 
-    clone.tags = [];
-    for (const tag of this.tags) {
-      clone.tags.push(tag);
-    }
+    clone.source = this.source;
+    clone.format = this.format;
+    clone.language = this.language;
 
     clone.title = this.title;
     clone.author = this.author;
@@ -51,8 +59,20 @@ export class Message {
     return firstLetter + otherLetters;
   }
 
-  addTag(tag: string): void {
-    this.tags.push(tag);
+  setSource(source: Source): void {
+    this.source = source;
+  }
+
+  setFormat(format: Format): void {
+    this.format = format;
+  }
+
+  setLanguage(language: string): void {
+    this.language = language;
+  }
+
+  getLanguage(): string | null {
+    return this.language;
   }
 
   setTitle(title: string): void {
@@ -121,17 +141,32 @@ export class Message {
     this.url = url;
   }
 
-  private toTagsString(start = 0): string {
-    let tags = '';
+  private toTagsString(addRequest: boolean): string {
+    const tags: string[] = [];
 
-    for (let i = start; i < this.tags.length; i++) {
-      if (i > start) {
-        tags += ' ';
-      }
-      tags += '#' + this.tags[i];
+    // request
+    if (addRequest) {
+      tags.push('#request');
     }
 
-    return tags;
+    // source
+    if (this.source != null) {
+      const source: string = Source[this.source];
+      tags.push(source.toLowerCase());
+    }
+
+    // format
+    if (this.format != null && this.format != Format.EBOOK) {
+      const format: string = Format[this.format];
+      tags.push(format.toLowerCase());
+    }
+
+    // language
+    if (this.language != null) {
+      tags.push(this.language);
+    }
+
+    return tags.join(' #');
   }
 
   getLink(): string {
@@ -142,7 +177,7 @@ export class Message {
     let message = '';
 
     // tags
-    message += this.toTagsString();
+    message += this.toTagsString(true);
 
     message += '\n\n';
 
@@ -165,7 +200,7 @@ export class Message {
   }
 
   toTileString(): string {
-    return this.toTagsString(1);
+    return this.toTagsString(false);
   }
 
   toDetailsString(): string {

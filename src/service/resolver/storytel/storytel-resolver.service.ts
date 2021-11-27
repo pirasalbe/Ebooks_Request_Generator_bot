@@ -16,6 +16,8 @@ import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
 import { I18nUtil } from '../../../util/i18n-util';
 import { AbstractResolver } from '../abstract-resolver';
+import { Format } from './../../../model/telegram/format.enum';
+import { Source } from './../../../model/telegram/source.enum';
 import { StatisticsService } from './../../statistics/statistic.service';
 
 export class StorytelResolverService extends AbstractResolver {
@@ -85,7 +87,7 @@ export class StorytelResolverService extends AbstractResolver {
       }
 
       // tags
-      message.addTag('storytel');
+      message.setSource(Source.STORYTEL);
 
       let language: string | null = information.getLanguage();
       if (!this.isLanguageDefined(language)) {
@@ -93,7 +95,7 @@ export class StorytelResolverService extends AbstractResolver {
       }
 
       if (this.isLanguageTagRequired(language)) {
-        message.addTag(language as string);
+        message.setLanguage(language as string);
       }
 
       const messages: Message[] = [];
@@ -101,10 +103,10 @@ export class StorytelResolverService extends AbstractResolver {
       switch (this.getFormat(bookIcon, audiobookIcon)) {
         case StorytelFormat.BOTH:
           messages.push(message.clone());
-          message.addTag(Message.AUDIOBOOK_TAG);
+          message.setFormat(Format.AUDIOBOOK);
           break;
         case StorytelFormat.AUDIOBOOK:
-          message.addTag(Message.AUDIOBOOK_TAG);
+          message.setFormat(Format.AUDIOBOOK);
           break;
         case StorytelFormat.EBOOK:
         default:

@@ -15,8 +15,9 @@ import { StatisticsService } from './service/statistics/statistic.service';
 import { BotService } from './service/telegram/bot.service';
 import { TwitterService } from './service/twitter/twitter.service';
 import { AuthorValidatorService } from './service/validator/author/author-validator.service';
-import { PublisherValidatorService } from './service/validator/author/publisher-validator.service';
-import { TitleValidatorService } from './service/validator/author/title-validator.service';
+import { LanguageValidatorService } from './service/validator/language/language-validator.service';
+import { PublisherValidatorService } from './service/validator/publisher/publisher-validator.service';
+import { TitleValidatorService } from './service/validator/title/title-validator.service';
 import { Validator } from './service/validator/validator';
 import { ValidatorService } from './service/validator/validator.service';
 
@@ -50,6 +51,7 @@ export class ApplicationContext {
 
     // validators
     const validators: Validator[] = [
+      new LanguageValidatorService(),
       new AuthorValidatorService(),
       new TitleValidatorService(),
       new PublisherValidatorService(),
