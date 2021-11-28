@@ -134,7 +134,10 @@ export abstract class AbstractResolver implements Resolver {
 
     if (statusCode == 404) {
       // Not found
-      error += ': Page not found';
+      error += ': Page not found.';
+    } else if (statusCode == 403) {
+      // Not found
+      error += ': Access forbidden.';
     } else if (statusCode == 503) {
       // Service unavailable
       error +=

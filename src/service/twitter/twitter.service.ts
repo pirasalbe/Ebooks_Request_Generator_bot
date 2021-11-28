@@ -40,11 +40,10 @@ export class TwitterService {
   }
 
   private toTweet(message: Message): string {
-    let tweet = '';
-
     // tags
+    let tweet: string = message.toTileString().trim();
+
     const site: string = message.getSiteName().toLowerCase();
-    tweet += message.toTileString();
     if (!tweet.includes(site)) {
       tweet = '#' + site + ' ' + tweet;
     }
