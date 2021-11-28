@@ -2,7 +2,6 @@ import { HTMLElement } from 'node-html-parser';
 import { URL } from 'url';
 
 import { NullableHtmlElement } from '../../../model/html/nullable-html-element';
-import { Cookies } from '../../../model/http/cookies';
 
 export class AmazonCaptchaResolverService {
   private static readonly CAPTCHA_FORM_ID =
@@ -10,21 +9,13 @@ export class AmazonCaptchaResolverService {
   static readonly CAPTCHA_ERROR =
     'Amazon requested a captcha. Try again later or change locale (for example, amazon.co.uk instead of amazon.com).';
 
-  checkCaptcha(
-    url: URL,
-    html: HTMLElement,
-    cookies: Map<string, Cookies>
-  ): void {
+  checkCaptcha(url: URL, html: HTMLElement, cookies: string): void {
     const captchaForm: NullableHtmlElement = html.querySelector(
       AmazonCaptchaResolverService.CAPTCHA_FORM_ID
     );
 
     if (captchaForm != null) {
-      const hostCookies: Cookies | undefined = cookies.get(url.hostname);
-      console.error(
-        url.hostname,
-        hostCookies != undefined ? hostCookies.toString() : ''
-      );
+      console.error(url.hostname, cookies);
       throw AmazonCaptchaResolverService.CAPTCHA_ERROR;
     }
   }

@@ -78,7 +78,7 @@ export abstract class AbstractResolver implements Resolver {
    * @param host Host to call
    * @returns Cookies
    */
-  private getCookies(host: string): string {
+  protected getCookies(host: string): string {
     if (!this.cookies.has(host)) {
       this.cookies.set(host, new Cookies());
     }

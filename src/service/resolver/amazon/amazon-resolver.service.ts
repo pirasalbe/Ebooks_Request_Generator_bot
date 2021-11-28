@@ -163,7 +163,11 @@ export class AmazonResolverService extends AbstractResolver {
   extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {
     return new Promise<Message[]>((resolve) => {
       // captcha
-      this.amazonCaptchaResolverService.checkCaptcha(url, html, this.cookies);
+      this.amazonCaptchaResolverService.checkCaptcha(
+        url,
+        html,
+        this.getCookies(url.hostname)
+      );
 
       // checks
       const kindleFormat: NullableHtmlElement = html.querySelector(
