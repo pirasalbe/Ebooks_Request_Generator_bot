@@ -26,8 +26,8 @@ export class BotService {
   private static readonly INVALID_THUMB_URL =
     'https://www.downloadclipart.net/large/14121-warning-icon-design.png';
 
-  private static readonly INLINE_TUTORIAL_LINK =
-    'CgACAgQAAxkBAAIM9mGjibE9BVEXhQTKo4p5bTjcw3zKAAI5CgACk40QUSc6CG_90hNSIgQ';
+  private static readonly INLINE_TUTORIAL_ID =
+    'CgACAgQAAxkBAAIfqGGjiv7C2Zso9D3XrmUQx5ZklxCyAAI5CgACk40QUeXUPtz-_XoJIgQ';
 
   private token: string;
   private telegram: Telegram;
@@ -83,7 +83,7 @@ export class BotService {
     });
     this.bot.command('inline', (ctx) => {
       ctx.replyWithAnimation(
-        BotService.INLINE_TUTORIAL_LINK,
+        BotService.INLINE_TUTORIAL_ID,
 
         {
           reply_to_message_id: ctx.message.message_id,
