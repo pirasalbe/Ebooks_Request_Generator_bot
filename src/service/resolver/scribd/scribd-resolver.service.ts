@@ -66,10 +66,9 @@ export class ScribdResolverService extends AbstractResolver {
       message.setTitle(information.name);
 
       if (typeof information.author == 'string') {
-        message.addAuthor(information.author as string);
+        message.addAuthor(information.author);
       } else {
-        const scribdAuthors: ScribdAuthor[] =
-          information.author as ScribdAuthor[];
+        const scribdAuthors: ScribdAuthor[] = information.author;
         for (const author of scribdAuthors) {
           message.addAuthor(author.name);
         }
