@@ -18,7 +18,7 @@ export class Message {
 
   // information
   private title: string | null;
-  private author: string | null;
+  private authors: string[];
   private publisher: string;
   private publicationDate: Date | null;
   private url: URL;
@@ -29,7 +29,7 @@ export class Message {
     this.format = Format.EBOOK;
     this.language = null;
     this.title = null;
-    this.author = null;
+    this.authors = [];
     this.publisher = 'Self-Published';
     this.publicationDate = null;
     this.url = url;
@@ -43,7 +43,7 @@ export class Message {
     clone.language = this.language;
 
     clone.title = this.title;
-    clone.author = this.author;
+    clone.authors = this.authors;
     clone.publisher = this.publisher;
     clone.publicationDate = this.publicationDate;
 
@@ -83,12 +83,16 @@ export class Message {
     return this.title;
   }
 
-  setAuthor(author: string): void {
-    this.author = author;
+  addAuthor(author: string): void {
+    this.authors.push(author);
   }
 
-  getAuthor(): string | null {
-    return this.author;
+  getAuthors(): string[] {
+    return this.authors;
+  }
+
+  getAuthorsAsString(): string {
+    return this.authors.join(', ');
   }
 
   setPublisher(publisher: string | null | undefined): void {
@@ -185,7 +189,7 @@ export class Message {
 
     // info
     message += '<code>' + this.title + '</code>' + '\n';
-    message += '<code>' + this.author + '</code>' + '\n';
+    message += '<code>' + this.getAuthorsAsString() + '</code>' + '\n';
     message += '<i>' + this.publisher + '</i> ';
     if (this.publicationDate != null) {
       message += '(' + this.getPublicationDate() + ')';

@@ -2,7 +2,7 @@ import { HTMLElement } from 'node-html-parser';
 import { URL } from 'url';
 
 import { NullableHtmlElement } from '../../../model/html/nullable-html-element';
-import { AudibleAuthor, AudibleInformation } from '../../../model/resolver/audible-information';
+import { AudibleInformation } from '../../../model/resolver/audible-information';
 import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
 import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
@@ -46,9 +46,9 @@ export class AudibleResolverService extends AbstractResolver {
       // main info
       message.setTitle(information.name);
 
-      message.setAuthor(
-        information.author.map((a: AudibleAuthor) => a.name).join(', ')
-      );
+      for (const author of information.author) {
+        message.addAuthor(author.name);
+      }
 
       message.setPublisher(information.publisher);
 

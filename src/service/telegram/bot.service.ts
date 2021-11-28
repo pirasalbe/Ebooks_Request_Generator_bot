@@ -26,8 +26,8 @@ export class BotService {
   private static readonly INVALID_THUMB_URL =
     'https://www.downloadclipart.net/large/14121-warning-icon-design.png';
 
-  private static readonly INLINE_TUTORIAL_LINK =
-    'https://telegra.ph/file/d07ad72c3b67903162280.mp4';
+  private static readonly INLINE_TUTORIAL_ID =
+    'CgACAgQAAxkBAAIfqGGjiv7C2Zso9D3XrmUQx5ZklxCyAAI5CgACk40QUeXUPtz-_XoJIgQ';
 
   private token: string;
   private telegram: Telegram;
@@ -83,9 +83,8 @@ export class BotService {
     });
     this.bot.command('inline', (ctx) => {
       ctx.replyWithAnimation(
-        {
-          url: BotService.INLINE_TUTORIAL_LINK,
-        },
+        BotService.INLINE_TUTORIAL_ID,
+
         {
           reply_to_message_id: ctx.message.message_id,
           caption: this.inlineHelp(),
@@ -235,6 +234,13 @@ export class BotService {
               ctx.reply('Cannot start processing request.', extra);
             });
         }
+      });
+    });
+
+    this.bot.on('animation', (ctx) => {
+      ctx.reply('File ID: <code>' + ctx.message.animation.file_id + '</code>', {
+        reply_to_message_id: ctx.message.message_id,
+        parse_mode: 'HTML',
       });
     });
   }

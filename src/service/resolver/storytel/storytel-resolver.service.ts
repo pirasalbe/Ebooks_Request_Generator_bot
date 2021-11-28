@@ -77,7 +77,9 @@ export class StorytelResolverService extends AbstractResolver {
       // main info
       message.setTitle(information.getTitle());
 
-      message.setAuthor(information.getAuthor());
+      for (const author of information.getAuthors()) {
+        message.addAuthor(author);
+      }
 
       message.setPublisher(information.getPublisher());
 

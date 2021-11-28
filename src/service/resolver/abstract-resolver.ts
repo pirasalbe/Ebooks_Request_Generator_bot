@@ -78,7 +78,7 @@ export abstract class AbstractResolver implements Resolver {
    * @param host Host to call
    * @returns Cookies
    */
-  private getCookies(host: string): string {
+  protected getCookies(host: string): string {
     if (!this.cookies.has(host)) {
       this.cookies.set(host, new Cookies());
     }
@@ -134,7 +134,10 @@ export abstract class AbstractResolver implements Resolver {
 
     if (statusCode == 404) {
       // Not found
-      error += ': Page not found';
+      error += ': Page not found.';
+    } else if (statusCode == 403) {
+      // Not found
+      error += ': Access forbidden.';
     } else if (statusCode == 503) {
       // Service unavailable
       error +=

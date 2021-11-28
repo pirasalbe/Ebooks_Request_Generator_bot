@@ -116,7 +116,7 @@ export class ArchiveResolverService extends AbstractResolver {
 
     if (authorElement != null) {
       author = true;
-      message.setAuthor(HtmlUtil.getTextContent(authorElement as HTMLElement));
+      message.addAuthor(HtmlUtil.getTextContent(authorElement as HTMLElement));
     }
 
     const publisherElement: NullableHtmlElement = body.querySelector(
@@ -149,7 +149,7 @@ export class ArchiveResolverService extends AbstractResolver {
           case LanguageStrings.ASSOCIATED_NAMES_KEY:
             if (!author) {
               author = true;
-              message.setAuthor(entry.getValue());
+              message.addAuthor(entry.getValue());
             }
             break;
           case LanguageStrings.LANGUAGE_KEY:

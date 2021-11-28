@@ -10,7 +10,8 @@ import { OpenLibraryResolverService } from './service/resolver/openlibrary/open-
 import { Resolver } from './service/resolver/resolver';
 import { ResolverService } from './service/resolver/resolver.service';
 import { ScribdResolverService } from './service/resolver/scribd/scribd-resolver.service';
-import { StorytelResolverService } from './service/resolver/storytel/storytel-resolver.service';
+import { StorytelInfoResolverService } from './service/resolver/storytel/storytel-info-resolver.service';
+import { StorytelSearchResolverService } from './service/resolver/storytel/storytel-search-resolver.service';
 import { StatisticsService } from './service/statistics/statistic.service';
 import { BotService } from './service/telegram/bot.service';
 import { TwitterService } from './service/twitter/twitter.service';
@@ -39,7 +40,10 @@ export class ApplicationContext {
       ),
       1: new AudibleResolverService(statisticsService),
       2: new ScribdResolverService(statisticsService),
-      3: new StorytelResolverService(statisticsService),
+      3: new StorytelSearchResolverService(
+        new StorytelInfoResolverService(),
+        statisticsService
+      ),
       4: new ArchiveResolverService(statisticsService),
       5: new OpenLibraryResolverService(statisticsService),
     };
