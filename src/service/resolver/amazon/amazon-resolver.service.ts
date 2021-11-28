@@ -224,7 +224,7 @@ export class AmazonResolverService extends AbstractResolver {
 
       // main info
       message.setTitle(HtmlUtil.getTextContent(title as HTMLElement));
-      message.setAuthor(HtmlUtil.getTextContent(author as HTMLElement));
+      message.addAuthor(HtmlUtil.getTextContent(author as HTMLElement));
 
       this.setPublicationDate(
         message,

@@ -64,7 +64,7 @@ export class ScribdResolverService extends AbstractResolver {
       // main info
       message.setTitle(information.name);
 
-      message.setAuthor(information.author);
+      message.addAuthor(information.author);
 
       message.setPublisher(information.publisher);
 

@@ -54,7 +54,7 @@ export class OpenLibraryResolverService extends AbstractResolver {
       }
 
       message.setTitle(title);
-      message.setAuthor(HtmlUtil.getTextContent(author as HTMLElement));
+      message.addAuthor(HtmlUtil.getTextContent(author as HTMLElement));
       message.setPublisher(HtmlUtil.getTextContent(publisher as HTMLElement));
 
       // tags

@@ -51,7 +51,8 @@ export class TwitterService {
     tweet += '\n';
 
     // info
-    const info: string = message.getTitle() + ' by ' + message.getAuthor();
+    const info: string =
+      message.getTitle() + ' by ' + message.getAuthorsAsString();
     const link: string = message.getLink();
 
     if (tweet.length + link.length < TwitterService.TWEET_MAX_SIZE) {
