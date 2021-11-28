@@ -15,6 +15,7 @@ import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
 import { I18nUtil } from '../../../util/i18n-util';
 import { AbstractResolver } from '../abstract-resolver';
+import { ScribdAuthor } from './../../../model/resolver/scribd-information';
 import { Format } from './../../../model/telegram/format.enum';
 import { Source } from './../../../model/telegram/source.enum';
 import { StatisticsService } from './../../statistics/statistic.service';
@@ -64,7 +65,15 @@ export class ScribdResolverService extends AbstractResolver {
       // main info
       message.setTitle(information.name);
 
-      message.addAuthor(information.author);
+      if (typeof information.author == 'string') {
+        message.addAuthor(information.author as string);
+      } else {
+        const scribdAuthors: ScribdAuthor[] =
+          information.author as ScribdAuthor[];
+        for (const author of scribdAuthors) {
+          message.addAuthor(author.name);
+        }
+      }
 
       message.setPublisher(information.publisher);
 

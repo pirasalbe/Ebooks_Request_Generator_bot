@@ -42,7 +42,7 @@ export type ScribdInformation = {
   '@type': 'Book' | 'Audiobook';
   name: string;
   inLanguage: string;
-  author: string;
+  author: string | ScribdAuthor[];
   publisher: string;
   datePublished: string;
 };
