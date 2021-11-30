@@ -1,5 +1,5 @@
 import { Context, Markup, Telegraf, Telegram } from 'telegraf';
-import { ExtraAnswerInlineQuery, ExtraReplyMessage } from 'telegraf/typings/telegram-types';
+import { ExtraAnimation, ExtraAnswerInlineQuery, ExtraReplyMessage } from 'telegraf/typings/telegram-types';
 import {
   InlineQueryResult,
   InlineQueryResultArticle,
@@ -20,6 +20,7 @@ import { StatisticsService } from './../statistics/statistic.service';
 
 export class BotService {
   private static readonly REPORT: string = '/report';
+  private static readonly INLINE_COMMAND: string = 'inline';
 
   private static readonly SUCCESSFULL_THUMB_URL =
     'https://telegra.ph/file/5b2fad22d5b296b843acf.jpg';
@@ -76,20 +77,23 @@ export class BotService {
    */
   private initializeHandlers(): void {
     this.bot.start((ctx) => {
-      ctx.replyWithHTML(this.helpMessage());
+      ctx.replyWithHTML(this.helpMessage()).then(() => {
+        // inline help on start
+        if (ctx.startPayload == BotService.INLINE_COMMAND) {
+          ctx.replyWithAnimation(
+            BotService.INLINE_TUTORIAL_ID,
+            this.inlineExtra(ctx.message.message_id)
+          );
+        }
+      });
     });
     this.bot.help((ctx) => {
       ctx.replyWithHTML(this.helpMessage());
     });
-    this.bot.command('inline', (ctx) => {
+    this.bot.command(BotService.INLINE_COMMAND, (ctx) => {
       ctx.replyWithAnimation(
         BotService.INLINE_TUTORIAL_ID,
-
-        {
-          reply_to_message_id: ctx.message.message_id,
-          caption: this.inlineHelp(),
-          parse_mode: 'HTML',
-        }
+        this.inlineExtra(ctx.message.message_id)
       );
     });
     this.bot.command('stats', (ctx) => {
@@ -340,6 +344,14 @@ export class BotService {
       '\n\n' +
       'You can use me inline as well. Send /inline for more information.'
     );
+  }
+
+  private inlineExtra(messageId: number): ExtraAnimation {
+    return {
+      reply_to_message_id: messageId,
+      caption: this.inlineHelp(),
+      parse_mode: 'HTML',
+    };
   }
 
   private inlineHelp(): string {
