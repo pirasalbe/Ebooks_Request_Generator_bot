@@ -77,40 +77,58 @@ export class BotService {
    */
   private initializeHandlers(): void {
     this.bot.start((ctx) => {
-      ctx.replyWithHTML(this.helpMessage()).then(() => {
-        // inline help on start
-        if (ctx.startPayload == BotService.INLINE_COMMAND) {
-          ctx.replyWithAnimation(
-            BotService.INLINE_TUTORIAL_ID,
-            this.inlineExtra(ctx.message.message_id)
-          );
-        }
-      });
+      ctx
+        .replyWithHTML(this.helpMessage())
+        .then(() => {
+          // inline help on start
+          if (ctx.startPayload == BotService.INLINE_COMMAND) {
+            ctx
+              .replyWithAnimation(
+                BotService.INLINE_TUTORIAL_ID,
+                this.inlineExtra(ctx.message.message_id)
+              )
+              .catch((error) => this.onError(error));
+          }
+        })
+        .catch((error) => this.onError(error));
     });
     this.bot.help((ctx) => {
-      ctx.replyWithHTML(this.helpMessage());
+      ctx
+        .replyWithHTML(this.helpMessage())
+        .catch((error) => this.onError(error));
     });
     this.bot.command(BotService.INLINE_COMMAND, (ctx) => {
-      ctx.replyWithAnimation(
-        BotService.INLINE_TUTORIAL_ID,
-        this.inlineExtra(ctx.message.message_id)
-      );
+      ctx
+        .replyWithAnimation(
+          BotService.INLINE_TUTORIAL_ID,
+          this.inlineExtra(ctx.message.message_id)
+        )
+        .catch((error) => this.onError(error));
     });
     this.bot.command('stats', (ctx) => {
-      ctx.reply(this.statisticsService.toString(), {
-        parse_mode: 'HTML',
-        reply_to_message_id: ctx.message.message_id,
-      });
+      ctx
+        .reply(this.statisticsService.toString(), {
+          parse_mode: 'HTML',
+          reply_to_message_id: ctx.message.message_id,
+        })
+        .catch((error) => this.onError(error));
     });
     this.bot.command('refresh', (ctx) => {
-      ctx.reply('Refresh in progress').then((loading: TelegramMessage) => {
-        this.validatorService.refresh(true).then(() => {
-          ctx.deleteMessage(loading.message_id);
-          ctx.reply('Refresh completed', {
-            reply_to_message_id: ctx.message.message_id,
-          });
-        });
-      });
+      ctx
+        .reply('Refresh in progress')
+        .then((loading: TelegramMessage) =>
+          this.validatorService.refresh(true).then(() => {
+            ctx
+              .deleteMessage(loading.message_id)
+              .catch((error) => this.onError(error));
+            ctx
+              .reply('Refresh completed', {
+                reply_to_message_id: ctx.message.message_id,
+              })
+              .catch((error) => this.onError(error));
+          })
+        )
+        .catch((error) => this.onError(error));
     });
 
     this.bot.on('inline_query', (ctx) => {
@@ -138,7 +156,9 @@ export class BotService {
                 );
               }
 
-              ctx.answerInlineQuery(inlineResults, extra);
+              ctx
+                .answerInlineQuery(inlineResults, extra)
+                .catch((error) => this.onError(error));
             })
             .catch((error: string) => {
               const errorResponse: string =
@@ -146,27 +166,31 @@ export class BotService {
               this.statisticsService
                 .getStats()
                 .increaseErrorCount(errorResponse);
-              ctx.answerInlineQuery(
-                [
-                  this.inlineResult(
-                    'Error!',
-                    errorResponse,
-                    errorResponse,
-                    BotService.INVALID_THUMB_URL
-                  ),
-                ],
-                extra
-              );
+              ctx
+                .answerInlineQuery(
+                  [
+                    this.inlineResult(
+                      'Error!',
+                      errorResponse,
+                      errorResponse,
+                      BotService.INVALID_THUMB_URL
+                    ),
+                  ],
+                  extra
+                )
+                .catch((error) => this.onError(error));
             });
         } else {
-          ctx.answerInlineQuery([
-            this.inlineResult(
-              'Incomplete Request!',
-              'Incomplete Request!',
-              this.smallHelpMessage(),
-              BotService.INVALID_THUMB_URL
-            ),
-          ]);
+          ctx
+            .answerInlineQuery([
+              this.inlineResult(
+                'Incomplete Request!',
+                'Incomplete Request!',
+                this.smallHelpMessage(),
+                BotService.INVALID_THUMB_URL
+              ),
+            ])
+            .catch((error) => this.onError(error));
         }
       });
     });
@@ -193,16 +217,23 @@ export class BotService {
                   this.extractUrl(ctx.message.text, ctx.message.entities)
                 )
                 .then((messages: Message[]) => {
-                  ctx.deleteMessage(loader.message_id);
+                  ctx
+                    .deleteMessage(loader.message_id)
+                    .catch((error) => this.onError(error));
                   for (const message of messages) {
-                    ctx.reply(message.toString(), {
-                      disable_web_page_preview: true,
-                      parse_mode: 'HTML',
-                      reply_to_message_id: ctx.message.message_id,
-                      ...Markup.inlineKeyboard([
-                        Markup.button.switchToChat('Forward', ctx.message.text),
-                      ]),
-                    });
+                    ctx
+                      .reply(message.toString(), {
+                        disable_web_page_preview: true,
+                        parse_mode: 'HTML',
+                        reply_to_message_id: ctx.message.message_id,
+                        ...Markup.inlineKeyboard([
+                          Markup.button.switchToChat(
+                            'Forward',
+                            ctx.message.text
+                          ),
+                        ]),
+                      })
+                      .catch((error) => this.onError(error));
                   }
                 })
                 .catch((error: unknown) => {
@@ -221,15 +252,16 @@ export class BotService {
                         error as ResolverException,
                         ctx.message.message_id
                       );
-                    ctx.replyWithDocument(
-                      documentResponse.document,
-                      documentResponse.extra
-                    );
+                    ctx
+                      .replyWithDocument(
+                        documentResponse.document,
+                        documentResponse.extra
+                      )
+                      .catch((error) => this.onError(error));
                   } else {
-                    ctx.reply(
-                      this.messageService.getErrorMessage(error),
-                      extra
-                    );
+                    ctx
+                      .reply(this.messageService.getErrorMessage(error), extra)
+                      .catch((error) => this.onError(error));
                   }
                 });
             })
@@ -242,10 +274,12 @@ export class BotService {
     });
 
     this.bot.on('animation', (ctx) => {
-      ctx.reply('File ID: <code>' + ctx.message.animation.file_id + '</code>', {
-        reply_to_message_id: ctx.message.message_id,
-        parse_mode: 'HTML',
-      });
+      ctx
+        .reply('File ID: <code>' + ctx.message.animation.file_id + '</code>', {
+          reply_to_message_id: ctx.message.message_id,
+          parse_mode: 'HTML',
+        })
+        .catch((error) => this.onError(error));
     });
   }
 
@@ -255,6 +289,10 @@ export class BotService {
     } catch (e) {
       console.error('Unexpected error', e);
     }
+  }
+
+  private onError(error: unknown): void {
+    console.error('Error sending message', error);
   }
 
   private extractUrl(text: string, entities: MessageEntity[] = []): string {
