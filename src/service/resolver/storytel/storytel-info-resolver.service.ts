@@ -45,6 +45,7 @@ export class StorytelInfoResolverService {
             'Sec-Fetch-Site': 'none',
             'Sec-Fetch-User': '?1',
             'Cache-Control': 'max-age=0',
+            'x-requested-with': 'XMLHttpRequest',
           },
         },
         (response: http.IncomingMessage) => {
