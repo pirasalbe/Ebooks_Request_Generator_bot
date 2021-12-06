@@ -53,7 +53,11 @@ export class MessageService {
             reject(error);
           });
       } catch (error) {
-        console.error('Error handling request', text, error);
+        console.error(
+          'Error handling request',
+          text,
+          this.getErrorMessage(error)
+        );
         reject('There was an error handling your request.');
       }
     });
@@ -75,10 +79,13 @@ export class MessageService {
 
   getErrorMessage(error: unknown): string {
     let result = String(error);
+    const errorObj: Error = error as Error;
     const exception: Exception = error as Exception;
 
     if (exception != undefined && exception.message != undefined) {
       result = exception.message;
+    } else if (errorObj != undefined && errorObj.message != undefined) {
+      result = errorObj.message;
     }
 
     return result;

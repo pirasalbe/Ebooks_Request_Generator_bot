@@ -292,6 +292,11 @@ export class BotService {
   }
 
   private onError(error: unknown): void {
+    this.statisticsService
+      .getStats()
+      .increaseErrorCount(
+        'Error sending message: ' + this.messageService.getErrorMessage(error)
+      );
     console.error('Error sending message', error);
   }
 
