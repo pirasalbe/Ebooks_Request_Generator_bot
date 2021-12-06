@@ -1,5 +1,5 @@
 import { Context, Markup, Telegraf, Telegram } from 'telegraf';
-import { ExtraAnimation, ExtraAnswerInlineQuery, ExtraReplyMessage } from 'telegraf/typings/telegram-types';
+import { ExtraAnswerInlineQuery, ExtraReplyMessage } from 'telegraf/typings/telegram-types';
 import {
   InlineQueryResult,
   InlineQueryResultArticle,
@@ -20,15 +20,11 @@ import { StatisticsService } from './../statistics/statistic.service';
 
 export class BotService {
   private static readonly REPORT: string = '/report';
-  private static readonly INLINE_COMMAND: string = 'inline';
 
   private static readonly SUCCESSFULL_THUMB_URL =
     'https://telegra.ph/file/06d1f7c944004bb0dcef1.jpg';
   private static readonly INVALID_THUMB_URL =
     'https://www.downloadclipart.net/large/14121-warning-icon-design.png';
-
-  private static readonly INLINE_TUTORIAL_ID =
-    'CgACAgQAAxkBAAIfqGGjiv7C2Zso9D3XrmUQx5ZklxCyAAI5CgACk40QUeXUPtz-_XoJIgQ';
 
   private token: string;
   private telegram: Telegram;
@@ -269,15 +265,6 @@ export class BotService {
         }
       });
     });
-
-    this.bot.on('animation', (ctx) => {
-      ctx
-        .reply('File ID: <code>' + ctx.message.animation.file_id + '</code>', {
-          reply_to_message_id: ctx.message.message_id,
-          parse_mode: 'HTML',
-        })
-        .catch((error) => this.onError(error));
-    });
   }
 
   private safeHandling(unsafeFunction: () => void): void {
@@ -384,40 +371,6 @@ export class BotService {
       '\n\n' +
       'You can use me inline as well. Just click on the button below or send <code>@bkcrushreqbot link</code>.'
     );
-  }
-
-  private inlineExtra(messageId: number): ExtraAnimation {
-    return {
-      reply_to_message_id: messageId,
-      caption: this.inlineHelp(),
-      parse_mode: 'HTML',
-    };
-  }
-
-  private inlineHelp(): string {
-    let help = '<b>How to use the bot inline</b>';
-    help += '\n\n';
-
-    help +=
-      '1) Write the bot name <code>@ebooks_request_generator_bot</code> and add <b>1 space</b>.';
-    help += '\n\n';
-
-    help += '2) Copy and paste ' + this.supportedSites() + ' link.';
-    help += '\n\n';
-
-    help +=
-      '✅ <code>@ebooks_request_generator_bot https://www.amazon.com/dp/B07NYBL322</code>\n';
-    help +=
-      '❌ <code>@ebooks_request_generator_bothttps://www.amazon.com/dp/B07NYBL322</code>';
-    help += '\n\n';
-
-    help +=
-      '3) <b>Wait</b> until the bot shows a popup with the book information.';
-    help += '\n\n';
-
-    help += '4) Click the popup.';
-
-    return help;
   }
 
   private inlineResult(
