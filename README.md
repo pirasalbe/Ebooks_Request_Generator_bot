@@ -6,12 +6,13 @@ Telegram bot that creates a text message from the link address of an ebook or an
 
 ## Commands
 
-- /start and /help: show an help message.
+- `/start` and `/help`: show an help message.
+- `/inline`: shows an help message for inline mode.
 - text: given a link or a text containing a link, it returns the request message.
-- /report text: works the same way it does with _text_, but it returns a _report.html_ file when errors occur.
+- `/report` text: works the same way it does with _text_, but it returns a _report.html_ file when errors occur.
 - inline: the bot works inline the same way it does with _text_.
-- /stats: sends information about the number of request received.
-- /refresh: reloads the information for the filters.
+- `/stats`: sends information about the number of request received.
+- `/refresh`: reloads the information for the filters.
 
 ## Message format
 
@@ -60,6 +61,7 @@ Given an Amazon link of a Kindle book, it returns the request message.
 - it: Italian
 - de: German
 - es: Spanish
+- pt: Portuguese
 - fr: French
 
 ### Extract message from Audible
@@ -111,6 +113,10 @@ The publication date of the given product cannot be in the future.
 
 The book or the author must not be protected by DMCA and the publisher must not be academic.
 
+### Languages
+
+Malayalam is not allowed.
+
 # Known bugs
 
 - Cannot get language information from Scribd links
@@ -142,3 +148,13 @@ BOT_TOKEN="110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw" npm start
 ```
 
 _Replace the token in the command, which is **invalid**, with your own._
+
+### Twitter service
+
+The bot can send a tweet for each request.
+
+Define the following variables and run the project
+
+```
+BOT_TOKEN="110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw" TWITTER_APP_KEY="twitter_variable" TWITTER_APP_SECRET="twitter_variable" TWITTER_ACCESS_TOKEN="twitter_variable" TWITTER_ACCESS_SECRET="twitter_variable" npm start
+```

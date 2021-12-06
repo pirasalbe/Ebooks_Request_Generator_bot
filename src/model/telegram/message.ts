@@ -3,24 +3,33 @@ import { URL } from 'url';
 import { DateUtil } from '../../util/date-util';
 import { SiteResolver } from '../resolver/site-resolver.enum';
 import { RandomUtil } from './../../util/random-util';
+import { Format } from './format.enum';
+import { Source } from './source.enum';
 
 export class Message {
-  public static readonly AUDIOBOOK_TAG = 'audiobook';
   private static readonly PUBLICATION_DATE_MINIMUM_AGE_DAYS = 0;
 
   private site: SiteResolver;
-  private tags: string[];
+
+  // tags
+  private source: Source | null;
+  private format: Format;
+  private language: string | null;
+
+  // information
   private title: string | null;
-  private author: string | null;
+  private authors: string[];
   private publisher: string;
   private publicationDate: Date | null;
   private url: URL;
 
   constructor(site: SiteResolver, url: URL) {
     this.site = site;
-    this.tags = ['ebook'];
+    this.source = null;
+    this.format = Format.EBOOK;
+    this.language = null;
     this.title = null;
-    this.author = null;
+    this.authors = [];
     this.publisher = 'Self-Published';
     this.publicationDate = null;
     this.url = url;
@@ -29,20 +38,19 @@ export class Message {
   clone(): Message {
     const clone: Message = new Message(this.site, this.url);
 
-    clone.tags = [];
-    for (const tag of this.tags) {
-      clone.tags.push(tag);
-    }
+    clone.source = this.source;
+    clone.format = this.format;
+    clone.language = this.language;
 
     clone.title = this.title;
-    clone.author = this.author;
+    clone.authors = this.authors;
     clone.publisher = this.publisher;
     clone.publicationDate = this.publicationDate;
 
     return clone;
   }
 
-  private getSiteName(): string {
+  getSiteName(): string {
     const name: string = SiteResolver[this.site];
 
     const firstLetter = name[0].toUpperCase();
@@ -51,11 +59,20 @@ export class Message {
     return firstLetter + otherLetters;
   }
 
-  addTag(tag: string): void {
-    if (this.tags[0] == 'ebook') {
-      this.tags.pop();
-    }
-    this.tags.push(tag);
+  setSource(source: Source): void {
+    this.source = source;
+  }
+
+  setFormat(format: Format): void {
+    this.format = format;
+  }
+
+  setLanguage(language: string): void {
+    this.language = language;
+  }
+
+  getLanguage(): string | null {
+    return this.language;
   }
 
   setTitle(title: string): void {
@@ -66,12 +83,16 @@ export class Message {
     return this.title;
   }
 
-  setAuthor(author: string): void {
-    this.author = author;
+  addAuthor(author: string): void {
+    this.authors.push(author);
   }
 
-  getAuthor(): string | null {
-    return this.author;
+  getAuthors(): string[] {
+    return this.authors;
+  }
+
+  getAuthorsAsString(): string {
+    return this.authors.join(', ');
   }
 
   setPublisher(publisher: string | null | undefined): void {
@@ -124,29 +145,51 @@ export class Message {
     this.url = url;
   }
 
-  private toTagsString(): string {
-    let tags = '';
+  private toTagsString(addRequest: boolean): string {
+    const tags: string[] = [];
 
-    for (let i = 0; i < this.tags.length; i++) {
-      if (i > 0) {
-        tags += ' ';
-      }
-      tags += '#' + this.tags[i];
+    // request
+    if (addRequest) {
+      tags.push('#request');
+    } else {
+      tags.push('');
     }
 
-    return tags;
+    // source
+    if (this.source != null) {
+      const source: string = Source[this.source];
+      tags.push(source.toLowerCase());
+    }
+
+    // format
+    if (this.format != null) {
+      const format: string = Format[this.format];
+      tags.push(format.toLowerCase());
+    }
+
+    // language
+    if (this.language != null) {
+      tags.push(this.language);
+    }
+
+    return tags.join(' #');
+  }
+
+  getLink(): string {
+    return this.url.toString();
   }
 
   toString(): string {
     let message = '';
 
+    // tags
     message += '#request';
 
     message += '\n\n';
 
     // info
     message += '<code>' + this.title + '</code>' + '\n';
-    message += '<code>' + this.author + '</code>' + '\n';
+    message += '<code>' + this.getAuthorsAsString() + '</code>' + '\n';
     message += '<i>' + this.publisher + '</i> ';
     if (this.publicationDate != null) {
       message += '(' + this.getPublicationDate() + ')';
@@ -161,13 +204,13 @@ export class Message {
 
     message += '\n\n';
     // tags
-    message += this.toTagsString();
+    message += this.toTagsString(false);
 
     return message;
   }
 
   toTileString(): string {
-    return this.toTagsString();
+    return this.toTagsString(false);
   }
 
   toDetailsString(): string {
@@ -175,6 +218,7 @@ export class Message {
   }
 
   toTagString(): string {
-    return this.tags[0] as string;
+    const format: string = Format[this.format];
+    return format.toLowerCase();
   }
 }

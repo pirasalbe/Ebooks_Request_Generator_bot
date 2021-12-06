@@ -4,4 +4,5 @@ export type Languages = {
   german: string;
   french: string;
   spanish: string;
+  portuguese: string;
 };

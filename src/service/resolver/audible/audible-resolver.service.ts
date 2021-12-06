@@ -2,11 +2,12 @@ import { HTMLElement } from 'node-html-parser';
 import { URL } from 'url';
 
 import { NullableHtmlElement } from '../../../model/html/nullable-html-element';
-import { AudibleAuthor, AudibleInformation } from '../../../model/resolver/audible-information';
+import { AudibleInformation } from '../../../model/resolver/audible-information';
 import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
 import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
 import { AbstractResolver } from '../abstract-resolver';
+import { Format } from './../../../model/telegram/format.enum';
 import { StatisticsService } from './../../statistics/statistic.service';
 
 export class AudibleResolverService extends AbstractResolver {
@@ -19,6 +20,8 @@ export class AudibleResolverService extends AbstractResolver {
   }
 
   prepareUrl(url: URL): URL {
+    url = super.prepareUrl(url);
+
     // add override to avoid redirection
     url.searchParams.set(AudibleResolverService.OVERRIDE_LANGUAGE, 'true');
 
@@ -43,19 +46,19 @@ export class AudibleResolverService extends AbstractResolver {
       // main info
       message.setTitle(information.name);
 
-      message.setAuthor(
-        information.author.map((a: AudibleAuthor) => a.name).join(', ')
-      );
+      for (const author of information.author) {
+        message.addAuthor(author.name);
+      }
 
       message.setPublisher(information.publisher);
 
       message.setPublicationDate(new Date(information.datePublished));
 
       // tags
-      message.addTag(Message.AUDIOBOOK_TAG);
+      message.setFormat(Format.AUDIOBOOK);
 
       if (this.isLanguageTagRequired(information.inLanguage)) {
-        message.addTag(information.inLanguage);
+        message.setLanguage(information.inLanguage);
       }
 
       resolve([message]);

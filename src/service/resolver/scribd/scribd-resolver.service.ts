@@ -7,7 +7,6 @@ import {
   ScribdAlternativeInformation,
   ScribdInformation,
   ScribdInformationI18n,
-  ScribdInformationWrapper,
   ScribdLanguage,
 } from '../../../model/resolver/scribd-information';
 import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
@@ -15,6 +14,9 @@ import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
 import { I18nUtil } from '../../../util/i18n-util';
 import { AbstractResolver } from '../abstract-resolver';
+import { ScribdAuthor } from './../../../model/resolver/scribd-information';
+import { Format } from './../../../model/telegram/format.enum';
+import { Source } from './../../../model/telegram/source.enum';
 import { StatisticsService } from './../../statistics/statistic.service';
 
 export class ScribdResolverService extends AbstractResolver {
@@ -62,16 +64,23 @@ export class ScribdResolverService extends AbstractResolver {
       // main info
       message.setTitle(information.name);
 
-      message.setAuthor(information.author);
+      if (typeof information.author == 'string') {
+        message.addAuthor(information.author);
+      } else {
+        const scribdAuthors: ScribdAuthor[] = information.author;
+        for (const author of scribdAuthors) {
+          message.addAuthor(author.name);
+        }
+      }
 
       message.setPublisher(information.publisher);
 
       message.setPublicationDate(new Date(information.datePublished));
 
       // tags
-      message.addTag('scribd');
+      message.setSource(Source.SCRIBD);
       if (information['@type'] === 'Audiobook') {
-        message.addTag(Message.AUDIOBOOK_TAG);
+        message.setFormat(Format.AUDIOBOOK);
       }
 
       this.setLanguage(message, information.inLanguage, languages);
@@ -88,14 +97,10 @@ export class ScribdResolverService extends AbstractResolver {
     for (let i = 0; i < content.length && information == null; i++) {
       const contentString = HtmlUtil.getRawText(content[i]);
 
-      const wrapper: ScribdInformationWrapper = JSON.parse(contentString);
+      const informationItems: ScribdInformation[] = JSON.parse(contentString);
 
-      for (
-        let k = 0;
-        k < wrapper['@graph'].length && information == null;
-        k++
-      ) {
-        const tempInformation: ScribdInformation = wrapper['@graph'][k];
+      for (let k = 0; k < informationItems.length && information == null; k++) {
+        const tempInformation: ScribdInformation = informationItems[k];
         if (
           tempInformation['@type'] === 'Book' ||
           tempInformation['@type'] === 'Audiobook'
@@ -165,7 +170,7 @@ export class ScribdResolverService extends AbstractResolver {
     if (languageFound != undefined) {
       const language: string = languageFound.name.toLowerCase();
       if (this.isLanguageTagRequired(language)) {
-        message.addTag(this.getLanguageTag(language));
+        message.setLanguage(this.getLanguageTag(language));
       }
     }
   }
@@ -199,6 +204,6 @@ export class ScribdResolverService extends AbstractResolver {
         break;
     }
 
-    return language;
+    return result;
   }
 }

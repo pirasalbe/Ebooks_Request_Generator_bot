@@ -20,13 +20,21 @@ export class AuthorValidatorService extends AbstractValidator<string> {
   protected validateMessage(message: Message): Validation {
     let result: Validation = Validation.valid();
 
-    const author: string | null = message.getAuthor();
-    if (author != null && this.elements.includes(author.toLowerCase())) {
-      result = Validation.invalid(
-        'The author of your #request, ' +
-          this.mask(author, 'Author') +
-          ", is either academic or protected by DMCA and can't be displayed here."
+    const authors: string[] = message.getAuthors();
+    if (authors.length > 0) {
+      const author: string | undefined = authors.find(
+        (a: string) =>
+          this.elements.findIndex(
+            (e: string) => e.toLowerCase() == a.toLowerCase()
+          ) > -1
       );
+      if (author != undefined) {
+        result = Validation.invalid(
+          'The author of your #request, ' +
+            this.mask(author, 'Author') +
+            ", is either academic or protected by DMCA and can't be displayed here."
+        );
+      }
     }
 
     return result;

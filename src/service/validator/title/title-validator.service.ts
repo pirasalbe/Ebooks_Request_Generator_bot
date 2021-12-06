@@ -23,12 +23,14 @@ export class TitleValidatorService extends AbstractValidator<Title> {
     let result: Validation = Validation.valid();
 
     const title: string | null = message.getTitle();
-    const author: string | null = message.getAuthor();
-    if (title != null && author != null) {
+    const authors: string[] = message.getAuthors();
+    if (title != null && authors.length > 0) {
       const protectedTitle: Title | undefined = this.elements.find(
         (t: Title) =>
           title.toLowerCase().startsWith(t.title.toLowerCase()) &&
-          author.toLowerCase() == t.author.toLowerCase()
+          authors.findIndex(
+            (a: string) => a.toLowerCase() == t.author.toLowerCase()
+          ) > -1
       );
       if (protectedTitle != undefined) {
         result = Validation.invalid(

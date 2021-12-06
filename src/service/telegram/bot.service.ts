@@ -1,5 +1,5 @@
 import { Context, Markup, Telegraf, Telegram } from 'telegraf';
-import { ExtraAnswerInlineQuery, ExtraReplyMessage } from 'telegraf/typings/telegram-types';
+import { ExtraAnimation, ExtraAnswerInlineQuery, ExtraReplyMessage } from 'telegraf/typings/telegram-types';
 import {
   InlineQueryResult,
   InlineQueryResultArticle,
@@ -11,38 +11,40 @@ import {
   UserFromGetMe,
 } from 'typegram';
 
-import { Exception } from '../../model/error/exception';
 import { ResolverException } from '../../model/error/resolver-exception';
 import { Message } from '../../model/telegram/message';
 import { DocumentResponse } from '../../model/telegram/telegram-responses';
-import { ResolverService } from '../resolver/resolver.service';
-import { Validation } from './../../model/validator/validation';
+import { MessageService } from '../message/message.service';
+import { ValidatorService } from '../validator/validator.service';
 import { StatisticsService } from './../statistics/statistic.service';
-import { ValidatorService } from './../validator/validator.service';
 
 export class BotService {
   private static readonly REPORT: string = '/report';
+  private static readonly INLINE_COMMAND: string = 'inline';
 
   private static readonly SUCCESSFULL_THUMB_URL =
     'https://telegra.ph/file/06d1f7c944004bb0dcef1.jpg';
   private static readonly INVALID_THUMB_URL =
     'https://www.downloadclipart.net/large/14121-warning-icon-design.png';
 
+  private static readonly INLINE_TUTORIAL_ID =
+    'CgACAgQAAxkBAAIfqGGjiv7C2Zso9D3XrmUQx5ZklxCyAAI5CgACk40QUeXUPtz-_XoJIgQ';
+
   private token: string;
   private telegram: Telegram;
   private bot: Telegraf<Context<Update>>;
 
-  private resolverService: ResolverService;
+  private messageService: MessageService;
   private validatorService: ValidatorService;
   private statisticsService: StatisticsService;
 
   constructor(
-    resolverService: ResolverService,
+    messageService: MessageService,
     validatorService: ValidatorService,
     statisticsService: StatisticsService,
     token: string
   ) {
-    this.resolverService = resolverService;
+    this.messageService = messageService;
     this.validatorService = validatorService;
     this.statisticsService = statisticsService;
 
@@ -75,42 +77,55 @@ export class BotService {
    */
   private initializeHandlers(): void {
     this.bot.start((ctx) =>
-      ctx.replyWithHTML(
-        'Hey, ' + ctx.from.first_name + ' 👋\n' + this.helpMessage(),
-        {
-          disable_web_page_preview: true,
-          ...Markup.inlineKeyboard([
-            Markup.button.switchToChat('Make a Request', ''),
-          ]),
-        }
-      )
+      ctx
+        .replyWithHTML(
+          'Hey, ' + ctx.from.first_name + ' 👋\n' + this.helpMessage(),
+          {
+            disable_web_page_preview: true,
+            ...Markup.inlineKeyboard([
+              Markup.button.switchToChat('Make a Request', ''),
+            ]),
+          }
+        )
+        .catch((error) => this.onError(error))
     );
     this.bot.help((ctx) =>
-      ctx.replyWithHTML(
-        'Hey, ' + ctx.from.first_name + ' 👋\n' + this.helpMessage(),
-        {
-          disable_web_page_preview: true,
-          ...Markup.inlineKeyboard([
-            Markup.button.switchToChat('Make a Request', ''),
-          ]),
-        }
-      )
+      ctx
+        .replyWithHTML(
+          'Hey, ' + ctx.from.first_name + ' 👋\n' + this.helpMessage(),
+          {
+            disable_web_page_preview: true,
+            ...Markup.inlineKeyboard([
+              Markup.button.switchToChat('Make a Request', ''),
+            ]),
+          }
+        )
+        .catch((error) => this.onError(error))
     );
     this.bot.command('stats', (ctx) => {
-      ctx.reply(this.statisticsService.toString(), {
-        parse_mode: 'HTML',
-        reply_to_message_id: ctx.message.message_id,
-      });
+      ctx
+        .reply(this.statisticsService.toString(), {
+          parse_mode: 'HTML',
+          reply_to_message_id: ctx.message.message_id,
+        })
+        .catch((error) => this.onError(error));
     });
     this.bot.command('refresh', (ctx) => {
-      ctx.reply('Refresh in progress').then((loading: TelegramMessage) => {
-        this.validatorService.refresh(true).then(() => {
-          ctx.deleteMessage(loading.message_id);
-          ctx.reply('Refresh completed', {
-            reply_to_message_id: ctx.message.message_id,
-          });
-        });
-      });
+      ctx
+        .reply('Refresh in progress')
+        .then((loading: TelegramMessage) =>
+          this.validatorService.refresh(true).then(() => {
+            ctx
+              .deleteMessage(loading.message_id)
+              .catch((error) => this.onError(error));
+            ctx
+              .reply('Refresh completed', {
+                reply_to_message_id: ctx.message.message_id,
+              })
+              .catch((error) => this.onError(error));
+          })
+        )
+        .catch((error) => this.onError(error));
     });
 
     this.bot.on('inline_query', (ctx) => {
@@ -119,7 +134,8 @@ export class BotService {
           this.statisticsService.getStats().increaseInlineRequestCount();
           const extra: ExtraAnswerInlineQuery = { cache_time: 60 };
 
-          this.getMessages(this.extractUrlFromText(ctx.inlineQuery.query))
+          this.messageService
+            .getMessages(this.extractUrlFromText(ctx.inlineQuery.query))
             .then((messages: Message[]) => {
               const inlineResults: InlineQueryResult[] = [];
 
@@ -137,34 +153,41 @@ export class BotService {
                 );
               }
 
-              ctx.answerInlineQuery(inlineResults, extra);
+              ctx
+                .answerInlineQuery(inlineResults, extra)
+                .catch((error) => this.onError(error));
             })
             .catch((error: string) => {
-              const errorResponse: string = this.getErrorMessage(error);
+              const errorResponse: string =
+                this.messageService.getErrorMessage(error);
               this.statisticsService
                 .getStats()
                 .increaseErrorCount(errorResponse);
-              ctx.answerInlineQuery(
-                [
-                  this.inlineResult(
-                    'Error!',
-                    errorResponse,
-                    errorResponse,
-                    BotService.INVALID_THUMB_URL
-                  ),
-                ],
-                extra
-              );
+              ctx
+                .answerInlineQuery(
+                  [
+                    this.inlineResult(
+                      'Error!',
+                      errorResponse,
+                      errorResponse,
+                      BotService.INVALID_THUMB_URL
+                    ),
+                  ],
+                  extra
+                )
+                .catch((error) => this.onError(error));
             });
         } else {
-          ctx.answerInlineQuery([
-            this.inlineResult(
-              'Incomplete Request!',
-              'Incomplete Request!',
-              this.smallHelpMessage(),
-              BotService.INVALID_THUMB_URL
-            ),
-          ]);
+          ctx
+            .answerInlineQuery([
+              this.inlineResult(
+                'Incomplete Request!',
+                'Incomplete Request!',
+                this.smallHelpMessage(),
+                BotService.INVALID_THUMB_URL
+              ),
+            ])
+            .catch((error) => this.onError(error));
         }
       });
     });
@@ -186,39 +209,56 @@ export class BotService {
             .reply('Processing...', extra)
             .then((loader: TelegramMessage.TextMessage) => {
               // resolve message from url
-              this.getMessages(
-                this.extractUrl(ctx.message.text, ctx.message.entities)
-              )
+              this.messageService
+                .getMessages(
+                  this.extractUrl(ctx.message.text, ctx.message.entities)
+                )
                 .then((messages: Message[]) => {
-                  ctx.deleteMessage(loader.message_id);
+                  ctx
+                    .deleteMessage(loader.message_id)
+                    .catch((error) => this.onError(error));
                   for (const message of messages) {
-                    ctx.reply(message.toString(), {
-                      disable_web_page_preview: true,
-                      parse_mode: 'HTML',
-                      reply_to_message_id: ctx.message.message_id,
-                      ...Markup.inlineKeyboard([
-                        Markup.button.switchToChat('Forward', ctx.message.text),
-                      ]),
-                    });
+                    ctx
+                      .reply(message.toString(), {
+                        disable_web_page_preview: true,
+                        parse_mode: 'HTML',
+                        reply_to_message_id: ctx.message.message_id,
+                        ...Markup.inlineKeyboard([
+                          Markup.button.switchToChat(
+                            'Forward',
+                            ctx.message.text
+                          ),
+                        ]),
+                      })
+                      .catch((error) => this.onError(error));
                   }
                 })
                 .catch((error: unknown) => {
                   ctx.deleteMessage(loader.message_id);
                   this.statisticsService
                     .getStats()
-                    .increaseErrorCount(this.getErrorMessage(error));
-                  if (report && this.isResolverException(error)) {
+                    .increaseErrorCount(
+                      this.messageService.getErrorMessage(error)
+                    );
+                  if (
+                    report &&
+                    this.messageService.isResolverException(error)
+                  ) {
                     const documentResponse: DocumentResponse =
                       this.getReportResponse(
                         error as ResolverException,
                         ctx.message.message_id
                       );
-                    ctx.replyWithDocument(
-                      documentResponse.document,
-                      documentResponse.extra
-                    );
+                    ctx
+                      .replyWithDocument(
+                        documentResponse.document,
+                        documentResponse.extra
+                      )
+                      .catch((error) => this.onError(error));
                   } else {
-                    ctx.reply(this.getErrorMessage(error), extra);
+                    ctx
+                      .reply(this.messageService.getErrorMessage(error), extra)
+                      .catch((error) => this.onError(error));
                   }
                 });
             })
@@ -229,6 +269,15 @@ export class BotService {
         }
       });
     });
+
+    this.bot.on('animation', (ctx) => {
+      ctx
+        .reply('File ID: <code>' + ctx.message.animation.file_id + '</code>', {
+          reply_to_message_id: ctx.message.message_id,
+          parse_mode: 'HTML',
+        })
+        .catch((error) => this.onError(error));
+    });
   }
 
   private safeHandling(unsafeFunction: () => void): void {
@@ -237,6 +286,15 @@ export class BotService {
     } catch (e) {
       console.error('Unexpected error', e);
     }
+  }
+
+  private onError(error: unknown): void {
+    this.statisticsService
+      .getStats()
+      .increaseErrorCount(
+        'Error sending message: ' + this.messageService.getErrorMessage(error)
+      );
+    console.error('Error sending message', error);
   }
 
   private extractUrl(text: string, entities: MessageEntity[] = []): string {
@@ -307,45 +365,16 @@ export class BotService {
     return user != undefined && user.is_bot && user.id == bot.id;
   }
 
-  private getMessages(text: string): Promise<Message[]> {
-    return new Promise<Message[]>((resolve, reject) => {
-      try {
-        this.resolverService
-          .resolve(text)
-          .then((messages: Message[]) => {
-            const validation: Validation = this.areMessagesValid(messages);
-            if (validation.isValid()) {
-              resolve(messages);
-            } else {
-              console.error('Invalid messages', validation.getError());
-              reject(validation.getError());
-            }
-          })
-          .catch((error: string) => {
-            console.error(
-              'Error resolving message',
-              text,
-              this.getErrorMessage(error)
-            );
-            reject(error);
-          });
-      } catch (error) {
-        console.error('Error handling request', text, error);
-        reject('There was an error handling your request.');
-      }
-    });
-  }
-
-  private areMessagesValid(messages: Message[]): Validation {
-    // trigger refresh
-    this.validatorService.refresh();
-
-    // validate messages
-    return this.validatorService.validate(messages);
+  private supportedSites(): string {
+    return 'Amazon/Audible/Scribd/Storytel/Archive';
   }
 
   private smallHelpMessage(): string {
-    return 'Send me an Amazon/Audible/Scribd/Storytel/Archive link to get a well-formatted request ready to be posted in <b>BookCrush: Requests or @BooksHelpClub</b> groups.';
+    return (
+      'Send me an ' +
+      this.supportedSites() +
+      ' link to get a well-formatted request ready to be posted in <b>BookCrush: Requests or @BooksHelpClub</b> groups.'
+    );
   }
 
   private helpMessage(): string {
@@ -355,6 +384,40 @@ export class BotService {
       '\n\n' +
       'You can use me inline as well. Just click on the button below or send <code>@bkcrushreqbot link</code>.'
     );
+  }
+
+  private inlineExtra(messageId: number): ExtraAnimation {
+    return {
+      reply_to_message_id: messageId,
+      caption: this.inlineHelp(),
+      parse_mode: 'HTML',
+    };
+  }
+
+  private inlineHelp(): string {
+    let help = '<b>How to use the bot inline</b>';
+    help += '\n\n';
+
+    help +=
+      '1) Write the bot name <code>@ebooks_request_generator_bot</code> and add <b>1 space</b>.';
+    help += '\n\n';
+
+    help += '2) Copy and paste ' + this.supportedSites() + ' link.';
+    help += '\n\n';
+
+    help +=
+      '✅ <code>@ebooks_request_generator_bot https://www.amazon.com/dp/B07NYBL322</code>\n';
+    help +=
+      '❌ <code>@ebooks_request_generator_bothttps://www.amazon.com/dp/B07NYBL322</code>';
+    help += '\n\n';
+
+    help +=
+      '3) <b>Wait</b> until the bot shows a popup with the book information.';
+    help += '\n\n';
+
+    help += '4) Click the popup.';
+
+    return help;
   }
 
   private inlineResult(
@@ -378,23 +441,6 @@ export class BotService {
       description: description,
       thumb_url: thumb_url,
     };
-    return result;
-  }
-
-  private isResolverException(error: unknown): boolean {
-    const exception: ResolverException = error as ResolverException;
-
-    return exception != undefined && exception.html != undefined;
-  }
-
-  private getErrorMessage(error: unknown): string {
-    let result = String(error);
-    const exception: Exception = error as Exception;
-
-    if (exception != undefined && exception.message != undefined) {
-      result = exception.message;
-    }
-
     return result;
   }
 

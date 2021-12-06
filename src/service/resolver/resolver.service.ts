@@ -38,7 +38,7 @@ export class ResolverService {
     try {
       url = new URL(link);
     } catch (error) {
-      console.error('Invalid link', error);
+      console.error('Invalid link', String(error));
     }
 
     return url;

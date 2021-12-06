@@ -46,6 +46,7 @@ export class I18nUtil {
         german: 'german',
         french: 'french',
         spanish: 'spanish',
+        portuguese: 'portuguese',
       }
     ),
     it: new LanguageStrings(
@@ -90,6 +91,7 @@ export class I18nUtil {
         german: 'tedesco',
         french: 'francese',
         spanish: 'spagnolo',
+        portuguese: 'portoghese',
       }
     ),
     de: new LanguageStrings(
@@ -134,6 +136,7 @@ export class I18nUtil {
         german: 'deutsch',
         french: 'französisch',
         spanish: 'spanisch',
+        portuguese: 'portugiesisch',
       }
     ),
     fr: new LanguageStrings(
@@ -178,6 +181,7 @@ export class I18nUtil {
         german: 'allemand',
         french: 'français',
         spanish: 'espagnol',
+        portuguese: 'portugais',
       }
     ),
     es: new LanguageStrings(
@@ -222,6 +226,52 @@ export class I18nUtil {
         german: 'aleman',
         french: 'francés',
         spanish: 'español',
+        portuguese: 'portugués',
+      }
+    ),
+    pt: new LanguageStrings(
+      {
+        language: 'idioma',
+        publisher: 'editora',
+        publicationDate: 'data da publicação',
+        associatedNames: 'nomes-associados',
+        asin: 'asin',
+        months: {
+          0: 'janeiro',
+          1: 'fevereiro',
+          2: 'março',
+          3: 'abril',
+          4: 'maio',
+          5: 'junho',
+          6: 'julho',
+          7: 'agosto',
+          8: 'setembro',
+          9: 'outubro',
+          10: 'novembro',
+          11: 'dezembro',
+        },
+        shortMonths: {
+          0: 'jan',
+          1: 'fev',
+          2: 'mar',
+          3: 'abr',
+          4: 'mai',
+          5: 'jun',
+          6: 'jul',
+          7: 'ago',
+          8: 'set',
+          9: 'out',
+          10: 'nov',
+          11: 'dez',
+        },
+      },
+      {
+        english: 'inglês',
+        italian: 'italiano',
+        german: 'alemão',
+        french: 'francês',
+        spanish: 'espanhol',
+        portuguese: 'português',
       }
     ),
   };
