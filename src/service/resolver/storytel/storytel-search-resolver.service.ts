@@ -6,20 +6,17 @@ import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
 import { Format } from '../../../model/telegram/format.enum';
 import { Message } from '../../../model/telegram/message';
 import { Source } from '../../../model/telegram/source.enum';
-import { HtmlUtil } from '../../../util/html-util';
 import { StatisticsService } from '../../statistics/statistic.service';
 import { AbstractResolver } from '../abstract-resolver';
 import { StorytelItem, StorytelItemInformation } from './../../../model/resolver/storytel-item-information';
 import { StorytelInfoResolverService } from './storytel-info-resolver.service';
 
 export class StorytelSearchResolverService extends AbstractResolver {
-  private static readonly SEARCH_URL = 'https://www.storytel.com/it/it/cerca-';
+  private static readonly SEARCH_URL = 'https://www.storytel.com/in/en/search-';
 
-  private static readonly TITLE_WRAP_ID = '.titleWrapp';
-
-  private static readonly PLACEHOLDER = 'placeholder';
-  private static readonly BOOK_ELEMENT =
-    'a[href="/it/it/books/' + StorytelSearchResolverService.PLACEHOLDER + '"]';
+  private static readonly BOOK_ELEMENT = 'a';
+  private static readonly HREF = 'href';
+  private static readonly HREF_START_VALUE = '/in/en/books/';
 
   private static readonly BOOK_ID_ATTRIBUTE = 'bookid';
 
@@ -35,35 +32,27 @@ export class StorytelSearchResolverService extends AbstractResolver {
 
   prepareUrl(url: URL): URL {
     const newLink: string =
-      StorytelSearchResolverService.SEARCH_URL + this.getLastPathElement(url);
+      StorytelSearchResolverService.SEARCH_URL + this.getItemUrlId(url);
 
     return new URL(newLink);
   }
 
-  private getLastPathElement(url: URL): string {
+  private getItemUrlId(url: URL): string {
     const paths: string[] = url.pathname.split('/');
 
-    return paths[paths.length - 1];
+    const itemUrl: string = paths[paths.length - 1];
+
+    const elements: string[] = itemUrl.split('-');
+
+    return elements[elements.length - 1];
   }
 
   extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {
     return new Promise<Message[]>((resolve, reject) => {
-      const bookUrl: NullableHtmlElement = html.querySelector(
-        StorytelSearchResolverService.TITLE_WRAP_ID
+      const linkButtonNullable: NullableHtmlElement = this.getLinkButton(
+        url,
+        html
       );
-
-      this.checkRequiredElements(
-        [bookUrl],
-        'There was an error resolving book url.'
-      );
-
-      const linkId: string = StorytelSearchResolverService.BOOK_ELEMENT.replace(
-        StorytelSearchResolverService.PLACEHOLDER,
-        HtmlUtil.getTextContent(bookUrl as HTMLElement)
-      );
-
-      const linkButtonNullable: NullableHtmlElement =
-        html.querySelector(linkId);
 
       this.checkRequiredElements([linkButtonNullable], 'Book not found.');
 
@@ -135,6 +124,34 @@ export class StorytelSearchResolverService extends AbstractResolver {
           reject(error);
         });
     });
+  }
+
+  private getLinkButton(url: URL, html: HTMLElement): NullableHtmlElement {
+    let linkButton: NullableHtmlElement = null;
+
+    const itemUrlId: string = this.getItemUrlId(url);
+
+    const linkButtons: HTMLElement[] = html.querySelectorAll(
+      StorytelSearchResolverService.BOOK_ELEMENT
+    );
+
+    for (let i = 0; i < linkButtons.length && linkButton == null; i++) {
+      const linkElement: HTMLElement = linkButtons[i];
+      if (linkElement.hasAttribute(StorytelSearchResolverService.HREF)) {
+        const link: string = linkElement.getAttribute(
+          StorytelSearchResolverService.HREF
+        ) as string;
+
+        if (
+          link.startsWith(StorytelSearchResolverService.HREF_START_VALUE) &&
+          link.endsWith(itemUrlId)
+        ) {
+          linkButton = linkElement;
+        }
+      }
+    }
+
+    return linkButton;
   }
 
   private setPublisherAndPublicationDate(
