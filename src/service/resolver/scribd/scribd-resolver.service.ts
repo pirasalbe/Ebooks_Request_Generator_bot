@@ -7,7 +7,6 @@ import {
   ScribdAlternativeInformation,
   ScribdInformation,
   ScribdInformationI18n,
-  ScribdInformationWrapper,
   ScribdLanguage,
 } from '../../../model/resolver/scribd-information';
 import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
@@ -98,14 +97,10 @@ export class ScribdResolverService extends AbstractResolver {
     for (let i = 0; i < content.length && information == null; i++) {
       const contentString = HtmlUtil.getRawText(content[i]);
 
-      const wrapper: ScribdInformationWrapper = JSON.parse(contentString);
+      const informationItems: ScribdInformation[] = JSON.parse(contentString);
 
-      for (
-        let k = 0;
-        k < wrapper['@graph'].length && information == null;
-        k++
-      ) {
-        const tempInformation: ScribdInformation = wrapper['@graph'][k];
+      for (let k = 0; k < informationItems.length && information == null; k++) {
+        const tempInformation: ScribdInformation = informationItems[k];
         if (
           tempInformation['@type'] === 'Book' ||
           tempInformation['@type'] === 'Audiobook'

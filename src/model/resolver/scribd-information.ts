@@ -34,10 +34,6 @@ export type ScribdInformationI18n = {
   languages: ScribdLanguage[];
 };
 
-export type ScribdInformationWrapper = {
-  '@graph': ScribdInformation[];
-};
-
 export type ScribdInformation = {
   '@type': 'Book' | 'Audiobook';
   name: string;
