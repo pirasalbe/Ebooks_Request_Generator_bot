@@ -163,11 +163,13 @@ It's a list of _auth_ elements with the following format:
 }
 ```
 
-For example
+For example:
 
 ```
 BOT_TOKEN="110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw" STORYTEL_AUTHS="[{'userId':'12345678','token':'AAAAAAAAA_BBBBBBBB','locale':'/in/en/'}]" npm start
 ```
+
+The authentication is required to get books and audiobooks information. The bot **may not** work as expected, if not provided.
 
 ### Twitter service
 
