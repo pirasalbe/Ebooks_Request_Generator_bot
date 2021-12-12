@@ -8,8 +8,11 @@ import { Message } from '../../../model/telegram/message';
 import { Source } from '../../../model/telegram/source.enum';
 import { StatisticsService } from '../../statistics/statistic.service';
 import { AbstractResolver } from '../abstract-resolver';
-import { StorytelItem, StorytelItemInformation } from './../../../model/resolver/storytel-item-information';
-import { StorytelInfoResolverService } from './storytel-info-resolver.service';
+import {
+  StorytelItem,
+  StorytelItemInformation,
+} from './../../../model/resolver/storytel-item-information';
+import { StorytelApiResolverService } from './api/storytel-api-resolver.service';
 
 export class StorytelSearchResolverService extends AbstractResolver {
   private static readonly SEARCH_URL = 'https://www.storytel.com/in/en/search-';
@@ -20,10 +23,10 @@ export class StorytelSearchResolverService extends AbstractResolver {
 
   private static readonly BOOK_ID_ATTRIBUTE = 'bookid';
 
-  private storytelInfoResolverService: StorytelInfoResolverService;
+  private storytelInfoResolverService: StorytelApiResolverService;
 
   constructor(
-    storytelInfoResolverService: StorytelInfoResolverService,
+    storytelInfoResolverService: StorytelApiResolverService,
     statisticsService: StatisticsService
   ) {
     super(statisticsService);
@@ -70,7 +73,7 @@ export class StorytelSearchResolverService extends AbstractResolver {
       ) as string;
 
       this.storytelInfoResolverService
-        .getInfo(bookId, this.getCookies(url.hostname))
+        .getByBookId(bookId, this.getCookies(this.getCookiesKey(url)))
         .then((information: StorytelItemInformation) => {
           // prepare message
           const message: Message = new Message(SiteResolver.STORYTEL, url);

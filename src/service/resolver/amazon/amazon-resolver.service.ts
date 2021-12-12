@@ -166,7 +166,7 @@ export class AmazonResolverService extends AbstractResolver {
       this.amazonCaptchaResolverService.checkCaptcha(
         url,
         html,
-        this.getCookies(url.hostname)
+        this.getCookies(this.getCookiesKey(url))
       );
 
       // checks
