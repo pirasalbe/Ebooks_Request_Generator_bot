@@ -11,6 +11,7 @@ import { Resolver } from './service/resolver/resolver';
 import { ResolverService } from './service/resolver/resolver.service';
 import { ScribdResolverService } from './service/resolver/scribd/scribd-resolver.service';
 import { StorytelApiResolverService } from './service/resolver/storytel/api/storytel-api-resolver.service';
+import { StorytelConsumableResolverService } from './service/resolver/storytel/storytel-consumable-resolver.service';
 import { StorytelSearchResolverService } from './service/resolver/storytel/storytel-search-resolver.service';
 import { StatisticsService } from './service/statistics/statistic.service';
 import { BotService } from './service/telegram/bot.service';
@@ -40,7 +41,7 @@ export class ApplicationContext {
       ),
       1: new AudibleResolverService(statisticsService),
       2: new ScribdResolverService(statisticsService),
-      3: new StorytelSearchResolverService(
+      3: new StorytelConsumableResolverService(
         new StorytelApiResolverService(),
         statisticsService
       ),
