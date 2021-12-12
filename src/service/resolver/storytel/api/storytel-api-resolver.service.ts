@@ -2,8 +2,9 @@ import * as http from 'http';
 import { OutgoingHttpHeaders } from 'http';
 import * as https from 'https';
 import { URL } from 'url';
+import { StorytelAuth } from '../../../../model/resolver/storytel/storytel-auth';
 
-import { StorytelItemInformation } from '../../../../model/resolver/storytel-item-information';
+import { StorytelItemInformation } from '../../../../model/resolver/storytel/storytel-item-information';
 import { HttpUtil } from '../../../../util/http-util';
 
 export class StorytelApiResolverService {
@@ -12,6 +13,45 @@ export class StorytelApiResolverService {
 
   private static readonly BOOK_ID_QUERY_PARAM = 'bookId';
   private static readonly CONSUMABLE_ID_QUERY_PARAM = 'consumableId';
+
+  private defaultAuth: StorytelAuth;
+  private auths: Map<string, StorytelAuth>;
+
+  constructor(auths: string) {
+    this.auths = new Map<string, StorytelAuth>();
+    this.defaultAuth = {
+      locale: '',
+      userId: '',
+      token: '',
+    };
+    this.fillAuths(auths);
+  }
+
+  /**
+   * Fill the auth map
+   * @param auths Auth string
+   */
+  private fillAuths(auths: string): void {
+    const authList: StorytelAuth[] = JSON.parse(auths);
+
+    if (authList.length > 0) {
+      this.defaultAuth = authList[0];
+
+      for (const auth of authList) {
+        this.auths.set(auth.locale, auth);
+      }
+    }
+  }
+
+  private getAuth(locale: string): StorytelAuth {
+    let result: StorytelAuth = this.defaultAuth;
+
+    if (this.auths.has(locale)) {
+      result = this.auths.get(locale) as StorytelAuth;
+    }
+
+    return result;
+  }
 
   private getRequestHeader(cookies: string): OutgoingHttpHeaders {
     return {
@@ -90,10 +130,13 @@ export class StorytelApiResolverService {
    * Get book information
    *
    * @param consumableId Book identifier
+   * @param locale Storytel locale
+   * @param cookies Cookies for the request
    * @returns Information
    */
   getByConsumableId(
     consumableId: string,
+    locale: string,
     cookies: string
   ): Promise<StorytelItemInformation> {
     const requestUrl: URL = new URL(StorytelApiResolverService.INFO_URL);
@@ -101,6 +144,11 @@ export class StorytelApiResolverService {
       StorytelApiResolverService.CONSUMABLE_ID_QUERY_PARAM,
       consumableId
     );
+
+    // authenticate
+    const auth: StorytelAuth = this.getAuth(locale);
+    requestUrl.searchParams.set('userid', auth.userId);
+    requestUrl.searchParams.set('token', auth.token);
 
     return new Promise<StorytelItemInformation>((resolve, reject) => {
       https.get(

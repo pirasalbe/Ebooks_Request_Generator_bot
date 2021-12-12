@@ -31,6 +31,11 @@ export class ApplicationContext {
 
     const statisticsService: StatisticsService = new StatisticsService();
 
+    let storytelAuth: string | undefined = process.env.STORYTEL_AUTHS;
+    if (storytelAuth == undefined) {
+      storytelAuth = '[]';
+    }
+
     // resolvers
     const resolvers: Record<SiteResolver, Resolver> = {
       0: new AmazonResolverService(
@@ -42,7 +47,7 @@ export class ApplicationContext {
       1: new AudibleResolverService(statisticsService),
       2: new ScribdResolverService(statisticsService),
       3: new StorytelConsumableResolverService(
-        new StorytelApiResolverService(),
+        new StorytelApiResolverService(storytelAuth),
         statisticsService
       ),
       4: new ArchiveResolverService(statisticsService),

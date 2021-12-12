@@ -149,6 +149,26 @@ BOT_TOKEN="110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw" npm start
 
 _Replace the token in the command, which is **invalid**, with your own._
 
+### Storytel
+
+Define _auths_ and run the project.
+
+It's a list of _auth_ elements with the following format:
+
+```
+{
+  "userId": "string",
+  "token": "string",
+  "locale": "string"
+}
+```
+
+For example
+
+```
+BOT_TOKEN="110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw" STORYTEL_AUTHS="[{'userId':'12345678','token':'AAAAAAAAA_BBBBBBBB','locale':'/in/en/'}]" npm start
+```
+
 ### Twitter service
 
 The bot can send a tweet for each request.

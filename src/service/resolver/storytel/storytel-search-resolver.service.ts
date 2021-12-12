@@ -11,7 +11,7 @@ import { AbstractResolver } from '../abstract-resolver';
 import {
   StorytelItem,
   StorytelItemInformation,
-} from './../../../model/resolver/storytel-item-information';
+} from './../../../model/resolver/storytel/storytel-item-information';
 import { StorytelApiResolverService } from './api/storytel-api-resolver.service';
 
 export class StorytelSearchResolverService extends AbstractResolver {

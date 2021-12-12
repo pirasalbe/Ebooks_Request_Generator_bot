@@ -6,7 +6,7 @@ import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
 import {
   StorytelItem,
   StorytelItemInformation,
-} from '../../../model/resolver/storytel-item-information';
+} from '../../../model/resolver/storytel/storytel-item-information';
 import { Format } from '../../../model/telegram/format.enum';
 import { Message } from '../../../model/telegram/message';
 import { Source } from '../../../model/telegram/source.enum';
@@ -34,6 +34,13 @@ export class StorytelConsumableResolverService extends AbstractResolver {
   }
 
   private getStorytelHost(url: URL): URL {
+    const newUrl: URL = new URL(url.toString());
+    newUrl.pathname = this.getLocale(url);
+
+    return newUrl;
+  }
+
+  private getLocale(url: URL): string {
     const path: string = url.pathname;
     let pathElements: string[] = path.split('/');
 
@@ -42,10 +49,7 @@ export class StorytelConsumableResolverService extends AbstractResolver {
       pathElements.push('');
     }
 
-    const newUrl: URL = new URL(url.toString());
-    newUrl.pathname = pathElements.join('/');
-
-    return newUrl;
+    return pathElements.join('/');
   }
 
   private getItemUrlId(url: URL): string {
@@ -65,6 +69,7 @@ export class StorytelConsumableResolverService extends AbstractResolver {
       this.storytelInfoResolverService
         .getByConsumableId(
           consumableId,
+          this.getLocale(url),
           this.getCookies(this.getCookiesKey(url))
         )
         .then((information: StorytelItemInformation) => {
