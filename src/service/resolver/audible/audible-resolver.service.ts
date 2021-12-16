@@ -55,11 +55,7 @@ export class AudibleResolverService extends AbstractResolver {
       message.setPublicationDate(new Date(information.datePublished));
 
       // tags
-      if (information['@type'] == 'PodcastSeries') {
-        message.setFormat(Format.PODCAST);
-      } else {
-        message.setFormat(Format.AUDIOBOOK);
-      }
+      message.setFormat(Format.AUDIOBOOK);
 
       if (this.isLanguageTagRequired(information.inLanguage)) {
         message.setLanguage(information.inLanguage);
