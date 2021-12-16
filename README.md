@@ -118,12 +118,6 @@ The book or the author must not be protected by DMCA and the publisher must not 
 
 Malayalam is not allowed.
 
-# Known bugs
-
-- Cannot get language information from Scribd links
-
-- Cannot get informations from some Storytel links ([example](https://www.storytel.com/in/en/books/770401-Pradnyavant-2---Pardeshi))
-
 # Instructions
 
 ## Build
