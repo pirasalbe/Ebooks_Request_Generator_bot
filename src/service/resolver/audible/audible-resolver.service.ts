@@ -55,7 +55,11 @@ export class AudibleResolverService extends AbstractResolver {
       message.setPublicationDate(new Date(information.datePublished));
 
       // tags
-      message.setFormat(Format.AUDIOBOOK);
+      if (information['@type'] == 'PodcastSeries') {
+        message.setFormat(Format.PODCAST);
+      } else {
+        message.setFormat(Format.AUDIOBOOK);
+      }
 
       if (this.isLanguageTagRequired(information.inLanguage)) {
         message.setLanguage(information.inLanguage);
@@ -79,7 +83,10 @@ export class AudibleResolverService extends AbstractResolver {
       const content: any[] = JSON.parse(contentString);
       for (let i = 0; i < content.length; i++) {
         const obj = content[i] as AudibleInformation;
-        if (obj.bookFormat != null && obj.bookFormat != undefined) {
+        if (
+          obj['@type'] != null &&
+          (obj['@type'] == 'Audiobook' || obj['@type'] == 'PodcastSeries')
+        ) {
           information = obj;
         }
       }

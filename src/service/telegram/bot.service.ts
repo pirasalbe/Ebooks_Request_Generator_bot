@@ -1,5 +1,9 @@
 import { Context, Markup, Telegraf, Telegram } from 'telegraf';
-import { ExtraAnimation, ExtraAnswerInlineQuery, ExtraReplyMessage } from 'telegraf/typings/telegram-types';
+import {
+  ExtraAnimation,
+  ExtraAnswerInlineQuery,
+  ExtraReplyMessage,
+} from 'telegraf/typings/telegram-types';
 import {
   InlineQueryResult,
   InlineQueryResultArticle,
