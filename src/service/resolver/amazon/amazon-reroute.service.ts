@@ -16,6 +16,8 @@ export class AmazonRerouteService {
     'www.amazon.de',
     'www.amazon.es',
     'www.amazon.fr',
+    'www.amazon.nl',
+    'www.amazon.com.br',
   ];
 
   private statisticsService: StatisticsService;

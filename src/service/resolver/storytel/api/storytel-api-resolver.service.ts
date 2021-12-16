@@ -14,16 +14,12 @@ export class StorytelApiResolverService {
   private static readonly BOOK_ID_QUERY_PARAM = 'bookId';
   private static readonly CONSUMABLE_ID_QUERY_PARAM = 'consumableId';
 
-  private defaultAuth: StorytelAuth;
+  private defaultAuth: StorytelAuth | null;
   private auths: Map<string, StorytelAuth>;
 
   constructor(auths: string) {
     this.auths = new Map<string, StorytelAuth>();
-    this.defaultAuth = {
-      locale: '',
-      userId: '',
-      token: '',
-    };
+    this.defaultAuth = null;
     this.fillAuths(auths);
   }
 
@@ -43,8 +39,8 @@ export class StorytelApiResolverService {
     }
   }
 
-  private getAuth(locale: string): StorytelAuth {
-    let result: StorytelAuth = this.defaultAuth;
+  private getAuth(locale: string): StorytelAuth | null {
+    let result: StorytelAuth | null = this.defaultAuth;
 
     if (this.auths.has(locale)) {
       result = this.auths.get(locale) as StorytelAuth;
@@ -146,9 +142,11 @@ export class StorytelApiResolverService {
     );
 
     // authenticate
-    const auth: StorytelAuth = this.getAuth(locale);
-    requestUrl.searchParams.set('userid', auth.userId);
-    requestUrl.searchParams.set('token', auth.token);
+    const auth: StorytelAuth | null = this.getAuth(locale);
+    if (auth != null) {
+      requestUrl.searchParams.set('userid', auth.userId);
+      requestUrl.searchParams.set('token', auth.token);
+    }
 
     return new Promise<StorytelItemInformation>((resolve, reject) => {
       https.get(

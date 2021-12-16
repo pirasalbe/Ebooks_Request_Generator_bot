@@ -60,6 +60,7 @@ Given an Amazon link of a Kindle book, it returns the request message.
 - en: English
 - it: Italian
 - de: German
+- nl: Dutch
 - es: Spanish
 - pt: Portuguese
 - fr: French
