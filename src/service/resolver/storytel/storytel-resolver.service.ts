@@ -11,7 +11,7 @@ import {
   StorytelInformation,
   StorytelInformationWrapper,
   StorytelOrganization,
-} from '../../../model/resolver/storytel-information';
+} from '../../../model/resolver/storytel/storytel-information';
 import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
 import { I18nUtil } from '../../../util/i18n-util';

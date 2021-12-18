@@ -45,11 +45,11 @@ export abstract class AbstractResolver implements Resolver {
             'Sec-Fetch-Mode': 'navigate',
             'Sec-Fetch-Site': 'none',
             'Sec-Fetch-User': '?1',
-            Cookie: this.getCookies(url.hostname),
+            Cookie: this.getCookies(this.getCookiesKey(url)),
           },
         },
         (response: http.IncomingMessage) => {
-          this.updateCookies(url.hostname, response.headers);
+          this.updateCookies(this.getCookiesKey(url), response.headers);
           this.processResponse(url, response)
             .then((messages: Message[]) => resolve(messages))
             .catch((error) => {
@@ -71,6 +71,15 @@ export abstract class AbstractResolver implements Resolver {
   protected prepareUrl(url: URL): URL {
     url.search = '';
     return url;
+  }
+
+  /**
+   * Get the key for the cookies map
+   * @param url URL
+   * @returns cookies key
+   */
+  protected getCookiesKey(url: URL): string {
+    return url.hostname;
   }
 
   /**

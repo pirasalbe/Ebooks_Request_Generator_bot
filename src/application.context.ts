@@ -10,7 +10,8 @@ import { OpenLibraryResolverService } from './service/resolver/openlibrary/open-
 import { Resolver } from './service/resolver/resolver';
 import { ResolverService } from './service/resolver/resolver.service';
 import { ScribdResolverService } from './service/resolver/scribd/scribd-resolver.service';
-import { StorytelInfoResolverService } from './service/resolver/storytel/storytel-info-resolver.service';
+import { StorytelApiResolverService } from './service/resolver/storytel/api/storytel-api-resolver.service';
+import { StorytelConsumableResolverService } from './service/resolver/storytel/storytel-consumable-resolver.service';
 import { StorytelSearchResolverService } from './service/resolver/storytel/storytel-search-resolver.service';
 import { StatisticsService } from './service/statistics/statistic.service';
 import { BotService } from './service/telegram/bot.service';
@@ -30,6 +31,11 @@ export class ApplicationContext {
 
     const statisticsService: StatisticsService = new StatisticsService();
 
+    let storytelAuth: string | undefined = process.env.STORYTEL_AUTHS;
+    if (storytelAuth == undefined) {
+      storytelAuth = '[]';
+    }
+
     // resolvers
     const resolvers: Record<SiteResolver, Resolver> = {
       0: new AmazonResolverService(
@@ -40,8 +46,8 @@ export class ApplicationContext {
       ),
       1: new AudibleResolverService(statisticsService),
       2: new ScribdResolverService(statisticsService),
-      3: new StorytelSearchResolverService(
-        new StorytelInfoResolverService(),
+      3: new StorytelConsumableResolverService(
+        new StorytelApiResolverService(storytelAuth),
         statisticsService
       ),
       4: new ArchiveResolverService(statisticsService),

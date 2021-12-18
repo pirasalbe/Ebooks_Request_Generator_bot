@@ -79,7 +79,10 @@ export class AudibleResolverService extends AbstractResolver {
       const content: any[] = JSON.parse(contentString);
       for (let i = 0; i < content.length; i++) {
         const obj = content[i] as AudibleInformation;
-        if (obj.bookFormat != null && obj.bookFormat != undefined) {
+        if (
+          obj['@type'] != null &&
+          (obj['@type'] == 'Audiobook' || obj['@type'] == 'PodcastSeries')
+        ) {
           information = obj;
         }
       }

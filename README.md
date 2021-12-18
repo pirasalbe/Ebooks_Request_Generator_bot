@@ -60,6 +60,7 @@ Given an Amazon link of a Kindle book, it returns the request message.
 - en: English
 - it: Italian
 - de: German
+- nl: Dutch
 - es: Spanish
 - pt: Portuguese
 - fr: French
@@ -117,12 +118,6 @@ The book or the author must not be protected by DMCA and the publisher must not 
 
 Malayalam is not allowed.
 
-# Known bugs
-
-- Cannot get language information from Scribd links
-
-- Cannot get informations from some Storytel links ([example](https://www.storytel.com/in/en/books/770401-Pradnyavant-2---Pardeshi))
-
 # Instructions
 
 ## Build
@@ -148,6 +143,28 @@ BOT_TOKEN="110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw" npm start
 ```
 
 _Replace the token in the command, which is **invalid**, with your own._
+
+### Storytel
+
+Define _auths_ and run the project.
+
+It's a list of _auth_ elements with the following format:
+
+```
+{
+  "userId": "string",
+  "token": "string",
+  "locale": "string"
+}
+```
+
+For example:
+
+```
+BOT_TOKEN="110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw" STORYTEL_AUTHS="[{'userId':'12345678','token':'AAAAAAAAA_BBBBBBBB','locale':'/in/en/'}]" npm start
+```
+
+The authentication is required to get books and audiobooks information. The bot **may not** work as expected, if not provided.
 
 ### Twitter service
 

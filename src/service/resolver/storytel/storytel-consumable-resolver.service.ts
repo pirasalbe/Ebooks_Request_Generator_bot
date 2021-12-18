@@ -3,26 +3,18 @@ import { URL } from 'url';
 
 import { NullableHtmlElement } from '../../../model/html/nullable-html-element';
 import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
+import {
+  StorytelItem,
+  StorytelItemInformation,
+} from '../../../model/resolver/storytel/storytel-item-information';
 import { Format } from '../../../model/telegram/format.enum';
 import { Message } from '../../../model/telegram/message';
 import { Source } from '../../../model/telegram/source.enum';
 import { StatisticsService } from '../../statistics/statistic.service';
 import { AbstractResolver } from '../abstract-resolver';
-import {
-  StorytelItem,
-  StorytelItemInformation,
-} from './../../../model/resolver/storytel/storytel-item-information';
 import { StorytelApiResolverService } from './api/storytel-api-resolver.service';
 
-export class StorytelSearchResolverService extends AbstractResolver {
-  private static readonly SEARCH_URL = 'https://www.storytel.com/in/en/search-';
-
-  private static readonly BOOK_ELEMENT = 'a';
-  private static readonly HREF = 'href';
-  private static readonly HREF_START_VALUE = '/in/en/books/';
-
-  private static readonly BOOK_ID_ATTRIBUTE = 'bookid';
-
+export class StorytelConsumableResolverService extends AbstractResolver {
   private storytelInfoResolverService: StorytelApiResolverService;
 
   constructor(
@@ -33,11 +25,31 @@ export class StorytelSearchResolverService extends AbstractResolver {
     this.storytelInfoResolverService = storytelInfoResolverService;
   }
 
-  prepareUrl(url: URL): URL {
-    const newLink: string =
-      StorytelSearchResolverService.SEARCH_URL + this.getItemUrlId(url);
+  protected prepareUrl(url: URL): URL {
+    return this.getStorytelHost(url);
+  }
 
-    return new URL(newLink);
+  protected getCookiesKey(url: URL): string {
+    return this.getStorytelHost(url).toString();
+  }
+
+  private getStorytelHost(url: URL): URL {
+    const newUrl: URL = new URL(url.toString());
+    newUrl.pathname = this.getLocale(url);
+
+    return newUrl;
+  }
+
+  private getLocale(url: URL): string {
+    const path: string = url.pathname;
+    let pathElements: string[] = path.split('/');
+
+    if (pathElements.length > 3) {
+      pathElements = pathElements.slice(0, 3);
+      pathElements.push('');
+    }
+
+    return pathElements.join('/');
   }
 
   private getItemUrlId(url: URL): string {
@@ -50,30 +62,16 @@ export class StorytelSearchResolverService extends AbstractResolver {
     return elements[elements.length - 1];
   }
 
-  extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {
+  extractMessages(url: URL): Promise<Message[]> {
     return new Promise<Message[]>((resolve, reject) => {
-      const linkButtonNullable: NullableHtmlElement = this.getLinkButton(
-        url,
-        html
-      );
-
-      this.checkRequiredElements([linkButtonNullable], 'Book not found.');
-
-      const linkButton: HTMLElement = linkButtonNullable as HTMLElement;
-      const parentDiv: HTMLElement = linkButton.parentNode.parentNode;
-
-      if (
-        !parentDiv.hasAttribute(StorytelSearchResolverService.BOOK_ID_ATTRIBUTE)
-      ) {
-        throw 'Unexpected format.';
-      }
-
-      const bookId: string = parentDiv.getAttribute(
-        StorytelSearchResolverService.BOOK_ID_ATTRIBUTE
-      ) as string;
+      const consumableId: string = this.getItemUrlId(url);
 
       this.storytelInfoResolverService
-        .getByBookId(bookId, this.getCookies(this.getCookiesKey(url)))
+        .getByConsumableId(
+          consumableId,
+          this.getLocale(url),
+          this.getCookies(this.getCookiesKey(url))
+        )
         .then((information: StorytelItemInformation) => {
           // prepare message
           const message: Message = new Message(SiteResolver.STORYTEL, url);
@@ -127,34 +125,6 @@ export class StorytelSearchResolverService extends AbstractResolver {
           reject(error);
         });
     });
-  }
-
-  private getLinkButton(url: URL, html: HTMLElement): NullableHtmlElement {
-    let linkButton: NullableHtmlElement = null;
-
-    const itemUrlId: string = this.getItemUrlId(url);
-
-    const linkButtons: HTMLElement[] = html.querySelectorAll(
-      StorytelSearchResolverService.BOOK_ELEMENT
-    );
-
-    for (let i = 0; i < linkButtons.length && linkButton == null; i++) {
-      const linkElement: HTMLElement = linkButtons[i];
-      if (linkElement.hasAttribute(StorytelSearchResolverService.HREF)) {
-        const link: string = linkElement.getAttribute(
-          StorytelSearchResolverService.HREF
-        ) as string;
-
-        if (
-          link.startsWith(StorytelSearchResolverService.HREF_START_VALUE) &&
-          link.endsWith(itemUrlId)
-        ) {
-          linkButton = linkElement;
-        }
-      }
-    }
-
-    return linkButton;
   }
 
   private setPublisherAndPublicationDate(
