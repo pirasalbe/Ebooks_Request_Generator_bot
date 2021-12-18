@@ -34,15 +34,11 @@ export type ScribdInformationI18n = {
   languages: ScribdLanguage[];
 };
 
-export type ScribdInformationWrapper = {
-  '@graph': ScribdInformation[];
-};
-
 export type ScribdInformation = {
   '@type': 'Book' | 'Audiobook';
   name: string;
   inLanguage: string;
-  author: string;
+  author: string | ScribdAuthor[];
   publisher: string;
   datePublished: string;
 };

@@ -1,4 +1,4 @@
-import { I18nUtil } from '../../util/i18n-util';
+import { I18nUtil } from '../../../util/i18n-util';
 
 export enum StorytelFormat {
   EBOOK,
@@ -46,8 +46,8 @@ export class StorytelInformationWrapper {
     return this.audiobook.name;
   }
 
-  getAuthor(): string {
-    return this.audiobook.author.map((a: StorytelAuthor) => a.name).join(', ');
+  getAuthors(): string[] {
+    return this.audiobook.author.map((a: StorytelAuthor) => a.name);
   }
 
   getPublisher(): string | null {

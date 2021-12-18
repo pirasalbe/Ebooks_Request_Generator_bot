@@ -1,5 +1,5 @@
 export type AudibleInformation = {
-  bookFormat: string;
+  '@type': 'BreadcrumbList' | 'Audiobook' | 'Product' | 'PodcastSeries';
   name: string;
   description: string;
   author: AudibleAuthor[];

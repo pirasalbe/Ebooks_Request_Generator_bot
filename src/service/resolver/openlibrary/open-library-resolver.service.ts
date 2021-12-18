@@ -6,6 +6,7 @@ import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
 import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
 import { AbstractResolver } from '../abstract-resolver';
+import { Source } from './../../../model/telegram/source.enum';
 import { StatisticsService } from './../../statistics/statistic.service';
 
 export class OpenLibraryResolverService extends AbstractResolver {
@@ -53,18 +54,18 @@ export class OpenLibraryResolverService extends AbstractResolver {
       }
 
       message.setTitle(title);
-      message.setAuthor(HtmlUtil.getTextContent(author as HTMLElement));
+      message.addAuthor(HtmlUtil.getTextContent(author as HTMLElement));
       message.setPublisher(HtmlUtil.getTextContent(publisher as HTMLElement));
 
       // tags
-      message.addTag('archive');
+      message.setSource(Source.ARCHIVE);
 
       if (languageElement != null) {
         let language: string = HtmlUtil.getTextContent(languageElement);
         language = language.trim().toLowerCase();
 
         if (this.isLanguageTagRequired(language)) {
-          message.addTag(language);
+          message.setLanguage(language);
         }
       }
 
