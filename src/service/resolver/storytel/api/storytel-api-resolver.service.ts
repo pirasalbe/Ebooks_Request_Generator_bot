@@ -88,37 +88,45 @@ export class StorytelApiResolverService {
     );
 
     return new Promise<StorytelItemInformation>((resolve, reject) => {
-      https.get(
-        requestUrl,
-        {
-          headers: this.getRequestHeader(cookies),
-        },
-        (response: http.IncomingMessage) => {
-          if (response.statusCode == 200) {
-            HttpUtil.processSuccessfulResponse(response, (data: string) => {
-              const info: StorytelItemInformation = JSON.parse(
-                data
-              ) as StorytelItemInformation;
-              return Promise.resolve(info);
-            })
-              .then((data: StorytelItemInformation) => {
-                if (data.result == 'success') {
-                  resolve(data);
-                } else {
-                  console.error(
-                    requestUrl.toString(),
-                    JSON.stringify(data),
-                    cookies
-                  );
-                  reject('Error retrieving information.');
-                }
+      https
+        .get(
+          requestUrl,
+          {
+            headers: this.getRequestHeader(cookies),
+          },
+          (response: http.IncomingMessage) => {
+            if (response.statusCode == 200) {
+              HttpUtil.processSuccessfulResponse(response, (data: string) => {
+                const info: StorytelItemInformation = JSON.parse(
+                  data
+                ) as StorytelItemInformation;
+                return Promise.resolve(info);
               })
-              .catch((error) => reject(error));
-          } else {
-            reject('Error ' + response.statusCode);
+                .then((data: StorytelItemInformation) => {
+                  if (data.result == 'success') {
+                    resolve(data);
+                  } else {
+                    console.error(
+                      requestUrl.toString(),
+                      JSON.stringify(data),
+                      cookies
+                    );
+                    reject('Error retrieving information.');
+                  }
+                })
+                .catch((error) => reject(error));
+            } else {
+              reject('Error ' + response.statusCode);
+            }
           }
-        }
-      );
+        )
+        .on('timeout', () => {
+          reject('Connection timed out');
+        })
+        .on('error', (err: Error) => {
+          console.error('Error connecting to ', url.toString(), err.message);
+          reject(err);
+        });
     });
   }
 
@@ -149,37 +157,45 @@ export class StorytelApiResolverService {
     }
 
     return new Promise<StorytelItemInformation>((resolve, reject) => {
-      https.get(
-        requestUrl,
-        {
-          headers: this.getRequestHeader(cookies),
-        },
-        (response: http.IncomingMessage) => {
-          if (response.statusCode == 200) {
-            HttpUtil.processSuccessfulResponse(response, (data: string) => {
-              const info: StorytelItemInformation = JSON.parse(
-                data
-              ) as StorytelItemInformation;
-              return Promise.resolve(info);
-            })
-              .then((data: StorytelItemInformation) => {
-                if (data.result == 'success') {
-                  resolve(data);
-                } else {
-                  console.error(
-                    requestUrl.toString(),
-                    JSON.stringify(data),
-                    cookies
-                  );
-                  reject('Error retrieving information.');
-                }
+      https
+        .get(
+          requestUrl,
+          {
+            headers: this.getRequestHeader(cookies),
+          },
+          (response: http.IncomingMessage) => {
+            if (response.statusCode == 200) {
+              HttpUtil.processSuccessfulResponse(response, (data: string) => {
+                const info: StorytelItemInformation = JSON.parse(
+                  data
+                ) as StorytelItemInformation;
+                return Promise.resolve(info);
               })
-              .catch((error) => reject(error));
-          } else {
-            reject('Error ' + response.statusCode);
+                .then((data: StorytelItemInformation) => {
+                  if (data.result == 'success') {
+                    resolve(data);
+                  } else {
+                    console.error(
+                      requestUrl.toString(),
+                      JSON.stringify(data),
+                      cookies
+                    );
+                    reject('Error retrieving information.');
+                  }
+                })
+                .catch((error) => reject(error));
+            } else {
+              reject('Error ' + response.statusCode);
+            }
           }
-        }
-      );
+        )
+        .on('timeout', () => {
+          reject('Connection timed out');
+        })
+        .on('error', (err: Error) => {
+          console.error('Error connecting to ', url.toString(), err.message);
+          reject(err);
+        });
     });
   }
 }

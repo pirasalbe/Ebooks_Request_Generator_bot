@@ -114,32 +114,40 @@ export class AmazonFormatResolverService {
     requestUrl.search = '';
 
     return new Promise<HTMLElement>((resolve, reject) => {
-      const request: http.ClientRequest = https.request(
-        requestUrl,
-        {
-          method: 'POST',
-          headers: {
-            'User-Agent': HttpUtil.USER_AGENT,
-            'Content-Type': 'application/json',
-            Accept: '*/*',
-            'Accept-Encoding': HttpUtil.ACCEPT_ENCODING,
-            'x-amz-acp-params': acpParams,
+      const request: http.ClientRequest = https
+        .request(
+          requestUrl,
+          {
+            method: 'POST',
+            headers: {
+              'User-Agent': HttpUtil.USER_AGENT,
+              'Content-Type': 'application/json',
+              Accept: '*/*',
+              'Accept-Encoding': HttpUtil.ACCEPT_ENCODING,
+              'x-amz-acp-params': acpParams,
+            },
           },
-        },
-        (response: http.IncomingMessage) => {
-          if (response.statusCode == 200) {
-            HttpUtil.processSuccessfulResponse(response, (data: string) => {
-              return new Promise<HTMLElement>((resolve) =>
-                resolve(HtmlUtil.parseHTML(data))
-              );
-            })
-              .then((html: HTMLElement) => resolve(html))
-              .catch((error) => reject(error));
-          } else {
-            reject('Error ' + response.statusCode);
+          (response: http.IncomingMessage) => {
+            if (response.statusCode == 200) {
+              HttpUtil.processSuccessfulResponse(response, (data: string) => {
+                return new Promise<HTMLElement>((resolve) =>
+                  resolve(HtmlUtil.parseHTML(data))
+                );
+              })
+                .then((html: HTMLElement) => resolve(html))
+                .catch((error) => reject(error));
+            } else {
+              reject('Error ' + response.statusCode);
+            }
           }
-        }
-      );
+        )
+        .on('timeout', () => {
+          reject('Connection timed out');
+        })
+        .on('error', (err: Error) => {
+          console.error('Error connecting to ', url.toString(), err.message);
+          reject(err);
+        });
 
       // add body and send request
       request.write(
