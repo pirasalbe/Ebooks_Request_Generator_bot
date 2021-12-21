@@ -124,8 +124,8 @@ export class StorytelApiResolverService {
           reject('Connection timed out');
         })
         .on('error', (err: Error) => {
-          console.error('Error connecting to ', url.toString(), err.message);
-          reject(err);
+          console.error('Error connecting to the API', err.message);
+          reject('Connection error: ' + err.message);
         });
     });
   }
@@ -193,8 +193,8 @@ export class StorytelApiResolverService {
           reject('Connection timed out');
         })
         .on('error', (err: Error) => {
-          console.error('Error connecting to ', url.toString(), err.message);
-          reject(err);
+          console.error('Error connecting to the API', err.message);
+          reject('Connection error: ' + err.message);
         });
     });
   }

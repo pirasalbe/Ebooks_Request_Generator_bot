@@ -92,7 +92,7 @@ export abstract class AbstractValidator<T> implements Validator {
           resolve();
         })
         .on('error', (err: Error) => {
-          console.error('Error connecting to ', err.message);
+          console.error('Error resolving elements', err.message);
           resolve();
         });
     });

@@ -66,7 +66,7 @@ export abstract class AbstractResolver implements Resolver {
         })
         .on('error', (err: Error) => {
           console.error('Error connecting to ', url.toString(), err.message);
-          reject(err);
+          reject('Connection error: ' + err.message);
         });
     });
   }

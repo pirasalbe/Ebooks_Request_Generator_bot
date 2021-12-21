@@ -146,7 +146,7 @@ export class AmazonFormatResolverService {
         })
         .on('error', (err: Error) => {
           console.error('Error connecting to ', url.toString(), err.message);
-          reject(err);
+          reject('Connection error: ' + err.message);
         });
 
       // add body and send request
