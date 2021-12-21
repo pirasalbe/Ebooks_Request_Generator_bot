@@ -75,17 +75,26 @@ export abstract class AbstractValidator<T> implements Validator {
    */
   private updateElements(): Promise<void> {
     return new Promise<void>((resolve) => {
-      https.get(this.getElementsLink(), (response: http.IncomingMessage) => {
-        this.processResponse(response)
-          .then(() => resolve())
-          .catch((error) => {
-            console.error(
-              'There was an error resolving elements for validation',
-              error
-            );
-            resolve();
-          });
-      });
+      https
+        .get(this.getElementsLink(), (response: http.IncomingMessage) => {
+          this.processResponse(response)
+            .then(() => resolve())
+            .catch((error) => {
+              console.error(
+                'There was an error resolving elements for validation',
+                error
+              );
+              resolve();
+            });
+        })
+        .on('timeout', () => {
+          console.error('Connection timed out');
+          resolve();
+        })
+        .on('error', (err: Error) => {
+          console.error('Error resolving elements', err.message);
+          resolve();
+        });
     });
   }
 
