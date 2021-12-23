@@ -1,5 +1,5 @@
 export type AmazonSiteStripeResponse = {
-  shortUrl: string;
-  longUrl: string;
+  shortUrl: string | null;
+  longUrl: string | null;
   isOk: boolean;
 };

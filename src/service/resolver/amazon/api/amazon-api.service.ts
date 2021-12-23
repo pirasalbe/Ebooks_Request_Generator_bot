@@ -7,7 +7,7 @@ import { HttpUtil } from '../../../../util/http-util';
 
 export class AmazonApiResolverService {
   private static readonly SITESTRIPE_URL: string =
-    'https://www.amazon.it/associates/sitestripe/getShortUrl';
+    'https://www.amazon.com/associates/sitestripe/getShortUrl';
   private static readonly SITESTRIPE_LONG_URL: string = 'longUrl';
   private static readonly SITESTRIPE_MARKETPLACE_ID: string = 'marketplaceId';
 
@@ -57,7 +57,7 @@ export class AmazonApiResolverService {
                   return Promise.resolve(info);
                 })
                   .then((data: AmazonSiteStripeResponse) => {
-                    if (data.isOk) {
+                    if (data.isOk && data.shortUrl != null) {
                       resolve(data.shortUrl);
                     } else {
                       console.error(
