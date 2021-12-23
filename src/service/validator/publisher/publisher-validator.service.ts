@@ -13,7 +13,8 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
     'https://telegra.ph/DMCA-Publishers-List-09-21-3';
   private static readonly BEGIN_LIST: string = '𝙼𝚎𝚖𝚋𝚎𝚛𝚜 𝚙𝚕𝚎𝚊𝚜𝚎 𝚝𝚊𝚔𝚎 𝚗𝚘𝚝𝚎';
   private static readonly LIST_ELEMENT_START: string = '▫︎ ';
-  private static readonly IMPRINT: string = '- Imprint';
+  private static readonly IMPRINT_SPACE: string = '- Imprint';
+  private static readonly IMPRINT: string = '-Imprint';
   private static readonly MASK_PARAM: string = 'Publisher';
 
   constructor() {
@@ -89,7 +90,11 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
     // remove list element and other special chars
     const sanitizedString: string = content
       .substring(PublisherValidatorService.LIST_ELEMENT_START.length)
-      .replace('\\U0026', '&');
+      .replace('\\U0026', '&')
+      .replace(
+        PublisherValidatorService.IMPRINT_SPACE,
+        PublisherValidatorService.IMPRINT
+      );
 
     const hashTagIndex: number = sanitizedString.indexOf('#');
 
