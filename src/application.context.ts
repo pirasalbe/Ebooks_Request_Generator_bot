@@ -1,3 +1,4 @@
+import { AmazonApiResolverService } from './service/resolver/amazon/api/amazon-api.service';
 import { SiteResolver } from './model/resolver/site-resolver.enum';
 import { MessageService } from './service/message/message.service';
 import { AmazonCaptchaResolverService } from './service/resolver/amazon/amazon-captcha-resolver.service';
@@ -72,6 +73,15 @@ export class ApplicationContext {
       this.log('Validators loaded');
     });
 
+    // amazon api
+    const sitestripeMarketplaceId: string | undefined =
+      process.env.AMAZON_API_SITESTRIPE_MARKETPLACE_ID;
+    const sitestripeCookies: string | undefined =
+      process.env.AMAZON_API_SITESTRIPE_COOKIES;
+
+    const amazonApiResolverService: AmazonApiResolverService =
+      new AmazonApiResolverService(sitestripeMarketplaceId, sitestripeCookies);
+
     // twitter
     const appKey: string | undefined = process.env.TWITTER_APP_KEY;
     const appSecret: string | undefined = process.env.TWITTER_APP_SECRET;
@@ -89,7 +99,8 @@ export class ApplicationContext {
         appKey,
         appSecret,
         accessToken,
-        accessSecret
+        accessSecret,
+        amazonApiResolverService
       );
     }
 

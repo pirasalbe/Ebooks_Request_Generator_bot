@@ -175,3 +175,13 @@ Define the following variables and run the project
 ```
 BOT_TOKEN="110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw" TWITTER_APP_KEY="twitter_variable" TWITTER_APP_SECRET="twitter_variable" TWITTER_ACCESS_TOKEN="twitter_variable" TWITTER_ACCESS_SECRET="twitter_variable" npm start
 ```
+
+### Amazon API
+
+To interact with the API
+
+Define the following variables and run the project
+
+```
+BOT_TOKEN="110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw" AMAZON_API_SITESTRIPE_MARKETPLACE_ID="12345" AMAZON_API_SITESTRIPE_COOKIES="..." npm start
+```
