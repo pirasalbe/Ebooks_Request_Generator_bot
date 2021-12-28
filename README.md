@@ -144,11 +144,17 @@ BOT_TOKEN="110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw" npm start
 
 _Replace the token in the command, which is **invalid**, with your own._
 
-### Storytel
+### Variables
 
-Define _auths_ and run the project.
+#### Required Variables
 
-It's a list of _auth_ elements with the following format:
+- `BOT_TOKEN`: Create a bot using [@BotFather](https://telegram.dog/BotFather), and get the Telegram API token.
+
+#### Optional Variables
+
+##### Storytel
+
+- `STORYTEL_AUTHS`: list of _auth_ objects as defined below.
 
 ```
 {
@@ -158,7 +164,7 @@ It's a list of _auth_ elements with the following format:
 }
 ```
 
-For example:
+Example:
 
 ```
 BOT_TOKEN="110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw" STORYTEL_AUTHS="[{'userId':'12345678','token':'AAAAAAAAA_BBBBBBBB','locale':'/in/en/'}]" npm start
@@ -166,22 +172,19 @@ BOT_TOKEN="110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw" STORYTEL_AUTHS="[{'user
 
 The authentication is required to get books and audiobooks information. The bot **may not** work as expected, if not provided.
 
-### Twitter service
+##### Twitter service
 
 The bot can send a tweet for each request.
 
-Define the following variables and run the project
+- `TWITTER_APP_KEY`: APP key provided by Twitter on the developer console.
+- `TWITTER_APP_SECRET`: APP secret provided by Twitter on the developer console.
+- `TWITTER_ACCESS_TOKEN`: Access token for OAuth1 provided by Twitter on the developer console.
+- `TWITTER_ACCESS_SECRET`: Access secret for OAuth1 provided by Twitter on the developer console.
 
-```
-BOT_TOKEN="110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw" TWITTER_APP_KEY="twitter_variable" TWITTER_APP_SECRET="twitter_variable" TWITTER_ACCESS_TOKEN="twitter_variable" TWITTER_ACCESS_SECRET="twitter_variable" npm start
-```
+##### Amazon API
 
-### Amazon API
+To interact with the Amazon API
 
-To interact with the API
-
-Define the following variables and run the project
-
-```
-BOT_TOKEN="110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw" AMAZON_API_SITESTRIPE_MARKETPLACE_ID="12345" AMAZON_API_SITESTRIPE_COOKIES="..." npm start
-```
+- `AMAZON_API_SITESTRIPE_MARKETPLACE_ID`: marketplace id provided by Amazon.
+- `AMAZON_API_SITESTRIPE_LONG_URL_PARAMS`: URL parameters that tracks back to the Affiliate account.
+- `AMAZON_API_SITESTRIPE_COOKIES`: cookies to authenticate to the API.

@@ -12,17 +12,25 @@ export class AmazonApiResolverService {
   private static readonly SITESTRIPE_MARKETPLACE_ID: string = 'marketplaceId';
 
   private sitestripeMarketplaceId: string | undefined;
+  private sitestripeLongUrlParams: string;
   private sitestripeCookies: string | undefined;
 
   constructor(
     sitestripeMarketplaceId: string | undefined,
+    sitestripeLongUrlParams: string | undefined,
     sitestripeCookies: string | undefined
   ) {
     this.sitestripeMarketplaceId = sitestripeMarketplaceId;
+    if (sitestripeLongUrlParams != undefined) {
+      this.sitestripeLongUrlParams = sitestripeLongUrlParams;
+    } else {
+      this.sitestripeLongUrlParams = '';
+    }
     this.sitestripeCookies = sitestripeCookies;
   }
 
   siteStripe(longUrl: URL): Promise<string> {
+    longUrl.search = this.sitestripeLongUrlParams;
     const longUrlString: string = longUrl.toString();
     let promise: Promise<string> = Promise.resolve(longUrlString);
 
@@ -31,7 +39,6 @@ export class AmazonApiResolverService {
       this.sitestripeCookies != undefined
     ) {
       const requestUrl: URL = new URL(AmazonApiResolverService.SITESTRIPE_URL);
-      longUrl.search = '';
       requestUrl.searchParams.set(
         AmazonApiResolverService.SITESTRIPE_LONG_URL,
         longUrl.toString()

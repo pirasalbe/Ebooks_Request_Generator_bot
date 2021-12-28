@@ -76,11 +76,17 @@ export class ApplicationContext {
     // amazon api
     const sitestripeMarketplaceId: string | undefined =
       process.env.AMAZON_API_SITESTRIPE_MARKETPLACE_ID;
+    const sitestripeLongUrlParams: string | undefined =
+      process.env.AMAZON_API_SITESTRIPE_LONG_URL_PARAMS;
     const sitestripeCookies: string | undefined =
       process.env.AMAZON_API_SITESTRIPE_COOKIES;
 
     const amazonApiResolverService: AmazonApiResolverService =
-      new AmazonApiResolverService(sitestripeMarketplaceId, sitestripeCookies);
+      new AmazonApiResolverService(
+        sitestripeMarketplaceId,
+        sitestripeLongUrlParams,
+        sitestripeCookies
+      );
 
     // twitter
     const appKey: string | undefined = process.env.TWITTER_APP_KEY;
