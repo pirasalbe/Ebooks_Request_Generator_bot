@@ -8,6 +8,7 @@ import TwitterApiv2ReadWrite from 'twitter-api-v2/dist/v2/client.v2.write';
 
 import { Message } from './../../model/telegram/message';
 import { SiteResolver } from '../../model/resolver/site-resolver.enum';
+import { URL } from 'url';
 
 export class TwitterService {
   static readonly TWEET_MAX_SIZE = 280;
@@ -80,7 +81,8 @@ export class TwitterService {
     let link: Promise<string> = Promise.resolve(message.getLink());
 
     if (message.getSite() == SiteResolver.AMAZON) {
-      link = this.amazonApiResolverService.siteStripe(message.getUrl());
+      const longUrl: URL = new URL(message.getUrl().toString());
+      link = this.amazonApiResolverService.siteStripe(longUrl);
     }
 
     return link;
