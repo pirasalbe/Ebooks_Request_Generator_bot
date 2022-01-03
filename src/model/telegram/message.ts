@@ -172,7 +172,7 @@ export class Message {
       tags.push(this.language);
     }
 
-    return tags.join(' #');
+    return tags.join(' #').trim();
   }
 
   getLink(): string {

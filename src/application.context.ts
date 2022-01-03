@@ -15,7 +15,7 @@ import { StorytelConsumableResolverService } from './service/resolver/storytel/s
 import { StorytelSearchResolverService } from './service/resolver/storytel/storytel-search-resolver.service';
 import { StatisticsService } from './service/statistics/statistic.service';
 import { BotService } from './service/telegram/bot.service';
-import { TwitterService } from './service/twitter/twitter.service';
+// import { TwitterService } from './service/twitter/twitter.service';
 import { AuthorValidatorService } from './service/validator/author/author-validator.service';
 import { LanguageValidatorService } from './service/validator/language/language-validator.service';
 import { PublisherValidatorService } from './service/validator/publisher/publisher-validator.service';
@@ -78,26 +78,26 @@ export class ApplicationContext {
     const accessToken: string | undefined = process.env.TWITTER_ACCESS_TOKEN;
     const accessSecret: string | undefined = process.env.TWITTER_ACCESS_SECRET;
 
-    let twitterService: TwitterService | null = null;
-    if (
-      appKey != undefined &&
-      appSecret != undefined &&
-      accessToken != undefined &&
-      accessSecret != undefined
-    ) {
-      twitterService = new TwitterService(
-        appKey,
-        appSecret,
-        accessToken,
-        accessSecret
-      );
-    }
+    // let twitterService: TwitterService | null = null;
+    // if (
+    //   appKey != undefined &&
+    //   appSecret != undefined &&
+    //   accessToken != undefined &&
+    //   accessSecret != undefined
+    // ) {
+    //   twitterService = new TwitterService(
+    //     appKey,
+    //     appSecret,
+    //     accessToken,
+    //     accessSecret
+    //   );
+    // }
 
     // messages
     const messageService: MessageService = new MessageService(
       resolverService,
       validatorService,
-      twitterService
+      // twitterService
     );
 
     // telegram
