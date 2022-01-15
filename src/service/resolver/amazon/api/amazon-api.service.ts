@@ -160,13 +160,16 @@ export class AmazonApiService {
             ) {
               resolve(response.ItemsResult.Items[0]);
             } else {
-              console.error('PAAPI5 error', response.Errors);
-              reject();
+              const errorMessage = response.Errors.map(
+                (error) => error.Message
+              ).join(', ');
+              console.error('PAAPI5 error', errorMessage, response.Errors);
+              reject(errorMessage);
             }
           })
           .catch((error: any) => {
             console.error('There was an error connecting to the PAAPI5', error);
-            reject();
+            reject(error);
           });
       });
     } else {

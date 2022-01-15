@@ -1,3 +1,4 @@
+import { Format } from './../../../../model/telegram/format.enum';
 import { I18nUtil } from './../../../../util/i18n-util';
 import { URL } from 'url';
 import { Message } from '../../../../model/telegram/message';
@@ -10,6 +11,7 @@ export class AmazonApiResolverService implements Resolver {
   private static readonly ASIN_PATTERN: RegExp = new RegExp(
     '^([A-Z]|[0-9]){10}$'
   );
+  private static readonly KINDLE_FORMAT: string = 'Kindle eBook';
 
   private amazonApiService: AmazonApiService;
 
@@ -35,6 +37,22 @@ export class AmazonApiResolverService implements Resolver {
         this.amazonApiService
           .getItemsRequest(itemId)
           .then((item: SDK.Item) => {
+            const itemInfo: SDK.ItemInfo = item.ItemInfo as SDK.ItemInfo;
+            const technicalInfo: SDK.TechnicalInfo =
+              itemInfo.TechnicalInfo as SDK.TechnicalInfo;
+
+            if (
+              itemInfo.TechnicalInfo == undefined ||
+              technicalInfo.Formats.DisplayValues.find(
+                (d) =>
+                  d.DisplayValue == AmazonApiResolverService.KINDLE_FORMAT ||
+                  (d as unknown as string) ==
+                    AmazonApiResolverService.KINDLE_FORMAT
+              ) == undefined
+            ) {
+              throw 'Provided link is not of a Kindle Edition. Make sure to copy the kindle edition link from amazon.';
+            }
+
             // prepare message
             const message: Message = new Message(
               SiteResolver.AMAZON,
@@ -42,7 +60,6 @@ export class AmazonApiResolverService implements Resolver {
             );
 
             // main info
-            const itemInfo: SDK.ItemInfo = item.ItemInfo as SDK.ItemInfo;
             const title: SDK.Title = itemInfo.Title as SDK.Title;
             const lineInfo: SDK.ByLineInfo =
               itemInfo.ByLineInfo as SDK.ByLineInfo;
@@ -83,9 +100,11 @@ export class AmazonApiResolverService implements Resolver {
               }
             }
 
+            // TODO KU
+
             resolve([message]);
           })
-          .catch(() => reject())
+          .catch((error: any) => reject(error))
       );
     } else {
       result = Promise.reject();

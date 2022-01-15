@@ -22,13 +22,15 @@ export class AmazonResolverDispatcher implements Resolver {
       this.amazonApiResolverService
         .resolve(url)
         .then((messages: Message[]) => resolve(messages))
-        .catch(() =>
+        .catch((error: any) => {
+          console.error('Cannot resolve message using Amazon API', error);
+
           // with errors use the html resolver
           this.amazonResolverService
             .resolve(url)
             .then((messages: Message[]) => resolve(messages))
-            .catch((error: any) => reject(error))
-        );
+            .catch((error: any) => reject(error));
+        });
     });
   }
 }
