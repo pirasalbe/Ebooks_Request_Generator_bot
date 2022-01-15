@@ -25,7 +25,7 @@ export class AmazonApiResolverService implements Resolver {
   }
 
   resolve(url: URL): Promise<Message[]> {
-    let result: Promise<Message[]> = Promise.reject();
+    let result: Promise<Message[]>;
 
     const itemId: string | undefined = this.getAsin(url);
 
@@ -39,17 +39,14 @@ export class AmazonApiResolverService implements Resolver {
               SiteResolver.AMAZON,
               new URL(item.DetailPageURL)
             );
-
             // main info
             const itemInfo: SDK.ItemInfo = item.ItemInfo as SDK.ItemInfo;
             const title: SDK.Title = itemInfo.Title as SDK.Title;
             const contributors: SDK.ByLineInfo =
               itemInfo.ByLineInfo as SDK.ByLineInfo;
-
             message.setTitle(title.DisplayValue);
             if (contributors.Contributors.length > 0) {
               for (const contributor of contributors.Contributors) {
-                console.log(contributor);
                 if (contributor.RoleType == SDK.RoleType.AUTHOR) {
                   message.addAuthor(this.fixAuthorName(contributor.Name));
                 }
@@ -64,9 +61,7 @@ export class AmazonApiResolverService implements Resolver {
             //   amazonDetails.getPublicationDate(),
             //   amazonDetails.getPublisher()
             // );
-
             // this.setPublisher(message, amazonDetails.getPublisher());
-
             // // tags
             // if (amazonDetails.hasLanguage()) {
             //   this.addLanguageTag(
@@ -75,11 +70,12 @@ export class AmazonApiResolverService implements Resolver {
             //     amazonDetails.getLanguage() as string
             //   );
             // }
-
             resolve([message]);
           })
           .catch(() => reject())
       );
+    } else {
+      result = Promise.reject();
     }
 
     return result;

@@ -122,7 +122,7 @@ export class AmazonApiService {
   }
 
   getItemsRequest(itemId: string): Promise<SDK.Item> {
-    let result: Promise<SDK.Item> = Promise.reject();
+    let result: Promise<SDK.Item>;
 
     if (
       this.accessKey != undefined &&
@@ -169,6 +169,8 @@ export class AmazonApiService {
             reject();
           });
       });
+    } else {
+      result = Promise.reject();
     }
 
     return result;
