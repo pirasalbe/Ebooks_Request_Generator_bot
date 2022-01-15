@@ -1,3 +1,4 @@
+import { AmazonApiException } from './../../../model/error/amazon/amazon-api-exception';
 import { URL } from 'url';
 import { Message } from '../../../model/telegram/message';
 import { Resolver } from '../resolver';
@@ -26,11 +27,21 @@ export class AmazonResolverDispatcher implements Resolver {
           console.error('Cannot resolve message using Amazon API', error);
 
           // with errors use the html resolver
-          this.amazonResolverService
-            .resolve(url)
-            .then((messages: Message[]) => resolve(messages))
-            .catch((error: any) => reject(error));
+          if (this.isAmazonApiException(error)) {
+            this.amazonResolverService
+              .resolve(url)
+              .then((messages: Message[]) => resolve(messages))
+              .catch((error: any) => reject(error));
+          } else {
+            reject(error);
+          }
         });
     });
+  }
+
+  private isAmazonApiException(error: any): boolean {
+    const exception: AmazonApiException = error as AmazonApiException;
+
+    return exception != undefined && exception.errors !== undefined;
   }
 }

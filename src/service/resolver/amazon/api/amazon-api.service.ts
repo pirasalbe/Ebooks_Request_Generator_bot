@@ -1,3 +1,4 @@
+import { AmazonApiException } from './../../../../model/error/amazon/amazon-api-exception';
 import { AmazonSiteStripeResponse } from './../../../../model/resolver/amazon/amazon-api';
 import * as http from 'http';
 import { OutgoingHttpHeaders } from 'http';
@@ -164,16 +165,28 @@ export class AmazonApiService {
                 (error) => error.Message
               ).join(', ');
               console.error('PAAPI5 error', errorMessage, response.Errors);
-              reject(errorMessage);
+              const amazonApiException: AmazonApiException = {
+                message: errorMessage,
+                errors: response.Errors,
+              };
+              reject(amazonApiException);
             }
           })
           .catch((error: any) => {
             console.error('There was an error connecting to the PAAPI5', error);
-            reject(error);
+            const amazonApiException: AmazonApiException = {
+              message: 'There was an error connecting to the PAAPI5',
+              errors: [],
+            };
+            reject(amazonApiException);
           });
       });
     } else {
-      result = Promise.reject();
+      const amazonApiException: AmazonApiException = {
+        message: 'Amazon PAAPI5 are disabled',
+        errors: [],
+      };
+      result = Promise.reject(amazonApiException);
     }
 
     return result;
