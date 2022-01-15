@@ -150,26 +150,21 @@ export class AmazonApiService {
       );
 
       result = new Promise<SDK.Item>((resolve, reject) => {
-        console.log('ciao0');
         request
           .send()
           .then((response: SDK.GetItemsResponse) => {
-            console.log('ciao1');
             if (
               response.Errors == undefined &&
               response.ItemsResult != undefined &&
               response.ItemsResult.Items.length > 0
             ) {
-              console.log('ciao2');
               resolve(response.ItemsResult.Items[0]);
             } else {
-              console.log('ciao3');
               console.error('PAAPI5 error', response.Errors);
               reject();
             }
           })
           .catch((error: any) => {
-            console.log('ciao4');
             console.error('There was an error connecting to the PAAPI5', error);
             reject();
           });
