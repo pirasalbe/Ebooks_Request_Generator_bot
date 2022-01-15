@@ -148,10 +148,15 @@ export class BotService {
 
                   // reply with support link
                   ctx
-                    .reply(supportLink, {
-                      reply_to_message_id: ctx.message.message_id,
-                      disable_web_page_preview: true,
-                    })
+                    .replyWithHTML(
+                      'Here is your link:\n' +
+                        supportLink +
+                        '\n\n<b>Thanks for your support!</b>',
+                      {
+                        reply_to_message_id: ctx.message.message_id,
+                        disable_web_page_preview: true,
+                      }
+                    )
                     .catch((error) => this.onError(error));
                 });
             })
