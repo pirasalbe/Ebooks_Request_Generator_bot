@@ -1,7 +1,7 @@
 import { HTMLElement } from 'node-html-parser';
 import { URL } from 'url';
 
-import { NullableHtmlElement } from '../../../model/html/nullable-html-element';
+import { NullableHtmlElement } from '../../../../model/html/nullable-html-element';
 
 export class AmazonCaptchaResolverService {
   private static readonly CAPTCHA_FORM_ID =

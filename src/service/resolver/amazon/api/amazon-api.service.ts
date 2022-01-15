@@ -4,8 +4,9 @@ import { OutgoingHttpHeaders } from 'http';
 import * as https from 'https';
 import { URL } from 'url';
 import { HttpUtil } from '../../../../util/http-util';
+import * as SDK from 'paapi5-typescript-sdk';
 
-export class AmazonApiResolverService {
+export class AmazonApiService {
   private static readonly SITESTRIPE_URL: string =
     'https://www.amazon.com/associates/sitestripe/getShortUrl';
   private static readonly SITESTRIPE_LONG_URL: string = 'longUrl';
@@ -15,11 +16,22 @@ export class AmazonApiResolverService {
   private sitestripeLongUrlParams: string;
   private sitestripeCookies: string | undefined;
 
+  private accessKey: string | undefined;
+  private secretKey: string | undefined;
+  private partnerTag: string | undefined;
+
   constructor(
+    accessKey: string | undefined,
+    secretKey: string | undefined,
+    partnerTag: string | undefined,
     sitestripeMarketplaceId: string | undefined,
     sitestripeLongUrlParams: string | undefined,
     sitestripeCookies: string | undefined
   ) {
+    this.accessKey = accessKey;
+    this.secretKey = secretKey;
+    this.partnerTag = partnerTag;
+
     this.sitestripeMarketplaceId = sitestripeMarketplaceId;
     if (sitestripeLongUrlParams != undefined) {
       this.sitestripeLongUrlParams = sitestripeLongUrlParams;
@@ -38,13 +50,13 @@ export class AmazonApiResolverService {
       this.sitestripeMarketplaceId != undefined &&
       this.sitestripeCookies != undefined
     ) {
-      const requestUrl: URL = new URL(AmazonApiResolverService.SITESTRIPE_URL);
+      const requestUrl: URL = new URL(AmazonApiService.SITESTRIPE_URL);
       requestUrl.searchParams.set(
-        AmazonApiResolverService.SITESTRIPE_LONG_URL,
+        AmazonApiService.SITESTRIPE_LONG_URL,
         longUrl.toString()
       );
       requestUrl.searchParams.set(
-        AmazonApiResolverService.SITESTRIPE_MARKETPLACE_ID,
+        AmazonApiService.SITESTRIPE_MARKETPLACE_ID,
         this.sitestripeMarketplaceId
       );
 
@@ -107,5 +119,63 @@ export class AmazonApiResolverService {
       'Accept-Encoding': HttpUtil.ACCEPT_ENCODING,
       Cookie: cookies,
     };
+  }
+
+  getItemsRequest(itemId: string): Promise<SDK.Item> {
+    let result: Promise<SDK.Item> = Promise.reject();
+
+    if (
+      this.accessKey != undefined &&
+      this.secretKey &&
+      this.partnerTag != undefined
+    ) {
+      const request: SDK.GetItemsRequest = new SDK.GetItemsRequest(
+        {
+          ItemIds: [itemId],
+          Resources: [
+            'ItemInfo.Title',
+            'ItemInfo.ByLineInfo',
+            'ItemInfo.ContentInfo',
+            'ItemInfo.ManufactureInfo',
+            'ItemInfo.ProductInfo',
+            'ItemInfo.TechnicalInfo',
+          ],
+        },
+        this.partnerTag,
+        SDK.PartnerType.ASSOCIATES,
+        this.accessKey,
+        this.secretKey,
+        SDK.Host.UNITED_STATES,
+        SDK.Region.UNITED_STATES
+      );
+
+      result = new Promise<SDK.Item>((resolve, reject) => {
+        console.log('ciao0');
+        request
+          .send()
+          .then((response: SDK.GetItemsResponse) => {
+            console.log('ciao1');
+            if (
+              response.Errors == undefined &&
+              response.ItemsResult != undefined &&
+              response.ItemsResult.Items.length > 0
+            ) {
+              console.log('ciao2');
+              resolve(response.ItemsResult.Items[0]);
+            } else {
+              console.log('ciao3');
+              console.error('PAAPI5 error', response.Errors);
+              reject();
+            }
+          })
+          .catch((error: any) => {
+            console.log('ciao4');
+            console.error('There was an error connecting to the PAAPI5', error);
+            reject();
+          });
+      });
+    }
+
+    return result;
   }
 }

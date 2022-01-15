@@ -32,6 +32,7 @@
   "dependencies": {
     "node-html-parser": "^5.0.0",
     "paapi5-nodejs-sdk": "^1.1.0",
+    "paapi5-typescript-sdk": "^0.2.0",
     "telegraf": "^4.4.2",
     "twitter-api-v2": "^1.7.0"
   }
