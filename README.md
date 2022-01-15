@@ -13,6 +13,7 @@ Telegram bot that creates a text message from the link address of an ebook or an
 - inline: the bot works inline the same way it does with _text_.
 - `/stats`: sends information about the number of request received.
 - `/refresh`: reloads the information for the filters.
+- `/support`: shows an help message on how to support the developer.
 
 ## Message format
 
