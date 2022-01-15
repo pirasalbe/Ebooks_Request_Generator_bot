@@ -1,3 +1,4 @@
+import { I18nUtil } from './../../../../util/i18n-util';
 import { URL } from 'url';
 import { Message } from '../../../../model/telegram/message';
 import { Resolver } from '../../resolver';
@@ -39,14 +40,19 @@ export class AmazonApiResolverService implements Resolver {
               SiteResolver.AMAZON,
               new URL(item.DetailPageURL)
             );
+
             // main info
             const itemInfo: SDK.ItemInfo = item.ItemInfo as SDK.ItemInfo;
             const title: SDK.Title = itemInfo.Title as SDK.Title;
-            const contributors: SDK.ByLineInfo =
+            const lineInfo: SDK.ByLineInfo =
               itemInfo.ByLineInfo as SDK.ByLineInfo;
+            const contentInfo: SDK.ContentInfo =
+              itemInfo.ContentInfo as SDK.ContentInfo;
+
             message.setTitle(title.DisplayValue);
-            if (contributors.Contributors.length > 0) {
-              for (const contributor of contributors.Contributors) {
+
+            if (lineInfo.Contributors.length > 0) {
+              for (const contributor of lineInfo.Contributors) {
                 if (contributor.RoleType == SDK.RoleType.AUTHOR) {
                   message.addAuthor(this.fixAuthorName(contributor.Name));
                 }
@@ -55,21 +61,28 @@ export class AmazonApiResolverService implements Resolver {
               message.addAuthor('');
             }
 
-            // this.setPublicationDate(
-            //   message,
-            //   siteLanguage,
-            //   amazonDetails.getPublicationDate(),
-            //   amazonDetails.getPublisher()
-            // );
-            // this.setPublisher(message, amazonDetails.getPublisher());
-            // // tags
-            // if (amazonDetails.hasLanguage()) {
-            //   this.addLanguageTag(
-            //     message,
-            //     siteLanguage,
-            //     amazonDetails.getLanguage() as string
-            //   );
-            // }
+            if (lineInfo.Manufacturer != undefined) {
+              message.setPublisher(lineInfo.Manufacturer.DisplayValue);
+            }
+
+            message.setPublicationDate(
+              new Date(contentInfo.PublicationDate.DisplayValue)
+            );
+
+            // tags
+            if (
+              contentInfo.Languages != undefined &&
+              contentInfo.Languages.DisplayValues != undefined &&
+              contentInfo.Languages.DisplayValues.length > 0
+            ) {
+              const language: string =
+                contentInfo.Languages.DisplayValues[0].DisplayValue.toLowerCase();
+
+              if (language != I18nUtil.ENGLISH) {
+                message.setLanguage(language);
+              }
+            }
+
             resolve([message]);
           })
           .catch(() => reject())
