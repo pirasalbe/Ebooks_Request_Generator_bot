@@ -1,9 +1,5 @@
 import { Context, Markup, Telegraf, Telegram } from 'telegraf';
-import {
-  ExtraAnimation,
-  ExtraAnswerInlineQuery,
-  ExtraReplyMessage,
-} from 'telegraf/typings/telegram-types';
+import { ExtraAnimation, ExtraAnswerInlineQuery, ExtraReplyMessage } from 'telegraf/typings/telegram-types';
 import {
   InlineQueryResult,
   InlineQueryResultArticle,
@@ -14,17 +10,20 @@ import {
   User,
   UserFromGetMe,
 } from 'typegram';
+import { URL } from 'url';
 
 import { ResolverException } from '../../model/error/resolver-exception';
 import { Message } from '../../model/telegram/message';
 import { DocumentResponse } from '../../model/telegram/telegram-responses';
 import { MessageService } from '../message/message.service';
 import { ValidatorService } from '../validator/validator.service';
+import { AmazonApiResolverService } from './../resolver/amazon/api/amazon-api.service';
 import { StatisticsService } from './../statistics/statistic.service';
 
 export class BotService {
   private static readonly REPORT: string = '/report';
   private static readonly INLINE_COMMAND: string = 'inline';
+  private static readonly SUPPORT_COMMAND: string = 'support';
 
   private static readonly SUCCESSFULL_THUMB_URL =
     'https://telegra.ph/file/5b2fad22d5b296b843acf.jpg';
@@ -42,15 +41,19 @@ export class BotService {
   private validatorService: ValidatorService;
   private statisticsService: StatisticsService;
 
+  private amazonApiResolverService: AmazonApiResolverService;
+
   constructor(
     messageService: MessageService,
     validatorService: ValidatorService,
     statisticsService: StatisticsService,
+    amazonApiResolverService: AmazonApiResolverService,
     token: string
   ) {
     this.messageService = messageService;
     this.validatorService = validatorService;
     this.statisticsService = statisticsService;
+    this.amazonApiResolverService = amazonApiResolverService;
 
     // init bot
     this.token = token;
@@ -92,6 +95,10 @@ export class BotService {
                 this.inlineExtra(ctx.message.message_id)
               )
               .catch((error) => this.onError(error));
+          } else if (ctx.startPayload == BotService.SUPPORT_COMMAND) {
+            ctx
+              .replyWithHTML(this.supportHelp())
+              .catch((error) => this.onError(error));
           }
         })
         .catch((error) => this.onError(error));
@@ -108,6 +115,60 @@ export class BotService {
           this.inlineExtra(ctx.message.message_id)
         )
         .catch((error) => this.onError(error));
+    });
+    this.bot.command(BotService.SUPPORT_COMMAND, (ctx) => {
+      this.safeHandling(() => {
+        const url: string = this.extractUrl(
+          ctx.message.text,
+          ctx.message.entities
+        );
+
+        // no url found, reply with help
+        if (url.startsWith('/' + BotService.SUPPORT_COMMAND)) {
+          ctx
+            .replyWithHTML(this.supportHelp())
+            .catch((error) => this.onError(error));
+        } else {
+          const extra: ExtraReplyMessage = {
+            reply_to_message_id: ctx.message.message_id,
+          };
+
+          // placeholder
+          ctx
+            .reply('Preparing link...', extra)
+            .then((loader: TelegramMessage.TextMessage) => {
+              // obtain url
+              this.amazonApiResolverService
+                .siteStripe(new URL(url))
+                .then((supportLink: string) => {
+                  // remove placeholder
+                  ctx
+                    .deleteMessage(loader.message_id)
+                    .catch((error) => this.onError(error));
+
+                  // reply with support link
+                  ctx
+                    .replyWithHTML(
+                      'Here is your link:\n' +
+                        supportLink +
+                        '\n\n<b>Thanks for your support!</b>',
+                      {
+                        reply_to_message_id: ctx.message.message_id,
+                        disable_web_page_preview: true,
+                      }
+                    )
+                    .catch((error) => this.onError(error));
+                });
+            })
+            .catch((error: string) => {
+              console.error('Cannot start processing link.', error);
+              ctx.reply(
+                'Cannot start processing link. Try again in a few seconds.',
+                extra
+              );
+            });
+        }
+      });
     });
     this.bot.command('stats', (ctx) => {
       ctx
@@ -276,15 +337,6 @@ export class BotService {
         }
       });
     });
-
-    this.bot.on('animation', (ctx) => {
-      ctx
-        .reply('File ID: <code>' + ctx.message.animation.file_id + '</code>', {
-          reply_to_message_id: ctx.message.message_id,
-          parse_mode: 'HTML',
-        })
-        .catch((error) => this.onError(error));
-    });
   }
 
   private safeHandling(unsafeFunction: () => void): void {
@@ -389,7 +441,9 @@ export class BotService {
       this.smallHelpMessage() +
       ' You can then forward the same request to the group.' +
       '\n\n' +
-      'You can use me inline as well. Send /inline for more information.'
+      'You can use me inline as well. Send /inline for more information.' +
+      '\n\n' +
+      'Send /support to get information on how to support bot developer.'
     );
   }
 
@@ -423,6 +477,47 @@ export class BotService {
     help += '\n\n';
 
     help += '4) Click the popup.';
+
+    return help;
+  }
+
+  private supportHelp(): string {
+    let help = '<b>How to support bot developer</b>';
+    help += '\n';
+
+    help +=
+      'This is how you can support my work by buying something on Amazon.';
+    help += '\n\n';
+
+    help += '1) Send me <code>/support</code> and add <b>1 space</b>.';
+    help += '\n\n';
+
+    help += '2) Copy and paste the Amazon link of whatever you want to buy.';
+    help += '\n\n';
+
+    help +=
+      '✅ <code>/support https://www.amazon.com/Colgate-Advanced-Optic-Toothbrush-Medium/dp/B07S9GV83R</code>\n';
+    help +=
+      '❌ <code>/supporthttps://www.amazon.com/Colgate-Advanced-Optic-Toothbrush-Medium/dp/B07S9GV83R</code>';
+    help += '\n\n';
+
+    help += 'The bot will reply with a custom link.';
+    help += '\n';
+
+    help += '1) Click the link.';
+    help += '\n';
+
+    help += '2) Add the object to your busket.';
+    help += '\n';
+
+    help += '3) Procede to checkout.';
+    help += '\n\n';
+
+    help += '<b>Thank you for your support!</b>';
+    help += '\n\n\n';
+
+    help +=
+      'Click <a href="https://affiliate-program.amazon.com/welcome/getstarted">here</a> if you want to understand how this helps me.';
 
     return help;
   }
