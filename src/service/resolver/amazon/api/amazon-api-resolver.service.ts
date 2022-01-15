@@ -68,14 +68,17 @@ export class AmazonApiResolverService implements Resolver {
 
             message.setTitle(title.DisplayValue);
 
-            if (lineInfo.Contributors.length > 0) {
+            if (
+              lineInfo.Contributors != undefined &&
+              lineInfo.Contributors.length > 0
+            ) {
               for (const contributor of lineInfo.Contributors) {
                 if (contributor.RoleType == SDK.RoleType.AUTHOR) {
                   message.addAuthor(this.fixAuthorName(contributor.Name));
                 }
               }
             } else {
-              message.addAuthor('');
+              message.addAuthor('No author');
             }
 
             if (lineInfo.Manufacturer != undefined) {
