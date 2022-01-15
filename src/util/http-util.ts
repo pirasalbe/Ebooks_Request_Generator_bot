@@ -54,4 +54,23 @@ export class HttpUtil {
         });
     });
   }
+
+  static logAny(object: any): string {
+    let result = '{';
+
+    for (const key in object) {
+      if (Object.prototype.hasOwnProperty.call(object, key)) {
+        const element = object[key];
+        if (typeof element == 'object') {
+          result += '"' + key + '":' + this.logAny(object[key]) + ',';
+        } else {
+          result += '"' + key + '":"' + element + '",';
+        }
+      }
+    }
+
+    result += '}';
+
+    return result;
+  }
 }
