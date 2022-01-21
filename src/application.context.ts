@@ -31,15 +31,31 @@ export class ApplicationContext {
 
     const statisticsService: StatisticsService = new StatisticsService();
 
+    // storytel api
     let storytelAuth: string | undefined = process.env.STORYTEL_AUTHS;
     if (storytelAuth == undefined) {
       storytelAuth = '[]';
     }
 
+    // amazon api
+    const sitestripeMarketplaceId: string | undefined =
+      process.env.AMAZON_API_SITESTRIPE_MARKETPLACE_ID;
+    const sitestripeLongUrlParams: string | undefined =
+      process.env.AMAZON_API_SITESTRIPE_LONG_URL_PARAMS;
+    const sitestripeCookies: string | undefined =
+      process.env.AMAZON_API_SITESTRIPE_COOKIES;
+
+    const amazonApiService: AmazonApiService = new AmazonApiService(
+      sitestripeMarketplaceId,
+      sitestripeLongUrlParams,
+      sitestripeCookies
+    );
+
     // resolvers
     const resolvers: Record<SiteResolver, Resolver> = {
       0: new AmazonResolverService(
         statisticsService,
+        amazonApiService,
         new AmazonFormatResolverService(),
         new AmazonCaptchaResolverService(),
         new AmazonRerouteService(statisticsService)
@@ -71,20 +87,6 @@ export class ApplicationContext {
     validatorService.refresh().then(() => {
       this.log('Validators loaded');
     });
-
-    // amazon api
-    const sitestripeMarketplaceId: string | undefined =
-      process.env.AMAZON_API_SITESTRIPE_MARKETPLACE_ID;
-    const sitestripeLongUrlParams: string | undefined =
-      process.env.AMAZON_API_SITESTRIPE_LONG_URL_PARAMS;
-    const sitestripeCookies: string | undefined =
-      process.env.AMAZON_API_SITESTRIPE_COOKIES;
-
-    const amazonApiService: AmazonApiService = new AmazonApiService(
-      sitestripeMarketplaceId,
-      sitestripeLongUrlParams,
-      sitestripeCookies
-    );
 
     // twitter
     const appKey: string | undefined = process.env.TWITTER_APP_KEY;
