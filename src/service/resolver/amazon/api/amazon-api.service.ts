@@ -29,13 +29,16 @@ export class AmazonApiService {
     this.sitestripeCookies = sitestripeCookies;
   }
 
-  siteStripe(longUrl: URL, short = true): Promise<string> {
-    longUrl.search = this.sitestripeLongUrlParams;
+  getSiteStripeParams(): string {
+    return this.sitestripeLongUrlParams;
+  }
+
+  siteStripe(longUrl: URL): Promise<string> {
+    longUrl.search = this.getSiteStripeParams();
     const longUrlString: string = longUrl.toString();
     let promise: Promise<string>;
 
     if (
-      short &&
       this.sitestripeMarketplaceId != undefined &&
       this.sitestripeCookies != undefined
     ) {

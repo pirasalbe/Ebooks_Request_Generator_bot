@@ -513,7 +513,7 @@ export class AmazonResolverService extends AbstractResolver {
   private getAmazonAsinUrl(url: URL, asin: string): URL {
     const newUrl: URL = new URL(url.toString());
     newUrl.pathname = AmazonResolverService.URL_PREFIX + asin;
-    newUrl.search = '';
+    newUrl.search = this.amazonApiService.getSiteStripeParams();
     return newUrl;
   }
 
