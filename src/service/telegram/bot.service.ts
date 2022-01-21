@@ -1,5 +1,9 @@
 import { Context, Markup, Telegraf, Telegram } from 'telegraf';
-import { ExtraAnimation, ExtraAnswerInlineQuery, ExtraReplyMessage } from 'telegraf/typings/telegram-types';
+import {
+  ExtraAnimation,
+  ExtraAnswerInlineQuery,
+  ExtraReplyMessage,
+} from 'telegraf/typings/telegram-types';
 import {
   InlineQueryResult,
   InlineQueryResultArticle,
@@ -17,7 +21,7 @@ import { Message } from '../../model/telegram/message';
 import { DocumentResponse } from '../../model/telegram/telegram-responses';
 import { MessageService } from '../message/message.service';
 import { ValidatorService } from '../validator/validator.service';
-import { AmazonApiResolverService } from './../resolver/amazon/api/amazon-api.service';
+import { AmazonApiService } from './../resolver/amazon/api/amazon-api.service';
 import { StatisticsService } from './../statistics/statistic.service';
 
 export class BotService {
@@ -41,19 +45,19 @@ export class BotService {
   private validatorService: ValidatorService;
   private statisticsService: StatisticsService;
 
-  private amazonApiResolverService: AmazonApiResolverService;
+  private amazonApiService: AmazonApiService;
 
   constructor(
     messageService: MessageService,
     validatorService: ValidatorService,
     statisticsService: StatisticsService,
-    amazonApiResolverService: AmazonApiResolverService,
+    amazonApiService: AmazonApiService,
     token: string
   ) {
     this.messageService = messageService;
     this.validatorService = validatorService;
     this.statisticsService = statisticsService;
-    this.amazonApiResolverService = amazonApiResolverService;
+    this.amazonApiService = amazonApiService;
 
     // init bot
     this.token = token;
@@ -138,7 +142,7 @@ export class BotService {
             .reply('Preparing link...', extra)
             .then((loader: TelegramMessage.TextMessage) => {
               // obtain url
-              this.amazonApiResolverService
+              this.amazonApiService
                 .siteStripe(new URL(url))
                 .then((supportLink: string) => {
                   // remove placeholder

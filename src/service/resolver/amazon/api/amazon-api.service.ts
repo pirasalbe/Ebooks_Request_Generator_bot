@@ -5,7 +5,7 @@ import * as https from 'https';
 import { URL } from 'url';
 import { HttpUtil } from '../../../../util/http-util';
 
-export class AmazonApiResolverService {
+export class AmazonApiService {
   private static readonly SITESTRIPE_URL: string =
     'https://www.amazon.com/associates/sitestripe/getShortUrl';
   private static readonly SITESTRIPE_LONG_URL: string = 'longUrl';
@@ -29,22 +29,26 @@ export class AmazonApiResolverService {
     this.sitestripeCookies = sitestripeCookies;
   }
 
+  getSiteStripeParams(): string {
+    return this.sitestripeLongUrlParams;
+  }
+
   siteStripe(longUrl: URL): Promise<string> {
-    longUrl.search = this.sitestripeLongUrlParams;
+    longUrl.search = this.getSiteStripeParams();
     const longUrlString: string = longUrl.toString();
-    let promise: Promise<string> = Promise.resolve(longUrlString);
+    let promise: Promise<string>;
 
     if (
       this.sitestripeMarketplaceId != undefined &&
       this.sitestripeCookies != undefined
     ) {
-      const requestUrl: URL = new URL(AmazonApiResolverService.SITESTRIPE_URL);
+      const requestUrl: URL = new URL(AmazonApiService.SITESTRIPE_URL);
       requestUrl.searchParams.set(
-        AmazonApiResolverService.SITESTRIPE_LONG_URL,
+        AmazonApiService.SITESTRIPE_LONG_URL,
         longUrl.toString()
       );
       requestUrl.searchParams.set(
-        AmazonApiResolverService.SITESTRIPE_MARKETPLACE_ID,
+        AmazonApiService.SITESTRIPE_MARKETPLACE_ID,
         this.sitestripeMarketplaceId
       );
 
@@ -93,6 +97,8 @@ export class AmazonApiResolverService {
             resolve(longUrlString);
           });
       });
+    } else {
+      promise = Promise.resolve(longUrlString);
     }
 
     return promise;

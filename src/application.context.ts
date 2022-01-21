@@ -4,7 +4,7 @@ import { AmazonCaptchaResolverService } from './service/resolver/amazon/amazon-c
 import { AmazonFormatResolverService } from './service/resolver/amazon/amazon-format-resolver.service';
 import { AmazonRerouteService } from './service/resolver/amazon/amazon-reroute.service';
 import { AmazonResolverService } from './service/resolver/amazon/amazon-resolver.service';
-import { AmazonApiResolverService } from './service/resolver/amazon/api/amazon-api.service';
+import { AmazonApiService } from './service/resolver/amazon/api/amazon-api.service';
 import { ArchiveResolverService } from './service/resolver/archive/archive-resolver.service';
 import { AudibleResolverService } from './service/resolver/audible/audible-resolver.service';
 import { OpenLibraryResolverService } from './service/resolver/openlibrary/open-library-resolver.service';
@@ -31,15 +31,31 @@ export class ApplicationContext {
 
     const statisticsService: StatisticsService = new StatisticsService();
 
+    // storytel api
     let storytelAuth: string | undefined = process.env.STORYTEL_AUTHS;
     if (storytelAuth == undefined) {
       storytelAuth = '[]';
     }
 
+    // amazon api
+    const sitestripeMarketplaceId: string | undefined =
+      process.env.AMAZON_API_SITESTRIPE_MARKETPLACE_ID;
+    const sitestripeLongUrlParams: string | undefined =
+      process.env.AMAZON_API_SITESTRIPE_LONG_URL_PARAMS;
+    const sitestripeCookies: string | undefined =
+      process.env.AMAZON_API_SITESTRIPE_COOKIES;
+
+    const amazonApiService: AmazonApiService = new AmazonApiService(
+      sitestripeMarketplaceId,
+      sitestripeLongUrlParams,
+      sitestripeCookies
+    );
+
     // resolvers
     const resolvers: Record<SiteResolver, Resolver> = {
       0: new AmazonResolverService(
         statisticsService,
+        amazonApiService,
         new AmazonFormatResolverService(),
         new AmazonCaptchaResolverService(),
         new AmazonRerouteService(statisticsService)
@@ -72,21 +88,6 @@ export class ApplicationContext {
       this.log('Validators loaded');
     });
 
-    // amazon api
-    const sitestripeMarketplaceId: string | undefined =
-      process.env.AMAZON_API_SITESTRIPE_MARKETPLACE_ID;
-    const sitestripeLongUrlParams: string | undefined =
-      process.env.AMAZON_API_SITESTRIPE_LONG_URL_PARAMS;
-    const sitestripeCookies: string | undefined =
-      process.env.AMAZON_API_SITESTRIPE_COOKIES;
-
-    const amazonApiResolverService: AmazonApiResolverService =
-      new AmazonApiResolverService(
-        sitestripeMarketplaceId,
-        sitestripeLongUrlParams,
-        sitestripeCookies
-      );
-
     // twitter
     const appKey: string | undefined = process.env.TWITTER_APP_KEY;
     const appSecret: string | undefined = process.env.TWITTER_APP_SECRET;
@@ -105,7 +106,7 @@ export class ApplicationContext {
         appSecret,
         accessToken,
         accessSecret,
-        amazonApiResolverService
+        amazonApiService
       );
     }
 
@@ -122,7 +123,7 @@ export class ApplicationContext {
       messageService,
       validatorService,
       statisticsService,
-      amazonApiResolverService,
+      amazonApiService,
       token
     );
 

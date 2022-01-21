@@ -1,3 +1,4 @@
+import { AmazonApiService } from './api/amazon-api.service';
 import * as http from 'http';
 import { HTMLElement } from 'node-html-parser';
 import { URL } from 'url';
@@ -42,17 +43,21 @@ export class AmazonResolverService extends AbstractResolver {
 
   private static readonly URL_PREFIX = '/dp/';
 
+  private amazonApiService: AmazonApiService;
+
   private amazonFormatResolverService: AmazonFormatResolverService;
   private amazonCaptchaResolverService: AmazonCaptchaResolverService;
   private amazonRerouteService: AmazonRerouteService;
 
   constructor(
     statisticsService: StatisticsService,
+    amazonApiService: AmazonApiService,
     amazonFormatResolverService: AmazonFormatResolverService,
     amazonCaptchaResolverService: AmazonCaptchaResolverService,
     amazonRerouteService: AmazonRerouteService
   ) {
     super(statisticsService);
+    this.amazonApiService = amazonApiService;
     this.amazonFormatResolverService = amazonFormatResolverService;
     this.amazonCaptchaResolverService = amazonCaptchaResolverService;
     this.amazonRerouteService = amazonRerouteService;
@@ -508,7 +513,7 @@ export class AmazonResolverService extends AbstractResolver {
   private getAmazonAsinUrl(url: URL, asin: string): URL {
     const newUrl: URL = new URL(url.toString());
     newUrl.pathname = AmazonResolverService.URL_PREFIX + asin;
-    newUrl.search = '';
+    newUrl.search = this.amazonApiService.getSiteStripeParams();
     return newUrl;
   }
 
