@@ -29,12 +29,13 @@ export class AmazonApiResolverService {
     this.sitestripeCookies = sitestripeCookies;
   }
 
-  siteStripe(longUrl: URL): Promise<string> {
+  siteStripe(longUrl: URL, short = true): Promise<string> {
     longUrl.search = this.sitestripeLongUrlParams;
     const longUrlString: string = longUrl.toString();
-    let promise: Promise<string> = Promise.resolve(longUrlString);
+    let promise: Promise<string>;
 
     if (
+      short &&
       this.sitestripeMarketplaceId != undefined &&
       this.sitestripeCookies != undefined
     ) {
@@ -93,6 +94,8 @@ export class AmazonApiResolverService {
             resolve(longUrlString);
           });
       });
+    } else {
+      promise = Promise.resolve(longUrlString);
     }
 
     return promise;
