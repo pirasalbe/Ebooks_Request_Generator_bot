@@ -1,4 +1,4 @@
-import { AmazonApiResolverService } from './../resolver/amazon/api/amazon-api.service';
+import { AmazonApiService } from './../resolver/amazon/api/amazon-api.service';
 import {
   TweetV2PostTweetResult,
   TwitterApi,
@@ -16,14 +16,14 @@ export class TwitterService {
   private twitterApi: TwitterApi;
   private twitterApiReadWrite: TwitterApiv2ReadWrite;
 
-  private amazonApiResolverService: AmazonApiResolverService;
+  private amazonApiService: AmazonApiService;
 
   constructor(
     appKey: string,
     appSecret: string,
     accessToken: string,
     accessSecret: string,
-    amazonApiResolverService: AmazonApiResolverService
+    amazonApiService: AmazonApiService
   ) {
     const twitterToken: TwitterApiTokens = {
       appKey: appKey,
@@ -33,7 +33,7 @@ export class TwitterService {
     };
     this.twitterApi = new TwitterApi(twitterToken);
     this.twitterApiReadWrite = this.twitterApi.readWrite.v2;
-    this.amazonApiResolverService = amazonApiResolverService;
+    this.amazonApiService = amazonApiService;
   }
 
   tweet(messages: Message[]): void {
@@ -82,7 +82,7 @@ export class TwitterService {
 
     if (message.getSite() == SiteResolver.AMAZON) {
       const longUrl: URL = new URL(message.getUrl().toString());
-      link = this.amazonApiResolverService.siteStripe(longUrl);
+      link = this.amazonApiService.siteStripe(longUrl);
     }
 
     return link;
