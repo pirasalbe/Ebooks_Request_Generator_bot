@@ -1,11 +1,12 @@
-import { Format } from './../../../../model/telegram/format.enum';
-import { I18nUtil } from './../../../../util/i18n-util';
+import * as SDK from 'paapi5-typescript-sdk';
 import { URL } from 'url';
+
+import { AmazonApiException } from '../../../../model/error/amazon/amazon-api-exception';
+import { SiteResolver } from '../../../../model/resolver/site-resolver.enum';
 import { Message } from '../../../../model/telegram/message';
 import { Resolver } from '../../resolver';
+import { I18nUtil } from './../../../../util/i18n-util';
 import { AmazonApiService } from './amazon-api.service';
-import * as SDK from 'paapi5-typescript-sdk';
-import { SiteResolver } from '../../../../model/resolver/site-resolver.enum';
 
 export class AmazonApiResolverService implements Resolver {
   private static readonly ASIN_PATTERN: RegExp = new RegExp(
@@ -110,7 +111,11 @@ export class AmazonApiResolverService implements Resolver {
           .catch((error: any) => reject(error))
       );
     } else {
-      result = Promise.reject();
+      const amazonApiException: AmazonApiException = {
+        message: 'ItemId not found, cannot use the PAAPI5',
+        errors: [],
+      };
+      result = Promise.reject(amazonApiException);
     }
 
     return result;
