@@ -186,6 +186,9 @@ The bot can send a tweet for each request.
 
 To interact with the Amazon API
 
+- `AMAZON_API_ACCESS_KEY`: access key to access the Amazon API
+- `AMAZON_API_SECRET_KEY`: secret key to access the Amazon API
+- `AMAZON_API_PARTNER_TAG`: partner tag for the Amazon API
 - `AMAZON_API_SITESTRIPE_MARKETPLACE_ID`: marketplace id provided by Amazon.
 - `AMAZON_API_SITESTRIPE_LONG_URL_PARAMS`: URL parameters that tracks back to the Affiliate account.
 - `AMAZON_API_SITESTRIPE_COOKIES`: cookies to authenticate to the API.

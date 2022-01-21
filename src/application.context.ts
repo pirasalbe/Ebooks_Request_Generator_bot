@@ -1,10 +1,12 @@
+import { AmazonApiResolverService } from './service/resolver/amazon/api/amazon-api-resolver.service';
+import { AmazonResolverDispatcher } from './service/resolver/amazon/amazon-resolver-dispatcher.service';
 import { SiteResolver } from './model/resolver/site-resolver.enum';
 import { MessageService } from './service/message/message.service';
-import { AmazonCaptchaResolverService } from './service/resolver/amazon/amazon-captcha-resolver.service';
-import { AmazonFormatResolverService } from './service/resolver/amazon/amazon-format-resolver.service';
-import { AmazonRerouteService } from './service/resolver/amazon/amazon-reroute.service';
-import { AmazonResolverService } from './service/resolver/amazon/amazon-resolver.service';
-import { AmazonApiResolverService } from './service/resolver/amazon/api/amazon-api.service';
+import { AmazonApiService } from './service/resolver/amazon/api/amazon-api.service';
+import { AmazonCaptchaResolverService } from './service/resolver/amazon/html/amazon-captcha-resolver.service';
+import { AmazonFormatResolverService } from './service/resolver/amazon/html/amazon-format-resolver.service';
+import { AmazonRerouteService } from './service/resolver/amazon/html/amazon-reroute.service';
+import { AmazonResolverService } from './service/resolver/amazon/html/amazon-resolver.service';
 import { ArchiveResolverService } from './service/resolver/archive/archive-resolver.service';
 import { AudibleResolverService } from './service/resolver/audible/audible-resolver.service';
 import { OpenLibraryResolverService } from './service/resolver/openlibrary/open-library-resolver.service';
@@ -36,13 +38,37 @@ export class ApplicationContext {
       storytelAuth = '[]';
     }
 
+    // amazon api
+    const accessKey: string | undefined = process.env.AMAZON_API_ACCESS_KEY;
+    const secretKey: string | undefined = process.env.AMAZON_API_SECRET_KEY;
+    const partnerTag: string | undefined = process.env.AMAZON_API_PARTNER_TAG;
+
+    const sitestripeMarketplaceId: string | undefined =
+      process.env.AMAZON_API_SITESTRIPE_MARKETPLACE_ID;
+    const sitestripeLongUrlParams: string | undefined =
+      process.env.AMAZON_API_SITESTRIPE_LONG_URL_PARAMS;
+    const sitestripeCookies: string | undefined =
+      process.env.AMAZON_API_SITESTRIPE_COOKIES;
+
+    const amazonApiService: AmazonApiService = new AmazonApiService(
+      accessKey,
+      secretKey,
+      partnerTag,
+      sitestripeMarketplaceId,
+      sitestripeLongUrlParams,
+      sitestripeCookies
+    );
+
     // resolvers
     const resolvers: Record<SiteResolver, Resolver> = {
-      0: new AmazonResolverService(
-        statisticsService,
-        new AmazonFormatResolverService(),
-        new AmazonCaptchaResolverService(),
-        new AmazonRerouteService(statisticsService)
+      0: new AmazonResolverDispatcher(
+        new AmazonApiResolverService(amazonApiService),
+        new AmazonResolverService(
+          statisticsService,
+          new AmazonFormatResolverService(),
+          new AmazonCaptchaResolverService(),
+          new AmazonRerouteService(statisticsService)
+        )
       ),
       1: new AudibleResolverService(statisticsService),
       2: new ScribdResolverService(statisticsService),
@@ -72,21 +98,6 @@ export class ApplicationContext {
       this.log('Validators loaded');
     });
 
-    // amazon api
-    const sitestripeMarketplaceId: string | undefined =
-      process.env.AMAZON_API_SITESTRIPE_MARKETPLACE_ID;
-    const sitestripeLongUrlParams: string | undefined =
-      process.env.AMAZON_API_SITESTRIPE_LONG_URL_PARAMS;
-    const sitestripeCookies: string | undefined =
-      process.env.AMAZON_API_SITESTRIPE_COOKIES;
-
-    const amazonApiResolverService: AmazonApiResolverService =
-      new AmazonApiResolverService(
-        sitestripeMarketplaceId,
-        sitestripeLongUrlParams,
-        sitestripeCookies
-      );
-
     // twitter
     const appKey: string | undefined = process.env.TWITTER_APP_KEY;
     const appSecret: string | undefined = process.env.TWITTER_APP_SECRET;
@@ -105,7 +116,7 @@ export class ApplicationContext {
         appSecret,
         accessToken,
         accessSecret,
-        amazonApiResolverService
+        amazonApiService
       );
     }
 
@@ -122,7 +133,7 @@ export class ApplicationContext {
       messageService,
       validatorService,
       statisticsService,
-      amazonApiResolverService,
+      amazonApiService,
       token
     );
 

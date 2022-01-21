@@ -1,9 +1,9 @@
 import { URL } from 'url';
+import { ResolverException } from '../../../../model/error/resolver-exception';
+import { AmazonReroute } from '../../../../model/resolver/amazon/amazon-reroute';
+import { RandomUtil } from '../../../../util/random-util';
+import { StatisticsService } from '../../../statistics/statistic.service';
 
-import { RandomUtil } from '../../../util/random-util';
-import { ResolverException } from './../../../model/error/resolver-exception';
-import { AmazonReroute } from '../../../model/resolver/amazon/amazon-reroute';
-import { StatisticsService } from './../../statistics/statistic.service';
 import { AmazonCaptchaResolverService } from './amazon-captcha-resolver.service';
 
 export class AmazonRerouteService {

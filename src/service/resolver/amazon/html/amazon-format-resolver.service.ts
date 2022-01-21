@@ -2,10 +2,9 @@ import * as http from 'http';
 import * as https from 'https';
 import { HTMLElement } from 'node-html-parser';
 import { URL } from 'url';
-
-import { NullableHtmlElement } from '../../../model/html/nullable-html-element';
-import { HtmlUtil } from '../../../util/html-util';
-import { HttpUtil } from '../../../util/http-util';
+import { NullableHtmlElement } from '../../../../model/html/nullable-html-element';
+import { HtmlUtil } from '../../../../util/html-util';
+import { HttpUtil } from '../../../../util/http-util';
 
 export class AmazonFormatResolverService {
   private static readonly KINDLE_UNLIMITED_ID = '.a-icon-kindle-unlimited';
