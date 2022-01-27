@@ -14,7 +14,7 @@ export class AmazonErrorResolverService {
 
   private static readonly ALERT_CONTENT_ID = '.a-alert-content';
   static readonly RELOAD_ERROR =
-    'Amazon requested a captcha. Try again later or change locale (for example, amazon.co.uk instead of amazon.com).';
+    "We're sorry, an error has occurred. Please reload this page and try again.";
 
   checkErrors(url: URL, html: HTMLElement, cookies: string): void {
     this.checkCaptcha(url, html, cookies);
