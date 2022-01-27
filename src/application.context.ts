@@ -1,6 +1,6 @@
 import { SiteResolver } from './model/resolver/site-resolver.enum';
 import { MessageService } from './service/message/message.service';
-import { AmazonCaptchaResolverService } from './service/resolver/amazon/amazon-captcha-resolver.service';
+import { AmazonErrorResolverService } from './service/resolver/amazon/amazon-error-resolver.service';
 import { AmazonFormatResolverService } from './service/resolver/amazon/amazon-format-resolver.service';
 import { AmazonRerouteService } from './service/resolver/amazon/amazon-reroute.service';
 import { AmazonResolverService } from './service/resolver/amazon/amazon-resolver.service';
@@ -57,7 +57,7 @@ export class ApplicationContext {
         statisticsService,
         amazonApiService,
         new AmazonFormatResolverService(),
-        new AmazonCaptchaResolverService(),
+        new AmazonErrorResolverService(),
         new AmazonRerouteService(statisticsService)
       ),
       1: new AudibleResolverService(statisticsService),

@@ -1,4 +1,3 @@
-import { AmazonApiService } from './api/amazon-api.service';
 import * as http from 'http';
 import { HTMLElement } from 'node-html-parser';
 import { URL } from 'url';
@@ -7,18 +6,19 @@ import { Entry } from '../../../model/entry';
 import { NullableHtmlElement } from '../../../model/html/nullable-html-element';
 import { LanguageStrings } from '../../../model/i18n/language-strings';
 import { AmazonDetails } from '../../../model/resolver/amazon/amazon-details';
+import { AmazonReroute } from '../../../model/resolver/amazon/amazon-reroute';
 import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
 import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
 import { I18nUtil } from '../../../util/i18n-util';
 import { AbstractResolver } from '../abstract-resolver';
 import { ResolverException } from './../../../model/error/resolver-exception';
-import { AmazonReroute } from '../../../model/resolver/amazon/amazon-reroute';
 import { Source } from './../../../model/telegram/source.enum';
 import { StatisticsService } from './../../statistics/statistic.service';
-import { AmazonCaptchaResolverService } from './amazon-captcha-resolver.service';
+import { AmazonErrorResolverService } from './amazon-error-resolver.service';
 import { AmazonFormatResolverService } from './amazon-format-resolver.service';
 import { AmazonRerouteService } from './amazon-reroute.service';
+import { AmazonApiService } from './api/amazon-api.service';
 
 export class AmazonResolverService extends AbstractResolver {
   private static readonly LANGUAGE_PATH_PARAM: RegExp = /^\/-\/[a-zA-Z]{2}\//g;
@@ -46,20 +46,20 @@ export class AmazonResolverService extends AbstractResolver {
   private amazonApiService: AmazonApiService;
 
   private amazonFormatResolverService: AmazonFormatResolverService;
-  private amazonCaptchaResolverService: AmazonCaptchaResolverService;
+  private amazonErrorResolverService: AmazonErrorResolverService;
   private amazonRerouteService: AmazonRerouteService;
 
   constructor(
     statisticsService: StatisticsService,
     amazonApiService: AmazonApiService,
     amazonFormatResolverService: AmazonFormatResolverService,
-    amazonCaptchaResolverService: AmazonCaptchaResolverService,
+    amazonErrorResolverService: AmazonErrorResolverService,
     amazonRerouteService: AmazonRerouteService
   ) {
     super(statisticsService);
     this.amazonApiService = amazonApiService;
     this.amazonFormatResolverService = amazonFormatResolverService;
-    this.amazonCaptchaResolverService = amazonCaptchaResolverService;
+    this.amazonErrorResolverService = amazonErrorResolverService;
     this.amazonRerouteService = amazonRerouteService;
   }
 
@@ -87,7 +87,7 @@ export class AmazonResolverService extends AbstractResolver {
 
   /**
    * Override processSuccessfulResponse
-   * Manage the captcha exceptions to redirect to another host
+   * Manage the custom exceptions to redirect to another host
    *
    * @param url Original url
    * @param response Original response
@@ -101,8 +101,8 @@ export class AmazonResolverService extends AbstractResolver {
         .processSuccessfulResponse(url, response)
         .then((messages: Message[]) => resolve(messages))
         .catch((error: ResolverException) => {
-          // when there are errors related to the captcha reroute
-          const reroute: AmazonReroute = this.amazonRerouteService.checkCaptcha(
+          // when there are errors related to the reroute
+          const reroute: AmazonReroute = this.amazonRerouteService.checkErrors(
             url,
             error
           );
@@ -167,8 +167,8 @@ export class AmazonResolverService extends AbstractResolver {
 
   extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {
     return new Promise<Message[]>((resolve) => {
-      // captcha
-      this.amazonCaptchaResolverService.checkCaptcha(
+      // errors
+      this.amazonErrorResolverService.checkErrors(
         url,
         html,
         this.getCookies(this.getCookiesKey(url))
