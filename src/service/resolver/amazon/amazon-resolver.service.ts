@@ -191,13 +191,14 @@ export class AmazonResolverService extends AbstractResolver {
         AmazonResolverService.TITLE_ID
       );
 
-      const author: NullableHtmlElement = this.getAuthorElement(html);
+      const authors: HTMLElement[] = this.getAuthorElements(html);
 
       const nullableDetailsList: NullableHtmlElement = html.querySelector(
         AmazonResolverService.DETAILS_LIST_ID
       );
 
-      this.checkRequiredElements([title, author, nullableDetailsList]);
+      this.checkRequiredElements([title, nullableDetailsList]);
+      this.checkRequiredElements(authors, 'Missing required author.');
 
       // details
       const detailsList: NullableHtmlElement =
@@ -233,7 +234,9 @@ export class AmazonResolverService extends AbstractResolver {
 
       // main info
       message.setTitle(HtmlUtil.getTextContent(title as HTMLElement));
-      message.addAuthor(HtmlUtil.getTextContent(author as HTMLElement));
+      for (const author of authors) {
+        message.addAuthor(HtmlUtil.getTextContent(author));
+      }
 
       this.setPublicationDate(
         message,
@@ -298,22 +301,68 @@ export class AmazonResolverService extends AbstractResolver {
     }
   }
 
-  private getAuthorElement(html: HTMLElement): NullableHtmlElement {
-    let author: NullableHtmlElement = html.querySelector(
-      AmazonResolverService.AUTHOR_ID
+  private getAuthorElements(html: HTMLElement): HTMLElement[] {
+    const authors: HTMLElement[] = [];
+
+    const authorWrappers: HTMLElement[] = html.querySelectorAll(
+      AmazonResolverService.AUTHOR_ALTERNATIVE_ID
     );
 
-    if (author == null) {
-      const authorWrapper: NullableHtmlElement = html.querySelector(
-        AmazonResolverService.AUTHOR_ALTERNATIVE_ID
-      );
+    for (let i = 0; i < authorWrappers.length; i++) {
+      const authorWrapper: HTMLElement = authorWrappers[i];
 
-      if (authorWrapper != null) {
-        author = authorWrapper.querySelector(AmazonResolverService.LINK_CLASS);
+      // look for authors
+      const authorTag: NullableHtmlElement =
+        authorWrapper.querySelector('.contribution');
+
+      if (authorTag != null && this.getContribution(authorTag) == 'author') {
+        // look for nested span
+        let wrapper: NullableHtmlElement =
+          authorWrapper.querySelector('.a-declarative');
+        if (wrapper == null) {
+          wrapper = authorWrapper;
+        }
+
+        const author = wrapper.querySelector(AmazonResolverService.LINK_CLASS);
+        if (author != null) {
+          authors.push(author);
+        }
       }
     }
 
-    return author;
+    if (authors.length == 0) {
+      const author = html.querySelector(AmazonResolverService.AUTHOR_ID);
+      if (author != null) {
+        authors.push(author);
+      }
+    }
+
+    return authors;
+  }
+
+  private getContribution(element: HTMLElement): string {
+    const text: string = HtmlUtil.getRawText(element).toLowerCase();
+
+    const startIndex: number = text.indexOf('(');
+    const endIndex: number = text.indexOf(')');
+
+    let result = '';
+    if (startIndex > -1 && endIndex > startIndex) {
+      const contribution: string = text.substring(startIndex + 1, endIndex);
+      result = contribution;
+
+      if (
+        contribution == 'author' ||
+        contribution == 'autore' ||
+        contribution == 'auteur' ||
+        contribution == 'autor' ||
+        contribution == 'auteur'
+      ) {
+        result = 'author';
+      }
+    }
+
+    return result;
   }
 
   private getAsin(url: URL, asin: string | null): string {
