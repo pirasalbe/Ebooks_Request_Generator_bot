@@ -331,13 +331,31 @@ export class AmazonResolverService extends AbstractResolver {
     }
 
     if (authors.length == 0) {
-      const author = html.querySelector(AmazonResolverService.AUTHOR_ID);
+      const author: NullableHtmlElement = this.getAuthorElement(html);
       if (author != null) {
         authors.push(author);
       }
     }
 
     return authors;
+  }
+
+  private getAuthorElement(html: HTMLElement): NullableHtmlElement {
+    let author: NullableHtmlElement = html.querySelector(
+      AmazonResolverService.AUTHOR_ID
+    );
+
+    if (author == null) {
+      const authorWrapper: NullableHtmlElement = html.querySelector(
+        AmazonResolverService.AUTHOR_ALTERNATIVE_ID
+      );
+
+      if (authorWrapper != null) {
+        author = authorWrapper.querySelector(AmazonResolverService.LINK_CLASS);
+      }
+    }
+
+    return author;
   }
 
   private getContribution(element: HTMLElement): string {
