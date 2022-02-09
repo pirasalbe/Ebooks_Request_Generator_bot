@@ -17,6 +17,8 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
   private static readonly IMPRINT: string = '-Imprint';
   private static readonly MASK_PARAM: string = 'Publisher';
 
+  public static readonly CHARS_PATTERN: RegExp = new RegExp('([a-z]| )');
+
   constructor() {
     super();
   }
@@ -27,13 +29,26 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
     const publisher: string | null = message.getPublisher();
     if (publisher != null) {
       const academicPublisher: Publisher | undefined = this.elements.find(
-        (p: Publisher) => publisher.toLowerCase().startsWith(p.name)
+        (p: Publisher) => this.isAcademic(p, publisher.toLowerCase())
       );
       if (academicPublisher != undefined) {
         result = Validation.invalid(
           this.getError(publisher, academicPublisher.imprint)
         );
       }
+    }
+
+    return result;
+  }
+
+  private isAcademic(publisher: Publisher, messagePublisher: string): boolean {
+    let result = false;
+
+    if (publisher.name == messagePublisher) {
+      result = true;
+    } else if (messagePublisher.startsWith(publisher.name)) {
+      const nextChar: string = messagePublisher.charAt(publisher.name.length);
+      result = !PublisherValidatorService.CHARS_PATTERN.test(nextChar);
     }
 
     return result;
