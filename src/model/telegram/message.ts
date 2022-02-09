@@ -1,3 +1,4 @@
+import { privateEncrypt } from 'crypto';
 import { URL } from 'url';
 
 import { DateUtil } from '../../util/date-util';
@@ -158,7 +159,16 @@ export class Message {
     // source
     if (this.source != null) {
       const source: string = Source[this.source];
-      tags.push(source.toLowerCase());
+      console.log(source)
+      if (source != "KU")
+        tags.push(source.toLowerCase());
+      else
+        tags.push(source.toUpperCase());
+    }
+
+    // language
+    if (this.language != null) {
+      tags.push(this.language[0].toUpperCase() + this.language.substring(1));
     }
 
     // format
@@ -166,12 +176,7 @@ export class Message {
       const format: string = Format[this.format];
       tags.push(format.toLowerCase());
     }
-
-    // language
-    if (this.language != null) {
-      tags.push(this.language);
-    }
-
+    
     return tags.join(' #').trim();
   }
 

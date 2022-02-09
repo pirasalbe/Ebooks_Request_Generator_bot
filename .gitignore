@@ -1,6 +1,8 @@
 # Custom
 *.html
 nohup.out
+.env
+
 
 # Logs
 logs

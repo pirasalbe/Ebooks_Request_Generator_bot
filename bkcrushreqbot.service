@@ -1,0 +1,9 @@
+[Service]
+Type=simple
+ExecStart=/home/pi/bkcrushreqbot/dist/app.js
+WorkingDirectory=/home/pi/bkcrushreqbot
+Restart=always
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=%n
