@@ -17,7 +17,7 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
   private static readonly IMPRINT: string = '-Imprint';
   private static readonly MASK_PARAM: string = 'Publisher';
 
-  public static readonly CHARS_PATTERN: RegExp = new RegExp('([a-z]| )');
+  public static readonly CHARS_PATTERN: RegExp = new RegExp('[a-z]');
 
   constructor() {
     super();
