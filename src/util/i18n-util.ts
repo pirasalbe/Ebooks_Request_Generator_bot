@@ -321,7 +321,7 @@ export class I18nUtil {
         italian: 'italiaans',
         german: 'duits',
         dutch: 'nederlands',
-        french: 'rans',
+        french: 'frans',
         spanish: 'spaans',
         portuguese: 'portugees',
       }
