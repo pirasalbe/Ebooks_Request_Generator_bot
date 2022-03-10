@@ -135,7 +135,9 @@ export abstract class AbstractResolver implements Resolver {
           .catch((error) => reject(error));
       } else if (response.statusCode == 301 || response.statusCode == 302) {
         // redirect
-        this.resolve(new URL(response.headers.location as string))
+        this.resolve(
+          this.getRedirectURL(url, response.headers.location as string)
+        )
           .then((messages: Message[]) => resolve(messages))
           .catch((error) => reject(error));
       } else {
@@ -144,6 +146,10 @@ export abstract class AbstractResolver implements Resolver {
         reject(this.getErrorResponse(url, response.statusCode));
       }
     });
+  }
+
+  protected getRedirectURL(originalUrl: URL, newLocation: string): URL {
+    return new URL(newLocation as string);
   }
 
   private getErrorResponse(url: URL, statusCode: number | undefined): string {
