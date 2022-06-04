@@ -31,6 +31,7 @@ export class AmazonResolverService extends AbstractResolver {
   private static readonly AUTHOR_ID = '.contributorNameID';
   private static readonly AUTHOR_ALTERNATIVE_ID = '.author';
   private static readonly KINDLE_FORMAT_ID = '#productSubtitle';
+  private static readonly CATEGORIES_ID = '#wayfinding-breadcrumbs_feature_div';
 
   private static readonly DETAILS_LIST_ID = '.detail-bullet-list';
   private static readonly DETAILS_CAROUSEL_ID =
@@ -40,6 +41,7 @@ export class AmazonResolverService extends AbstractResolver {
   private static readonly LINK_CLASS = '.a-link-normal';
 
   private static readonly KINDLE = 'kindle';
+  private static readonly TEXTBOOK = 'textbook';
 
   private static readonly URL_PREFIX = '/dp/';
 
@@ -181,6 +183,12 @@ export class AmazonResolverService extends AbstractResolver {
 
       this.checkKindleFormat(kindleFormat);
 
+      const categories: NullableHtmlElement = html.querySelector(
+        AmazonResolverService.CATEGORIES_ID
+      );
+
+      this.checkCategories(categories);
+
       const siteLanguageElements: HTMLElement[] = html.querySelectorAll(
         AmazonResolverService.SITE_LANGUAGE_ID
       );
@@ -298,6 +306,18 @@ export class AmazonResolverService extends AbstractResolver {
         .includes(AmazonResolverService.KINDLE)
     ) {
       throw 'Provided link is not of a Kindle Edition. Make sure to copy the kindle edition link from amazon.';
+    }
+  }
+
+  private checkCategories(categories: NullableHtmlElement): void {
+    if (
+      categories != null &&
+      categories.textContent != null &&
+      categories.textContent
+        .toLocaleLowerCase()
+        .includes(AmazonResolverService.TEXTBOOK)
+    ) {
+      throw 'Provided link is an academic textbook and is not supposed to be requested.';
     }
   }
 
