@@ -29,37 +29,45 @@ export abstract class AbstractResolver implements Resolver {
 
   resolve(url: URL): Promise<Message[]> {
     return new Promise<Message[]>((resolve, reject) => {
-      https.get(
-        this.prepareUrl(url),
-        {
-          headers: {
-            'User-Agent': HttpUtil.USER_AGENT,
-            Accept: HttpUtil.ACCEPT,
-            'Accept-Encoding': HttpUtil.ACCEPT_ENCODING,
-            'Accept-Language': 'en-US,en;q=0.5',
-            Host: url.host,
-            DNT: 1,
-            Connection: HttpUtil.CONNECTION,
-            'Upgrade-Insecure-Requests': 1,
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none',
-            'Sec-Fetch-User': '?1',
-            Cookie: this.getCookies(this.getCookiesKey(url)),
+      https
+        .get(
+          this.prepareUrl(url),
+          {
+            headers: {
+              'User-Agent': HttpUtil.USER_AGENT,
+              Accept: HttpUtil.ACCEPT,
+              'Accept-Encoding': HttpUtil.ACCEPT_ENCODING,
+              'Accept-Language': 'en-US,en;q=0.5',
+              Host: url.host,
+              DNT: 1,
+              Connection: HttpUtil.CONNECTION,
+              'Upgrade-Insecure-Requests': 1,
+              'Sec-Fetch-Dest': 'document',
+              'Sec-Fetch-Mode': 'navigate',
+              'Sec-Fetch-Site': 'none',
+              'Sec-Fetch-User': '?1',
+              Cookie: this.getCookies(this.getCookiesKey(url)),
+            },
           },
-        },
-        (response: http.IncomingMessage) => {
-          this.updateCookies(this.getCookiesKey(url), response.headers);
-          this.processResponse(url, response)
-            .then((messages: Message[]) => resolve(messages))
-            .catch((error) => {
-              this.statisticsService
-                .getStats()
-                .increaseHostErrorCount(url.host);
-              reject(error);
-            });
-        }
-      );
+          (response: http.IncomingMessage) => {
+            this.updateCookies(this.getCookiesKey(url), response.headers);
+            this.processResponse(url, response)
+              .then((messages: Message[]) => resolve(messages))
+              .catch((error) => {
+                this.statisticsService
+                  .getStats()
+                  .increaseHostErrorCount(url.host);
+                reject(error);
+              });
+          }
+        )
+        .on('timeout', () => {
+          reject('Connection timed out');
+        })
+        .on('error', (err: Error) => {
+          console.error('Error connecting to ', url.toString(), err.message);
+          reject('Connection error: ' + err.message);
+        });
     });
   }
 
