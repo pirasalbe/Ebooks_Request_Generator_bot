@@ -4,7 +4,7 @@
   "description": "Telegram Bot with TypeScript, Node.js, and Telegraf and deployment configuration for Heroku",
   "main": "dist/app.js",
   "engines": {
-    "node": "17.0",
+    "node": "^17.0",
     "npm": "8.1"
   },
   "scripts": {
@@ -27,7 +27,8 @@
     "@typescript-eslint/eslint-plugin": "^5.1.0",
     "@typescript-eslint/parser": "^5.1.0",
     "eslint": "^8.1.0",
-    "typescript": "^4.4.4"
+    "typescript": "^4.4.4",
+    "ws": "3.3.2"
   },
   "dependencies": {
     "dotenv": "^11.0.0",
