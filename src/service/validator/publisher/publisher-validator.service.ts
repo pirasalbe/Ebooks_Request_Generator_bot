@@ -46,7 +46,7 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
 
     if (publisher.name == messagePublisher) {
       result = true;
-    } else if (messagePublisher.startsWith(publisher.name)) {
+    } else if (messagePublisher.includes(publisher.name)) {
       const nextChar: string = messagePublisher.charAt(publisher.name.length);
       result = !PublisherValidatorService.CHARS_PATTERN.test(nextChar);
     }
