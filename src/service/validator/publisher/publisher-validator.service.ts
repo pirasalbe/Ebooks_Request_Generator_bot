@@ -28,13 +28,16 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
 
     const publisher: string | null = message.getPublisher();
     if (publisher != null) {
+      const lowerCasePublisher = publisher.toLowerCase();
       const academicPublisher: Publisher | undefined = this.elements.find(
-        (p: Publisher) => this.isAcademic(p, publisher.toLowerCase())
+        (p: Publisher) => this.isAcademic(p, lowerCasePublisher)
       );
       if (academicPublisher != undefined) {
         result = Validation.invalid(
           this.getError(publisher, academicPublisher.imprint)
         );
+      } else if (lowerCasePublisher.includes('university press')) {
+        result = Validation.invalid(this.getError(publisher, null));
       }
     }
 
@@ -46,7 +49,7 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
 
     if (publisher.name == messagePublisher) {
       result = true;
-    } else if (messagePublisher.includes(publisher.name)) {
+    } else if (messagePublisher.startsWith(publisher.name)) {
       const nextChar: string = messagePublisher.charAt(publisher.name.length);
       result = !PublisherValidatorService.CHARS_PATTERN.test(nextChar);
     }
