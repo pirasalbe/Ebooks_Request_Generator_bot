@@ -36,7 +36,10 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
         result = Validation.invalid(
           this.getError(publisher, academicPublisher.imprint)
         );
-      } else if (lowerCasePublisher.includes('university press')) {
+      } else if (
+        lowerCasePublisher.includes('university') &&
+        lowerCasePublisher.includes('press')
+      ) {
         result = Validation.invalid(this.getError(publisher, null));
       }
     }
