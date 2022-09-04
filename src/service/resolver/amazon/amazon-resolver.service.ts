@@ -649,8 +649,16 @@ export class AmazonResolverService extends AbstractResolver {
           // year
           year = Number(part);
         } else if (part.match(/[a-z]*/g)) {
+          // make sure it's the short month
+          let shortPart: string | null = null;
+          if (part.length > 3) {
+            shortPart = part.substring(0, 3);
+          } else {
+            shortPart = part;
+          }
+
           // month
-          month = I18nUtil.getKey(siteLanguage, part);
+          month = I18nUtil.getKey(siteLanguage, shortPart);
         }
       }
 
