@@ -1,14 +1,16 @@
 import { URL } from 'url';
 
+import { AmazonReroute } from '../../../model/resolver/amazon/amazon-reroute';
 import { RandomUtil } from '../../../util/random-util';
 import { ResolverException } from './../../../model/error/resolver-exception';
-import { AmazonReroute } from './../../../model/resolver/amazon-reroute';
 import { StatisticsService } from './../../statistics/statistic.service';
-import { AmazonCaptchaResolverService } from './amazon-captcha-resolver.service';
+import { AmazonErrorResolverService } from './amazon-error-resolver.service';
 
 export class AmazonRerouteService {
+  private static readonly AMAZON_COM_HOST: string = 'www.amazon.com';
+
   private static readonly AMAZON_HOSTS: string[] = [
-    'www.amazon.com',
+    AmazonRerouteService.AMAZON_COM_HOST,
     'www.amazon.co.uk',
     'www.amazon.ca',
     'www.amazon.com.au',
@@ -34,19 +36,22 @@ export class AmazonRerouteService {
   }
 
   /**
-   * Check if should reroute because of captcha
+   * Check if should reroute because of errors
    * @param url Original URL
    * @param error Error obtained
    * @returns Should reroute
    */
-  checkCaptcha(url: URL, error: ResolverException): AmazonReroute {
+  checkErrors(url: URL, error: ResolverException): AmazonReroute {
     let result: AmazonReroute = AmazonReroute.noReroute();
 
-    if (
-      error != undefined &&
-      error.message == AmazonCaptchaResolverService.CAPTCHA_ERROR
-    ) {
-      result = this.getReroute(url, error.message);
+    if (error != undefined) {
+      if (error.message == AmazonErrorResolverService.CAPTCHA_ERROR) {
+        result = this.getReroute(url, error.message);
+      } else if (error.message == AmazonErrorResolverService.RELOAD_ERROR) {
+        result = this.getReroute(url, error.message, [
+          AmazonRerouteService.AMAZON_COM_HOST,
+        ]);
+      }
     }
 
     return result;
@@ -62,14 +67,21 @@ export class AmazonRerouteService {
     return result;
   }
 
-  private getReroute(url: URL, error: string): AmazonReroute {
+  private getReroute(
+    url: URL,
+    error: string,
+    amazonHosts: string[] = AmazonRerouteService.AMAZON_HOSTS
+  ): AmazonReroute {
     let result: AmazonReroute = AmazonReroute.noReroute();
 
     // track the requested hosts
     this.addReroutedRequest(url);
 
     // find alternative hosts
-    const alternativeHosts: string[] = this.getAlternativeHosts(url);
+    const alternativeHosts: string[] = this.getAlternativeHosts(
+      url,
+      amazonHosts
+    );
 
     // if hosts found, build new url
     if (alternativeHosts.length > 0) {
@@ -109,12 +121,12 @@ export class AmazonRerouteService {
     hosts.push(url.host);
   }
 
-  private getAlternativeHosts(url: URL): string[] {
+  private getAlternativeHosts(url: URL, amazonHosts: string[]): string[] {
     const path: string = url.pathname;
     const hosts: string[] = this.reroutedRequests.get(path) as string[];
 
     const alternativeHosts: string[] = [];
-    for (const host of AmazonRerouteService.AMAZON_HOSTS) {
+    for (const host of amazonHosts) {
       const index: number = hosts.findIndex((h: string) => h == host);
       if (index < 0) {
         alternativeHosts.push(host);

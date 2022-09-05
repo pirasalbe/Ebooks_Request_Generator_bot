@@ -1,9 +1,10 @@
 import { SiteResolver } from './model/resolver/site-resolver.enum';
 import { MessageService } from './service/message/message.service';
-import { AmazonCaptchaResolverService } from './service/resolver/amazon/amazon-captcha-resolver.service';
+import { AmazonErrorResolverService } from './service/resolver/amazon/amazon-error-resolver.service';
 import { AmazonFormatResolverService } from './service/resolver/amazon/amazon-format-resolver.service';
 import { AmazonRerouteService } from './service/resolver/amazon/amazon-reroute.service';
 import { AmazonResolverService } from './service/resolver/amazon/amazon-resolver.service';
+import { AmazonApiService } from './service/resolver/amazon/api/amazon-api.service';
 import { ArchiveResolverService } from './service/resolver/archive/archive-resolver.service';
 import { AudibleResolverService } from './service/resolver/audible/audible-resolver.service';
 import { OpenLibraryResolverService } from './service/resolver/openlibrary/open-library-resolver.service';
@@ -12,10 +13,8 @@ import { ResolverService } from './service/resolver/resolver.service';
 import { ScribdResolverService } from './service/resolver/scribd/scribd-resolver.service';
 import { StorytelApiResolverService } from './service/resolver/storytel/api/storytel-api-resolver.service';
 import { StorytelConsumableResolverService } from './service/resolver/storytel/storytel-consumable-resolver.service';
-import { StorytelSearchResolverService } from './service/resolver/storytel/storytel-search-resolver.service';
 import { StatisticsService } from './service/statistics/statistic.service';
 import { BotService } from './service/telegram/bot.service';
-// import { TwitterService } from './service/twitter/twitter.service';
 import { AuthorValidatorService } from './service/validator/author/author-validator.service';
 import { LanguageValidatorService } from './service/validator/language/language-validator.service';
 import { PublisherValidatorService } from './service/validator/publisher/publisher-validator.service';
@@ -31,17 +30,33 @@ export class ApplicationContext {
 
     const statisticsService: StatisticsService = new StatisticsService();
 
+    // storytel api
     let storytelAuth: string | undefined = process.env.STORYTEL_AUTHS;
     if (storytelAuth == undefined) {
       storytelAuth = '[]';
     }
 
+    // amazon api
+    const sitestripeMarketplaceId: string | undefined =
+      process.env.AMAZON_API_SITESTRIPE_MARKETPLACE_ID;
+    const sitestripeLongUrlParams: string | undefined =
+      process.env.AMAZON_API_SITESTRIPE_LONG_URL_PARAMS;
+    const sitestripeCookies: string | undefined =
+      process.env.AMAZON_API_SITESTRIPE_COOKIES;
+
+    const amazonApiService: AmazonApiService = new AmazonApiService(
+      sitestripeMarketplaceId,
+      sitestripeLongUrlParams,
+      sitestripeCookies
+    );
+
     // resolvers
     const resolvers: Record<SiteResolver, Resolver> = {
       0: new AmazonResolverService(
         statisticsService,
+        amazonApiService,
         new AmazonFormatResolverService(),
-        new AmazonCaptchaResolverService(),
+        new AmazonErrorResolverService(),
         new AmazonRerouteService(statisticsService)
       ),
       1: new AudibleResolverService(statisticsService),
@@ -72,32 +87,10 @@ export class ApplicationContext {
       this.log('Validators loaded');
     });
 
-    // twitter
-    const appKey: string | undefined = process.env.TWITTER_APP_KEY;
-    const appSecret: string | undefined = process.env.TWITTER_APP_SECRET;
-    const accessToken: string | undefined = process.env.TWITTER_ACCESS_TOKEN;
-    const accessSecret: string | undefined = process.env.TWITTER_ACCESS_SECRET;
-
-    // let twitterService: TwitterService | null = null;
-    // if (
-    //   appKey != undefined &&
-    //   appSecret != undefined &&
-    //   accessToken != undefined &&
-    //   accessSecret != undefined
-    // ) {
-    //   twitterService = new TwitterService(
-    //     appKey,
-    //     appSecret,
-    //     accessToken,
-    //     accessSecret
-    //   );
-    // }
-
     // messages
     const messageService: MessageService = new MessageService(
       resolverService,
-      validatorService,
-      // twitterService
+      validatorService
     );
 
     // telegram
@@ -106,6 +99,7 @@ export class ApplicationContext {
       messageService,
       validatorService,
       statisticsService,
+      amazonApiService,
       token
     );
 

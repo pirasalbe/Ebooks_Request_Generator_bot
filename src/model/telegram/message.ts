@@ -51,6 +51,10 @@ export class Message {
     return clone;
   }
 
+  getSite(): SiteResolver {
+    return this.site;
+  }
+
   getSiteName(): string {
     const name: string = SiteResolver[this.site];
 
@@ -178,6 +182,10 @@ export class Message {
     }
     
     return tags.join(' #').trim();
+  }
+
+  getUrl(): URL {
+    return this.url;
   }
 
   getLink(): string {

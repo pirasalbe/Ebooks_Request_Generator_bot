@@ -5,19 +5,20 @@ import { URL } from 'url';
 import { Entry } from '../../../model/entry';
 import { NullableHtmlElement } from '../../../model/html/nullable-html-element';
 import { LanguageStrings } from '../../../model/i18n/language-strings';
-import { AmazonDetails } from '../../../model/resolver/amazon-details';
+import { AmazonDetails } from '../../../model/resolver/amazon/amazon-details';
+import { AmazonReroute } from '../../../model/resolver/amazon/amazon-reroute';
 import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
 import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
 import { I18nUtil } from '../../../util/i18n-util';
 import { AbstractResolver } from '../abstract-resolver';
 import { ResolverException } from './../../../model/error/resolver-exception';
-import { AmazonReroute } from './../../../model/resolver/amazon-reroute';
 import { Source } from './../../../model/telegram/source.enum';
 import { StatisticsService } from './../../statistics/statistic.service';
-import { AmazonCaptchaResolverService } from './amazon-captcha-resolver.service';
+import { AmazonErrorResolverService } from './amazon-error-resolver.service';
 import { AmazonFormatResolverService } from './amazon-format-resolver.service';
 import { AmazonRerouteService } from './amazon-reroute.service';
+import { AmazonApiService } from './api/amazon-api.service';
 
 export class AmazonResolverService extends AbstractResolver {
   private static readonly LANGUAGE_PATH_PARAM: RegExp = /^\/-\/[a-zA-Z]{2}\//g;
@@ -30,6 +31,7 @@ export class AmazonResolverService extends AbstractResolver {
   private static readonly AUTHOR_ID = '.contributorNameID';
   private static readonly AUTHOR_ALTERNATIVE_ID = '.author';
   private static readonly KINDLE_FORMAT_ID = '#productSubtitle';
+  private static readonly CATEGORIES_ID = '#wayfinding-breadcrumbs_feature_div';
 
   private static readonly DETAILS_LIST_ID = '.detail-bullet-list';
   private static readonly DETAILS_CAROUSEL_ID =
@@ -39,22 +41,27 @@ export class AmazonResolverService extends AbstractResolver {
   private static readonly LINK_CLASS = '.a-link-normal';
 
   private static readonly KINDLE = 'kindle';
+  private static readonly TEXTBOOK = 'textbook';
 
   private static readonly URL_PREFIX = '/dp/';
 
+  private amazonApiService: AmazonApiService;
+
   private amazonFormatResolverService: AmazonFormatResolverService;
-  private amazonCaptchaResolverService: AmazonCaptchaResolverService;
+  private amazonErrorResolverService: AmazonErrorResolverService;
   private amazonRerouteService: AmazonRerouteService;
 
   constructor(
     statisticsService: StatisticsService,
+    amazonApiService: AmazonApiService,
     amazonFormatResolverService: AmazonFormatResolverService,
-    amazonCaptchaResolverService: AmazonCaptchaResolverService,
+    amazonErrorResolverService: AmazonErrorResolverService,
     amazonRerouteService: AmazonRerouteService
   ) {
     super(statisticsService);
+    this.amazonApiService = amazonApiService;
     this.amazonFormatResolverService = amazonFormatResolverService;
-    this.amazonCaptchaResolverService = amazonCaptchaResolverService;
+    this.amazonErrorResolverService = amazonErrorResolverService;
     this.amazonRerouteService = amazonRerouteService;
   }
 
@@ -82,7 +89,7 @@ export class AmazonResolverService extends AbstractResolver {
 
   /**
    * Override processSuccessfulResponse
-   * Manage the captcha exceptions to redirect to another host
+   * Manage the custom exceptions to redirect to another host
    *
    * @param url Original url
    * @param response Original response
@@ -96,8 +103,8 @@ export class AmazonResolverService extends AbstractResolver {
         .processSuccessfulResponse(url, response)
         .then((messages: Message[]) => resolve(messages))
         .catch((error: ResolverException) => {
-          // when there are errors related to the captcha reroute
-          const reroute: AmazonReroute = this.amazonRerouteService.checkCaptcha(
+          // when there are errors related to the reroute
+          const reroute: AmazonReroute = this.amazonRerouteService.checkErrors(
             url,
             error
           );
@@ -162,8 +169,8 @@ export class AmazonResolverService extends AbstractResolver {
 
   extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {
     return new Promise<Message[]>((resolve) => {
-      // captcha
-      this.amazonCaptchaResolverService.checkCaptcha(
+      // errors
+      this.amazonErrorResolverService.checkErrors(
         url,
         html,
         this.getCookies(this.getCookiesKey(url))
@@ -176,6 +183,12 @@ export class AmazonResolverService extends AbstractResolver {
 
       this.checkKindleFormat(kindleFormat);
 
+      const categories: NullableHtmlElement = html.querySelector(
+        AmazonResolverService.CATEGORIES_ID
+      );
+
+      this.checkCategories(categories);
+
       const siteLanguageElements: HTMLElement[] = html.querySelectorAll(
         AmazonResolverService.SITE_LANGUAGE_ID
       );
@@ -186,13 +199,14 @@ export class AmazonResolverService extends AbstractResolver {
         AmazonResolverService.TITLE_ID
       );
 
-      const author: NullableHtmlElement = this.getAuthorElement(html);
+      const authors: HTMLElement[] = this.getAuthorElements(html);
 
       const nullableDetailsList: NullableHtmlElement = html.querySelector(
         AmazonResolverService.DETAILS_LIST_ID
       );
 
-      this.checkRequiredElements([title, author, nullableDetailsList]);
+      this.checkRequiredElements([title, nullableDetailsList]);
+      this.checkRequiredElements(authors, 'Missing required author.');
 
       // details
       const detailsList: NullableHtmlElement =
@@ -228,7 +242,9 @@ export class AmazonResolverService extends AbstractResolver {
 
       // main info
       message.setTitle(HtmlUtil.getTextContent(title as HTMLElement));
-      message.addAuthor(HtmlUtil.getTextContent(author as HTMLElement));
+      for (const author of authors) {
+        message.addAuthor(HtmlUtil.getTextContent(author));
+      }
 
       this.setPublicationDate(
         message,
@@ -293,6 +309,57 @@ export class AmazonResolverService extends AbstractResolver {
     }
   }
 
+  private checkCategories(categories: NullableHtmlElement): void {
+    if (
+      categories != null &&
+      categories.textContent != null &&
+      categories.textContent
+        .toLocaleLowerCase()
+        .includes(AmazonResolverService.TEXTBOOK)
+    ) {
+      throw 'Provided link is an academic textbook and is not supposed to be requested.';
+    }
+  }
+
+  private getAuthorElements(html: HTMLElement): HTMLElement[] {
+    const authors: HTMLElement[] = [];
+
+    const authorWrappers: HTMLElement[] = html.querySelectorAll(
+      AmazonResolverService.AUTHOR_ALTERNATIVE_ID
+    );
+
+    for (let i = 0; i < authorWrappers.length; i++) {
+      const authorWrapper: HTMLElement = authorWrappers[i];
+
+      // look for authors
+      const authorTag: NullableHtmlElement =
+        authorWrapper.querySelector('.contribution');
+
+      if (authorTag != null && this.getContribution(authorTag) == 'author') {
+        // look for nested span
+        let wrapper: NullableHtmlElement =
+          authorWrapper.querySelector('.a-declarative');
+        if (wrapper == null) {
+          wrapper = authorWrapper;
+        }
+
+        const author = wrapper.querySelector(AmazonResolverService.LINK_CLASS);
+        if (author != null) {
+          authors.push(author);
+        }
+      }
+    }
+
+    if (authors.length == 0) {
+      const author: NullableHtmlElement = this.getAuthorElement(html);
+      if (author != null) {
+        authors.push(author);
+      }
+    }
+
+    return authors;
+  }
+
   private getAuthorElement(html: HTMLElement): NullableHtmlElement {
     let author: NullableHtmlElement = html.querySelector(
       AmazonResolverService.AUTHOR_ID
@@ -309,6 +376,31 @@ export class AmazonResolverService extends AbstractResolver {
     }
 
     return author;
+  }
+
+  private getContribution(element: HTMLElement): string {
+    const text: string = HtmlUtil.getRawText(element).toLowerCase();
+
+    const startIndex: number = text.indexOf('(');
+    const endIndex: number = text.indexOf(')');
+
+    let result = '';
+    if (startIndex > -1 && endIndex > startIndex) {
+      const contribution: string = text.substring(startIndex + 1, endIndex);
+      result = contribution;
+
+      if (
+        contribution == 'author' ||
+        contribution == 'autore' ||
+        contribution == 'auteur' ||
+        contribution == 'autor' ||
+        contribution == 'auteur'
+      ) {
+        result = 'author';
+      }
+    }
+
+    return result;
   }
 
   private getAsin(url: URL, asin: string | null): string {
@@ -508,7 +600,7 @@ export class AmazonResolverService extends AbstractResolver {
   private getAmazonAsinUrl(url: URL, asin: string): URL {
     const newUrl: URL = new URL(url.toString());
     newUrl.pathname = AmazonResolverService.URL_PREFIX + asin;
-    newUrl.search = '';
+    newUrl.search = this.amazonApiService.getSiteStripeParams();
     return newUrl;
   }
 
@@ -557,8 +649,16 @@ export class AmazonResolverService extends AbstractResolver {
           // year
           year = Number(part);
         } else if (part.match(/[a-z]*/g)) {
+          // make sure it's the short month
+          let shortPart: string | null = null;
+          if (part.length > 3) {
+            shortPart = part.substring(0, 3);
+          } else {
+            shortPart = part;
+          }
+
           // month
-          month = I18nUtil.getKey(siteLanguage, part);
+          month = I18nUtil.getKey(siteLanguage, shortPart);
         }
       }
 

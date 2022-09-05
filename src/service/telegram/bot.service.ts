@@ -10,12 +10,14 @@ import {
   User,
   UserFromGetMe,
 } from 'typegram';
+import { URL } from 'url';
 
 import { ResolverException } from '../../model/error/resolver-exception';
 import { Message } from '../../model/telegram/message';
 import { DocumentResponse } from '../../model/telegram/telegram-responses';
 import { MessageService } from '../message/message.service';
 import { ValidatorService } from '../validator/validator.service';
+import { AmazonApiService } from './../resolver/amazon/api/amazon-api.service';
 import { StatisticsService } from './../statistics/statistic.service';
 
 export class BotService {
@@ -34,15 +36,19 @@ export class BotService {
   private validatorService: ValidatorService;
   private statisticsService: StatisticsService;
 
+  private amazonApiService: AmazonApiService;
+
   constructor(
     messageService: MessageService,
     validatorService: ValidatorService,
     statisticsService: StatisticsService,
+    amazonApiService: AmazonApiService,
     token: string
   ) {
     this.messageService = messageService;
     this.validatorService = validatorService;
     this.statisticsService = statisticsService;
+    this.amazonApiService = amazonApiService;
 
     // init bot
     this.token = token;
