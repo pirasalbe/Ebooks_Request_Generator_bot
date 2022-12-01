@@ -9,8 +9,7 @@ export class DateUtil {
   }
 
   public static addDays(date: Date, days: number): Date {
-    date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
-    return date;
+    return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
   }
 
   public static dateToString(date: Date): string {
