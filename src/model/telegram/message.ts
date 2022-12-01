@@ -7,7 +7,7 @@ import { Format } from './format.enum';
 import { Source } from './source.enum';
 
 export class Message {
-  private static readonly PUBLICATION_DATE_MINIMUM_AGE_DAYS = 0;
+  private static readonly PUBLICATION_DATE_MINIMUM_AGE_DAYS = 14;
 
   private site: SiteResolver;
 
