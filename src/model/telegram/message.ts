@@ -7,7 +7,7 @@ import { Format } from './format.enum';
 import { Source } from './source.enum';
 
 export class Message {
-  private static readonly PUBLICATION_DATE_MINIMUM_AGE_DAYS = 0;
+  private static readonly PUBLICATION_DATE_MINIMUM_AGE_DAYS = 14;
 
   private site: SiteResolver;
 
@@ -119,7 +119,7 @@ export class Message {
       this.publicationDate = publicationDate;
     } else {
       throw (
-        'Unable to generate the request. This title is scheduled to be released on ' +
+        'Unable to generate the request. This title can be requested from ' +
         DateUtil.dateToString(allowedRequestDate) +
         '.' +
         this.getEasterEgg()
