@@ -119,7 +119,9 @@ export class Message {
       this.publicationDate = publicationDate;
     } else {
       throw (
-        'Unable to generate the request. Please wait for 14 days before requesting newly released titles.\n' +
+        'Unable to generate the request. Please wait for ' +
+        Message.PUBLICATION_DATE_MINIMUM_AGE_DAYS +
+        ' days before requesting newly released titles.\n' +
         'The publication date is ' +
         DateUtil.dateToString(publicationDate) +
         '. This title can be requested on or after ' +
