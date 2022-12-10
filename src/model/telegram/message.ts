@@ -119,7 +119,10 @@ export class Message {
       this.publicationDate = publicationDate;
     } else {
       throw (
-        'Unable to generate the request. This title can be requested from ' +
+        'Unable to generate the request. Please wait for 14 days before requesting newly released titles.\n' +
+        'The publication date is ' +
+        DateUtil.dateToString(publicationDate) +
+        '. This title can be requested on or after ' +
         DateUtil.dateToString(allowedRequestDate) +
         '.' +
         this.getEasterEgg()
