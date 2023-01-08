@@ -2,6 +2,7 @@
 *.html
 nohup.out
 .env
+bkcrushreqbot.service
 
 
 # Logs
