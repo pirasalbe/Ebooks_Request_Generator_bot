@@ -22,7 +22,7 @@ export class BotService {
   private static readonly REPORT: string = '/report';
 
   private static readonly SUCCESSFULL_THUMB_URL =
-    'https://telegra.ph/file/06d1f7c944004bb0dcef1.jpg';
+    'https://graph.org/file/06d1f7c944004bb0dcef1.jpg';
   private static readonly INVALID_THUMB_URL =
     'https://www.downloadclipart.net/large/14121-warning-icon-design.png';
 

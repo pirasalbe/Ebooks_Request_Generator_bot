@@ -10,7 +10,7 @@ import { AbstractValidator } from '../abstract-validator';
 
 export class PublisherValidatorService extends AbstractValidator<Publisher> {
   private static readonly PUBLISHERS: string =
-    'https://telegra.ph/DMCA-Publishers-List-09-21-3';
+    'https://graph.org/DMCA-Publishers-List-09-21-3';
   private static readonly BEGIN_LIST: string = '𝙼𝚎𝚖𝚋𝚎𝚛𝚜 𝚙𝚕𝚎𝚊𝚜𝚎 𝚝𝚊𝚔𝚎 𝚗𝚘𝚝𝚎';
   private static readonly LIST_ELEMENT_START: string = '▫︎ ';
   private static readonly IMPRINT: string = '- Imprint';

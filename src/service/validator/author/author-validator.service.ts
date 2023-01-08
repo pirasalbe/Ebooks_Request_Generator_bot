@@ -9,7 +9,7 @@ import { HtmlUtil } from './../../../util/html-util';
 
 export class AuthorValidatorService extends AbstractValidator<string> {
   private static readonly AUTHORS =
-    'https://telegra.ph/Copyright--Authors-04-15';
+    'https://graph.org/Copyright--Authors-04-15';
   private static readonly BEGIN_LIST = '𝙼𝚎𝚖𝚋𝚎𝚛𝚜 𝚙𝚕𝚎𝚊𝚜𝚎 𝚝𝚊𝚔𝚎 𝚗𝚘𝚝𝚎';
   private static readonly LIST_ELEMENT_START = '▫︎ ';
 

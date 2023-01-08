@@ -4,8 +4,8 @@
   "description": "Telegram Bot with TypeScript, Node.js, and Telegraf and deployment configuration for Heroku",
   "main": "dist/app.js",
   "engines": {
-    "node": "^17.0",
-    "npm": "8.1"
+    "node": "18.0",
+    "npm": "8.19"
   },
   "scripts": {
     "build": "tsc",

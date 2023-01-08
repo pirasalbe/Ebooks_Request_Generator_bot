@@ -1,9 +1,13 @@
 [Service]
 Type=simple
-ExecStart=/home/pi/bkcrushreqbot/dist/app.js
+ExecStart=/usr/local/bin/node /home/pi/bkcrushreqbot/dist/app.js
+Environment=BOT_TOKEN=2088234598:AAGNpD_65lX3v6SUtBSWNxWonIQb0c3q7OY
 WorkingDirectory=/home/pi/bkcrushreqbot
 Restart=always
 RestartSec=5
 StandardOutput=syslog
 StandardError=syslog
 SyslogIdentifier=%n
+
+[Install]
+WantedBy=multi-user.target
