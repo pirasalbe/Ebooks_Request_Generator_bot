@@ -13,8 +13,11 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
     'https://graph.org/DMCA-Publishers-List-09-21-3';
   private static readonly BEGIN_LIST: string = '𝙼𝚎𝚖𝚋𝚎𝚛𝚜 𝚙𝚕𝚎𝚊𝚜𝚎 𝚝𝚊𝚔𝚎 𝚗𝚘𝚝𝚎';
   private static readonly LIST_ELEMENT_START: string = '▫︎ ';
-  private static readonly IMPRINT: string = '- Imprint';
+  private static readonly IMPRINT_SPACE: string = '- Imprint';
+  private static readonly IMPRINT: string = '-Imprint';
   private static readonly MASK_PARAM: string = 'Publisher';
+
+  public static readonly CHARS_PATTERN: RegExp = new RegExp('[a-z]');
 
   constructor() {
     super();
@@ -25,14 +28,33 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
 
     const publisher: string | null = message.getPublisher();
     if (publisher != null) {
+      const lowerCasePublisher = publisher.toLowerCase();
       const academicPublisher: Publisher | undefined = this.elements.find(
-        (p: Publisher) => publisher.toLowerCase().startsWith(p.name)
+        (p: Publisher) => this.isAcademic(p, lowerCasePublisher)
       );
       if (academicPublisher != undefined) {
         result = Validation.invalid(
           this.getError(publisher, academicPublisher.imprint)
         );
+      } else if (
+        lowerCasePublisher.includes('university') &&
+        lowerCasePublisher.includes('press')
+      ) {
+        result = Validation.invalid(this.getError(publisher, null));
       }
+    }
+
+    return result;
+  }
+
+  private isAcademic(publisher: Publisher, messagePublisher: string): boolean {
+    let result = false;
+
+    if (publisher.name == messagePublisher) {
+      result = true;
+    } else if (messagePublisher.startsWith(publisher.name)) {
+      const nextChar: string = messagePublisher.charAt(publisher.name.length);
+      result = !PublisherValidatorService.CHARS_PATTERN.test(nextChar);
     }
 
     return result;
@@ -89,7 +111,11 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
     // remove list element and other special chars
     const sanitizedString: string = content
       .substring(PublisherValidatorService.LIST_ELEMENT_START.length)
-      .replace('\\U0026', '&');
+      .replace('\\U0026', '&')
+      .replace(
+        PublisherValidatorService.IMPRINT_SPACE,
+        PublisherValidatorService.IMPRINT
+      );
 
     const hashTagIndex: number = sanitizedString.indexOf('#');
 

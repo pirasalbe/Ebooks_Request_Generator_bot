@@ -28,6 +28,14 @@ export class AudibleResolverService extends AbstractResolver {
     return url;
   }
 
+  protected getRedirectURL(originalUrl: URL, newLocation: string): URL {
+    const newUrl: URL = new URL(originalUrl.toString());
+
+    newUrl.pathname = newLocation.split('?')[0];
+
+    return newUrl;
+  }
+
   extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {
     return new Promise<Message[]>((resolve) => {
       const bottom: NullableHtmlElement = html.querySelector(
