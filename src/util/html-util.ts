@@ -18,7 +18,7 @@ export class HtmlUtil {
   }
 
   static decode(value: string): string {
-    const element: HTMLElement = parse(`<div>${value}</div>`);
+    const element: HTMLElement = parse(`${value}`);
     return HtmlUtil.getTextContent(element);
   }
 }
