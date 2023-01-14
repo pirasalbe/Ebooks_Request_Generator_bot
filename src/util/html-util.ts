@@ -16,4 +16,9 @@ export class HtmlUtil {
   static getTextContent(element: HTMLElement): string {
     return element.textContent.trim();
   }
+
+  static decode(value: string): string {
+    const element: HTMLElement = parse(`${value}`);
+    return HtmlUtil.getTextContent(element);
+  }
 }
