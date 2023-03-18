@@ -65,7 +65,11 @@ export class ResolverService {
   private getResolver(url: URL): Resolver | null {
     let resolver: Resolver | null = null;
 
-    if (url.hostname.includes('amazon')) {
+    if (
+      url.hostname.includes('amazon') ||
+      url.hostname.includes('a.co') ||
+      url.hostname.includes('amzn')
+    ) {
       resolver = this.resolvers[SiteResolver.AMAZON];
     } else if (url.hostname.includes('audible')) {
       resolver = this.resolvers[SiteResolver.AUDIBLE];
