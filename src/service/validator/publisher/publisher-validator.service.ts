@@ -72,7 +72,7 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
         ')';
     }
 
-    error += ", is academic and can't be displayed here.";
+    error += ", is academic and can't be requested here.";
 
     return error;
   }
