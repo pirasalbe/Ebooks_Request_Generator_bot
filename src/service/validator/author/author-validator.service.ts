@@ -32,7 +32,7 @@ export class AuthorValidatorService extends AbstractValidator<string> {
         result = Validation.invalid(
           'The author of your #request, ' +
             this.mask(author, 'Author') +
-            ", is either academic or protected by DMCA and can't be displayed here."
+            ", is either academic or protected by DMCA and can't be requested here."
         );
       }
     }
