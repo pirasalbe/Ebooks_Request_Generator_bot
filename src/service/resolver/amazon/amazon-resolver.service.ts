@@ -31,6 +31,7 @@ export class AmazonResolverService extends AbstractResolver {
   private static readonly AUTHOR_ID = '.contributorNameID';
   private static readonly AUTHOR_ALTERNATIVE_ID = '.author';
   private static readonly KINDLE_FORMAT_ID = '#productSubtitle';
+  private static readonly FORMAT_WRAPPER_ID = '#tmm-grid-swatch-KINDLE';
   private static readonly CATEGORIES_ID = '#wayfinding-breadcrumbs_feature_div';
 
   private static readonly DETAILS_LIST_ID = '.detail-bullet-list';
@@ -177,9 +178,7 @@ export class AmazonResolverService extends AbstractResolver {
       );
 
       // checks
-      const kindleFormat: NullableHtmlElement = html.querySelector(
-        AmazonResolverService.KINDLE_FORMAT_ID
-      );
+      const kindleFormat: NullableHtmlElement = this.getBookFormat(html);
 
       this.checkKindleFormat(kindleFormat);
 
@@ -293,6 +292,29 @@ export class AmazonResolverService extends AbstractResolver {
       index + AmazonResolverService.SITE_LANGUAGE_PROPERTY.length,
       2
     );
+  }
+
+  private getBookFormat(html: HTMLElement): NullableHtmlElement {
+    let kindleFormat: NullableHtmlElement = html.querySelector(
+      AmazonResolverService.KINDLE_FORMAT_ID
+    );
+
+    if (kindleFormat === null) {
+      const wrapper: NullableHtmlElement = html.querySelector(
+        AmazonResolverService.FORMAT_WRAPPER_ID
+      );
+
+      let selectedButton: NullableHtmlElement = null;
+      if (wrapper !== null) {
+        selectedButton = wrapper.querySelector('.a-button-selected');
+      }
+
+      if (selectedButton !== null) {
+        kindleFormat = selectedButton.querySelector('.slot-title');
+      }
+    }
+
+    return kindleFormat;
   }
 
   private checkKindleFormat(format: NullableHtmlElement): void {
