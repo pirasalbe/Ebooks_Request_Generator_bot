@@ -31,7 +31,6 @@ export class AmazonResolverService extends AbstractResolver {
   private static readonly AUTHOR_ID = '.contributorNameID';
   private static readonly AUTHOR_ALTERNATIVE_ID = '.author';
   private static readonly KINDLE_FORMAT_ID = '#productSubtitle';
-  private static readonly FORMAT_WRAPPER_ID = '#tmm-grid-swatch-KINDLE';
   private static readonly CATEGORIES_ID = '#wayfinding-breadcrumbs_feature_div';
 
   private static readonly DETAILS_LIST_ID = '.detail-bullet-list';
@@ -300,33 +299,33 @@ export class AmazonResolverService extends AbstractResolver {
     );
 
     if (kindleFormat === null) {
-      const wrapper: NullableHtmlElement = html.querySelector(
-        AmazonResolverService.FORMAT_WRAPPER_ID
-      );
+      const selectedButtons = html.querySelectorAll('.a-button-selected');
+      console.log(selectedButtons);
 
-      let selectedButton: NullableHtmlElement = null;
-      if (wrapper !== null) {
-        selectedButton = wrapper.querySelector('.a-button-selected');
-      }
-
-      if (selectedButton !== null) {
-        kindleFormat = selectedButton.querySelector('.slot-title');
-      }
+      kindleFormat =
+        selectedButtons.find((button) => this.isKindle(button)) || null;
     }
 
     return kindleFormat;
   }
 
+  private isKindle(format: NullableHtmlElement): boolean {
+    return (
+      format !== null &&
+      format.textContent !== null &&
+      format.textContent
+        .toLocaleLowerCase()
+        .includes(AmazonResolverService.KINDLE)
+    );
+  }
+
   private checkKindleFormat(format: NullableHtmlElement): void {
+    console.log(format);
     if (format == null || format.textContent == null) {
       throw 'Cannot find product information.';
     }
 
-    if (
-      !format.textContent
-        .toLocaleLowerCase()
-        .includes(AmazonResolverService.KINDLE)
-    ) {
+    if (!this.isKindle(format)) {
       throw 'Provided link is not of a Kindle Edition. Make sure to copy the kindle edition link from amazon.';
     }
   }
