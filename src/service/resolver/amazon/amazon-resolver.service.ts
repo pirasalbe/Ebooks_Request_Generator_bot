@@ -300,7 +300,6 @@ export class AmazonResolverService extends AbstractResolver {
 
     if (kindleFormat === null) {
       const selectedButtons = html.querySelectorAll('.a-button-selected');
-      console.log(selectedButtons);
 
       kindleFormat =
         selectedButtons.find((button) => this.isKindle(button)) || null;
@@ -320,7 +319,6 @@ export class AmazonResolverService extends AbstractResolver {
   }
 
   private checkKindleFormat(format: NullableHtmlElement): void {
-    console.log(format);
     if (format == null || format.textContent == null) {
       throw 'Cannot find product information.';
     }
