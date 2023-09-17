@@ -475,26 +475,28 @@ export class AmazonResolverService extends AbstractResolver {
     amazonDetails: AmazonDetails,
     siteLanguage: string,
     details: HTMLElement[],
-    getEntry: (element: HTMLElement) => Entry<string, string>
+    getEntry: (element: HTMLElement) => Entry<string, string[]>
   ): void {
     for (let i = 0; i < details.length && !amazonDetails.isComplete(); i++) {
       const element = details[i];
-      const entry: Entry<string, string> = getEntry(element);
+      const entry: Entry<string, string[]> = getEntry(element);
       const key: string | null = I18nUtil.getKey(siteLanguage, entry.getKey());
 
       if (key != null) {
+        const values = entry.getValue();
+
         switch (key) {
           case LanguageStrings.LANGUAGE_KEY:
-            amazonDetails.setLanguage(entry.getValue());
+            amazonDetails.setLanguage(values[values.length - 1]);
             break;
           case LanguageStrings.PUBLISHER_KEY:
-            amazonDetails.setPublisher(entry.getValue());
+            amazonDetails.setPublisher(values[0]);
             break;
           case LanguageStrings.PUBLICATION_DATE_KEY:
-            amazonDetails.setPublicationDate(entry.getValue());
+            amazonDetails.setPublicationDate(values.join(' '));
             break;
           case LanguageStrings.ASIN_KEY:
-            amazonDetails.setAsin(entry.getValue());
+            amazonDetails.setAsin(values[0]);
             break;
           default:
             break;
@@ -515,9 +517,9 @@ export class AmazonResolverService extends AbstractResolver {
    *
    * @param item A detail element
    */
-  private getEntryFromListItem(item: HTMLElement): Entry<string, string> {
+  private getEntryFromListItem(item: HTMLElement): Entry<string, string[]> {
     const parentSpan: NullableHtmlElement = item.querySelector('.a-list-item');
-    let entry: Entry<string, string>;
+    let entry: Entry<string, string[]>;
 
     if (parentSpan != null) {
       const spans: HTMLElement[] = parentSpan.getElementsByTagName(
@@ -528,7 +530,7 @@ export class AmazonResolverService extends AbstractResolver {
       if (spans.length == 2) {
         const key = this.sanitizeKey(spans[0]);
         const value = HtmlUtil.getTextContent(spans[1]);
-        entry = new Entry<string, string>(key, value);
+        entry = new Entry<string, string[]>(key, [value]);
       } else {
         console.error(parentSpan.childNodes, spans);
         throw 'Error parsing page. Cannot read product detail information from list.';
@@ -558,7 +560,7 @@ export class AmazonResolverService extends AbstractResolver {
    *
    * @param item A detail element
    */
-  private getEntryFromCarouselItem(item: HTMLElement): Entry<string, string> {
+  private getEntryFromCarouselItem(item: HTMLElement): Entry<string, string[]> {
     const keyElement: NullableHtmlElement = item.querySelector(
       '.rpi-attribute-label'
     );
@@ -567,17 +569,17 @@ export class AmazonResolverService extends AbstractResolver {
     );
 
     let key = '';
-    let value = '';
+    let value: string[] = [];
 
     if (keyElement != null && valueElement != null) {
       key = HtmlUtil.getRawText(this.getSpan(keyElement));
-      value = HtmlUtil.getTextContent(this.getSpan(valueElement));
+      value = this.getSpans(valueElement).map(HtmlUtil.getTextContent);
     }
 
-    return new Entry<string, string>(key, value);
+    return new Entry<string, string[]>(key, value);
   }
 
-  private getSpan(element: HTMLElement): HTMLElement {
+  private getSpans(element: HTMLElement): HTMLElement[] {
     const spans: HTMLElement[] = element.getElementsByTagName(
       AmazonResolverService.SPAN
     );
@@ -587,7 +589,11 @@ export class AmazonResolverService extends AbstractResolver {
       throw 'Error parsing page. Cannot read product detail information from carousel.';
     }
 
-    return spans[0];
+    return spans;
+  }
+
+  private getSpan(element: HTMLElement): HTMLElement {
+    return this.getSpans(element)[0];
   }
 
   private sanitizeKey(key: HTMLElement): string {
