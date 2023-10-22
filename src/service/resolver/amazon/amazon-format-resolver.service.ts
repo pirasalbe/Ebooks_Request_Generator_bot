@@ -16,7 +16,7 @@ export class AmazonFormatResolverService {
     AmazonFormatResolverService.PLACEHOLDER +
     '"]';
 
-  private static readonly CONTAINERS_ID = 'div[data-a-name]';
+  private static readonly CONTAINERS_ID = '.sidesheetAsinListContainer';
   private static readonly ASIN_ID =
     'input[type="hidden"][value="' +
     AmazonFormatResolverService.PLACEHOLDER +
