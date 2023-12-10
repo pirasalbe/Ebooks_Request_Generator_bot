@@ -73,8 +73,8 @@ export class ResolverService {
       resolver = this.resolvers[SiteResolver.AMAZON];
     } else if (url.hostname.includes('audible')) {
       resolver = this.resolvers[SiteResolver.AUDIBLE];
-    } else if (url.hostname.includes('scribd')) {
-      resolver = this.resolvers[SiteResolver.SCRIBD];
+    } else if (url.hostname.includes('everand')) {
+      resolver = this.resolvers[SiteResolver.EVERAND];
     } else if (url.hostname.includes('storytel')) {
       resolver = this.resolvers[SiteResolver.STORYTEL];
     } else if (url.hostname.includes('archive')) {
