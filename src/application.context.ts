@@ -10,7 +10,7 @@ import { AudibleResolverService } from './service/resolver/audible/audible-resol
 import { OpenLibraryResolverService } from './service/resolver/openlibrary/open-library-resolver.service';
 import { Resolver } from './service/resolver/resolver';
 import { ResolverService } from './service/resolver/resolver.service';
-import { ScribdResolverService } from './service/resolver/scribd/scribd-resolver.service';
+import { EverandResolverService } from './service/resolver/everand/everand-resolver.service';
 import { StorytelApiResolverService } from './service/resolver/storytel/api/storytel-api-resolver.service';
 import { StorytelConsumableResolverService } from './service/resolver/storytel/storytel-consumable-resolver.service';
 import { StatisticsService } from './service/statistics/statistic.service';
@@ -53,21 +53,23 @@ export class ApplicationContext {
 
     // resolvers
     const resolvers: Record<SiteResolver, Resolver> = {
-      0: new AmazonResolverService(
+      [SiteResolver.AMAZON]: new AmazonResolverService(
         statisticsService,
         amazonApiService,
         new AmazonFormatResolverService(),
         new AmazonErrorResolverService(),
         new AmazonRerouteService(statisticsService)
       ),
-      1: new AudibleResolverService(statisticsService),
-      2: new ScribdResolverService(statisticsService),
-      3: new StorytelConsumableResolverService(
+      [SiteResolver.AUDIBLE]: new AudibleResolverService(statisticsService),
+      [SiteResolver.EVERAND]: new EverandResolverService(statisticsService),
+      [SiteResolver.STORYTEL]: new StorytelConsumableResolverService(
         new StorytelApiResolverService(storytelAuth),
         statisticsService
       ),
-      4: new ArchiveResolverService(statisticsService),
-      5: new OpenLibraryResolverService(statisticsService),
+      [SiteResolver.ARCHIVE]: new ArchiveResolverService(statisticsService),
+      [SiteResolver.OPENBOOKS]: new OpenLibraryResolverService(
+        statisticsService
+      ),
     };
 
     const resolverService: ResolverService = new ResolverService(
