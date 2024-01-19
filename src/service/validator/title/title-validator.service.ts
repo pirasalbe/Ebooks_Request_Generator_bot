@@ -39,7 +39,7 @@ export class TitleValidatorService extends AbstractValidator<Title> {
               protectedTitle.title + ' by ' + protectedTitle.author,
               'Book'
             ) +
-            " is protected by DMCA and can't be displayed here."
+            " is protected by DMCA and can't be requested here."
         );
       }
     }

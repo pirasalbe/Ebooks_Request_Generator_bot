@@ -52,13 +52,13 @@ export class AudibleResolverService extends AbstractResolver {
       const message: Message = new Message(SiteResolver.AUDIBLE, url);
 
       // main info
-      message.setTitle(information.name);
+      message.setTitle(HtmlUtil.decode(information.name));
 
       for (const author of information.author) {
-        message.addAuthor(author.name);
+        message.addAuthor(HtmlUtil.decode(author.name));
       }
 
-      message.setPublisher(information.publisher);
+      message.setPublisher(HtmlUtil.decode(information.publisher));
 
       message.setPublicationDate(new Date(information.datePublished));
 

@@ -1,7 +1,7 @@
 export enum SiteResolver {
   AMAZON,
   AUDIBLE,
-  SCRIBD,
+  EVERAND,
   STORYTEL,
   ARCHIVE,
   OPENBOOKS,

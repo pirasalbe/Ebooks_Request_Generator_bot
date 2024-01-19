@@ -133,7 +133,11 @@ export abstract class AbstractResolver implements Resolver {
         this.processSuccessfulResponse(url, response)
           .then((messages: Message[]) => resolve(messages))
           .catch((error) => reject(error));
-      } else if (response.statusCode == 301 || response.statusCode == 302) {
+      } else if (
+        response.statusCode == 301 ||
+        response.statusCode == 302 ||
+        response.statusCode == 308
+      ) {
         // redirect
         this.resolve(
           this.getRedirectURL(url, response.headers.location as string)

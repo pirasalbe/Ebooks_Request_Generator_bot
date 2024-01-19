@@ -1,12 +1,7 @@
-import { HTMLElement } from 'node-html-parser';
 import { URL } from 'url';
 
-import { NullableHtmlElement } from '../../../model/html/nullable-html-element';
 import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
-import {
-  StorytelItem,
-  StorytelItemInformation,
-} from '../../../model/resolver/storytel/storytel-item-information';
+import { StorytelItem, StorytelItemInformation } from '../../../model/resolver/storytel/storytel-item-information';
 import { Format } from '../../../model/telegram/format.enum';
 import { Message } from '../../../model/telegram/message';
 import { Source } from '../../../model/telegram/source.enum';
@@ -46,7 +41,10 @@ export class StorytelConsumableResolverService extends AbstractResolver {
 
     if (pathElements.length > 3) {
       pathElements = pathElements.slice(0, 3);
-      pathElements.push('');
+
+      if (pathElements[pathElements.length - 1] !== 'books') {
+        pathElements.push('');
+      }
     }
 
     return pathElements.join('/');

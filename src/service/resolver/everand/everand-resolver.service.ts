@@ -14,12 +14,12 @@ import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
 import { I18nUtil } from '../../../util/i18n-util';
 import { AbstractResolver } from '../abstract-resolver';
-import { ScribdAuthor } from './../../../model/resolver/scribd-information';
-import { Format } from './../../../model/telegram/format.enum';
-import { Source } from './../../../model/telegram/source.enum';
-import { StatisticsService } from './../../statistics/statistic.service';
+import { ScribdAuthor } from '../../../model/resolver/scribd-information';
+import { Format } from '../../../model/telegram/format.enum';
+import { Source } from '../../../model/telegram/source.enum';
+import { StatisticsService } from '../../statistics/statistic.service';
 
-export class ScribdResolverService extends AbstractResolver {
+export class EverandResolverService extends AbstractResolver {
   private static readonly CONTENT_ID = 'script[type="application/ld+json"]';
   private static readonly ALTERNATIVE_CONTENT_ID =
     'script[data-hypernova-key="contentpreview"]';
@@ -216,11 +216,11 @@ export class ScribdResolverService extends AbstractResolver {
   extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {
     return new Promise<Message[]>((resolve) => {
       const content: HTMLElement[] = html.querySelectorAll(
-        ScribdResolverService.CONTENT_ID
+        EverandResolverService.CONTENT_ID
       );
 
       const additionalContent: NullableHtmlElement = html.querySelector(
-        ScribdResolverService.ALTERNATIVE_CONTENT_ID
+        EverandResolverService.ALTERNATIVE_CONTENT_ID
       );
 
       this.checkRequiredElements([additionalContent]);
@@ -244,7 +244,7 @@ export class ScribdResolverService extends AbstractResolver {
       }
 
       // prepare message
-      const message: Message = new Message(SiteResolver.SCRIBD, url);
+      const message: Message = new Message(SiteResolver.EVERAND, url);
 
       // main info
       message.setTitle(information.name);
@@ -359,7 +359,7 @@ export class ScribdResolverService extends AbstractResolver {
       }
     } else {
       const language: string | undefined =
-        ScribdResolverService.LANGUAGES[inLanguage];
+        EverandResolverService.LANGUAGES[inLanguage];
       if (this.isLanguageTagRequired(language)) {
         message.setLanguage(language);
       }
