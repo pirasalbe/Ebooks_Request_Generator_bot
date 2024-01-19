@@ -42,11 +42,28 @@ export class StorytelApiResolverService {
   private getAuth(locale: string): StorytelAuth | null {
     let result: StorytelAuth | null = this.defaultAuth;
 
-    if (this.auths.has(locale)) {
-      result = this.auths.get(locale) as StorytelAuth;
+    const authKey = this.getAuthKey(locale);
+
+    if (this.auths.has(authKey)) {
+      result = this.auths.get(authKey) as StorytelAuth;
     }
 
     return result;
+  }
+
+  private getAuthKey(locale: string): string {
+    const localeParts = locale.replace('books', '').split('/');
+
+    if (localeParts.length < 4) {
+      const localeCountryIndex = localeParts.findIndex((part) => part !== '');
+      localeParts.splice(
+        localeCountryIndex,
+        0,
+        localeParts[localeCountryIndex]
+      );
+    }
+
+    return localeParts.join('/');
   }
 
   private getRequestHeader(cookies: string): OutgoingHttpHeaders {
