@@ -12,7 +12,7 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
   private static readonly PUBLISHERS: string =
     'https://telegra.ph/DMCA-Publishers-List-09-21-3';
   private static readonly BEGIN_LIST: string = '𝙼𝚎𝚖𝚋𝚎𝚛𝚜 𝚙𝚕𝚎𝚊𝚜𝚎 𝚝𝚊𝚔𝚎 𝚗𝚘𝚝𝚎';
-  private static readonly LIST_ELEMENT_START: string = '▫︎ ';
+  private static readonly LIST_ELEMENT_START: string[] = ['▫︎ ', '▫️ '];
   private static readonly IMPRINT_SPACE: string = '- Imprint';
   private static readonly IMPRINT: string = '-Imprint';
   private static readonly MASK_PARAM: string = 'Publisher';
@@ -91,7 +91,9 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
 
       if (
         isList &&
-        content.startsWith(PublisherValidatorService.LIST_ELEMENT_START)
+        PublisherValidatorService.LIST_ELEMENT_START.some((start) =>
+          content.startsWith(start)
+        )
       ) {
         elements.push(this.getPublisher(content));
       }
@@ -109,8 +111,13 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
 
   private getPublisher(content: string): Publisher {
     // remove list element and other special chars
+    const listBullet =
+      PublisherValidatorService.LIST_ELEMENT_START.find((start) =>
+        content.startsWith(start)
+      ) ?? PublisherValidatorService.LIST_ELEMENT_START[0];
+
     const sanitizedString: string = content
-      .substring(PublisherValidatorService.LIST_ELEMENT_START.length)
+      .substring(listBullet.length)
       .replace('\\U0026', '&')
       .replace(
         PublisherValidatorService.IMPRINT_SPACE,
