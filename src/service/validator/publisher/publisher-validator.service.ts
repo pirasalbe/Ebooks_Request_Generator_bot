@@ -111,13 +111,13 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
 
   private getPublisher(content: string): Publisher {
     // remove list element and other special chars
-    const chars =
+    const listBullet =
       PublisherValidatorService.LIST_ELEMENT_START.find((start) =>
         content.startsWith(start)
       ) ?? PublisherValidatorService.LIST_ELEMENT_START[0];
 
     const sanitizedString: string = content
-      .substring(chars.length)
+      .substring(listBullet.length)
       .replace('\\U0026', '&')
       .replace(
         PublisherValidatorService.IMPRINT_SPACE,
