@@ -24,7 +24,10 @@ export class AmazonFormatResolverService {
 
   private static readonly ACP_PARAMS_ATTRIBUTE = 'data-acp-params';
   private static readonly ACP_PATH_ATTRIBUTE = 'data-acp-path';
-  private static readonly FORMAT_RESOURCE = 'getSidesheetHtml';
+  private static readonly FORMAT_RESOURCES = [
+    'getPageHTML',
+    'getSidesheetHtml',
+  ];
 
   isKindleUnlimited(
     url: URL,
@@ -52,22 +55,9 @@ export class AmazonFormatResolverService {
         }
 
         if (acpParams != undefined && acpPath != undefined) {
-          this.getFormats(url, acpPath, acpParams, asin)
-            .then((div: HTMLElement) => {
-              const ebookElement: NullableHtmlElement = this.getEbookElement(
-                asin,
-                div
-              );
-              if (ebookElement != null) {
-                // check kindle unlimited on the right book
-                if (this.existsKindleUnlimitedElement(ebookElement)) {
-                  resolve(true);
-                } else {
-                  resolve(false);
-                }
-              } else {
-                resolve(false);
-              }
+          this.getFormatsDetails(url, acpPath, 0, acpParams, asin)
+            .then((kindleUnlimited: boolean) => {
+              resolve(kindleUnlimited);
             })
             .catch((error) => {
               reject(error);
@@ -103,14 +93,71 @@ export class AmazonFormatResolverService {
     return formats;
   }
 
+  private getFormatsDetails(
+    url: URL,
+    acpPath: string,
+    formatResourceIndex: number,
+    acpParams: string,
+    asin: string
+  ): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      if (
+        formatResourceIndex >
+        AmazonFormatResolverService.FORMAT_RESOURCES.length
+      ) {
+        reject('Error while resolving format');
+      }
+
+      this.getFormats(
+        url,
+        acpPath,
+        AmazonFormatResolverService.FORMAT_RESOURCES[formatResourceIndex],
+        acpParams,
+        asin
+      )
+        .then((div: HTMLElement) => {
+          const ebookElement: NullableHtmlElement = this.getEbookElement(
+            asin,
+            div
+          );
+          if (ebookElement != null) {
+            // check kindle unlimited on the right book
+            if (this.existsKindleUnlimitedElement(ebookElement)) {
+              resolve(true);
+            } else {
+              resolve(false);
+            }
+          } else {
+            resolve(false);
+          }
+        })
+        .catch((error) => {
+          this.getFormatsDetails(
+            url,
+            acpPath,
+            formatResourceIndex + 1,
+            acpParams,
+            asin
+          )
+            .then((kindleUnlimited: boolean) => {
+              resolve(kindleUnlimited);
+            })
+            .catch((nextIndexError) => {
+              reject([error, nextIndexError].join(' ,'));
+            });
+        });
+    });
+  }
+
   private getFormats(
     url: URL,
     acpPath: string,
+    formatResource: string,
     acpParams: string,
     asin: string
   ): Promise<HTMLElement> {
     const requestUrl: URL = new URL(url.toString());
-    requestUrl.pathname = acpPath + AmazonFormatResolverService.FORMAT_RESOURCE;
+    requestUrl.pathname = acpPath + formatResource;
     requestUrl.search = '';
 
     return new Promise<HTMLElement>((resolve, reject) => {
