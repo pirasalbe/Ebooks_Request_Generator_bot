@@ -33,7 +33,8 @@ export class AmazonResolverService extends AbstractResolver {
   private static readonly KINDLE_FORMAT_ID = '#productSubtitle';
   private static readonly CATEGORIES_ID = '#wayfinding-breadcrumbs_feature_div';
 
-  private static readonly DETAILS_LIST_ID = '.detail-bullet-list';
+  private static readonly DETAILS_LIST_ID =
+    '.detail-bullets-wrapper > #detailBullets_feature_div';
   private static readonly DETAILS_CAROUSEL_ID =
     '.a-carousel-card.rpi-carousel-attribute-card';
   private static readonly SPAN = 'span';
@@ -519,26 +520,35 @@ export class AmazonResolverService extends AbstractResolver {
     const parentSpan: NullableHtmlElement = item.querySelector('.a-list-item');
     let entry: Entry<string, string[]>;
 
+    let key = '';
+    let value: string[] = [];
+
     if (parentSpan != null) {
-      const spans: HTMLElement[] = parentSpan.getElementsByTagName(
-        AmazonResolverService.SPAN
-      );
+      const spans: HTMLElement[] = parentSpan
+        .getElementsByTagName(AmazonResolverService.SPAN)
+        .filter((span) => span.parentNode === parentSpan);
 
       // span with info
       if (spans.length == 2) {
-        const key = this.sanitizeKey(spans[0]);
-        const value = HtmlUtil.getTextContent(spans[1]);
-        entry = new Entry<string, string[]>(key, [value]);
+        key = this.sanitizeKey(spans[0]);
+        value = [HtmlUtil.getTextContent(spans[1])];
       } else {
-        console.error(parentSpan.childNodes, spans);
-        throw 'Error parsing page. Cannot read product detail information from list.';
+        console.error(
+          'Error parsing page. Cannot read product detail information from list.',
+          spans.length,
+          parentSpan.childNodes,
+          spans
+        );
       }
     } else {
-      console.error(item.childNodes, parentSpan);
-      throw 'Error parsing page. Cannot read a product detail from list.';
+      console.error(
+        'Error parsing page. Cannot read a product detail from list.',
+        item.childNodes,
+        parentSpan
+      );
     }
 
-    return entry;
+    return new Entry<string, string[]>(key, value);
   }
 
   /**
