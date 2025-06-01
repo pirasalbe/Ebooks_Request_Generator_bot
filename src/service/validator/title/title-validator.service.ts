@@ -10,9 +10,9 @@ import { AbstractValidator } from '../abstract-validator';
 
 export class TitleValidatorService extends AbstractValidator<Title> {
   private static readonly TITLES =
-    'https://telegra.ph/Copyright--Book-Titles-04-15';
+    'https://telegra.ph/D%E1%B4%8D%E1%B4%84%E1%B4%80-T%C9%AA%E1%B4%9B%CA%9F%E1%B4%87s-05-31';
   private static readonly BEGIN_LIST = '𝙼𝚎𝚖𝚋𝚎𝚛𝚜 𝚙𝚕𝚎𝚊𝚜𝚎 𝚝𝚊𝚔𝚎 𝚗𝚘𝚝𝚎';
-  private static readonly LIST_ELEMENT_START = '▫︎ ';
+  private static readonly LIST_ELEMENT_START: string[] = ['▫︎ ', '▫️ '];
   private static readonly BY = 'By';
 
   constructor() {
@@ -61,7 +61,9 @@ export class TitleValidatorService extends AbstractValidator<Title> {
       const content: string = HtmlUtil.getTextContent(htmlElement).trim();
       if (
         isList &&
-        content.startsWith(TitleValidatorService.LIST_ELEMENT_START) &&
+        TitleValidatorService.LIST_ELEMENT_START.some((start) =>
+          content.startsWith(start)
+        ) &&
         content.includes(TitleValidatorService.BY)
       ) {
         // title by author
@@ -77,7 +79,9 @@ export class TitleValidatorService extends AbstractValidator<Title> {
         }
       } else if (
         isList &&
-        content.startsWith(TitleValidatorService.LIST_ELEMENT_START)
+        TitleValidatorService.LIST_ELEMENT_START.some((start) =>
+          content.startsWith(start)
+        )
       ) {
         // title
         title = content.substring(

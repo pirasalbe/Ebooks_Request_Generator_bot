@@ -136,6 +136,10 @@ export abstract class AbstractValidator<T> implements Validator {
       return new Promise<void>((resolve) => {
         this.elements = this.parseElements(HtmlUtil.parseHTML(data));
         resolve();
+        console.log(
+          this.constructor.name,
+          `Fetched ${this.elements.length} elements`
+        );
       });
     });
   }
