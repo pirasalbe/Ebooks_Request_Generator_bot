@@ -173,15 +173,6 @@ BOT_TOKEN="110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw" STORYTEL_AUTHS="[{'user
 
 The authentication is required to get books and audiobooks information. The bot **may not** work as expected, if not provided.
 
-##### Twitter service
-
-The bot can send a tweet for each request.
-
-- `TWITTER_APP_KEY`: APP key provided by Twitter on the developer console.
-- `TWITTER_APP_SECRET`: APP secret provided by Twitter on the developer console.
-- `TWITTER_ACCESS_TOKEN`: Access token for OAuth1 provided by Twitter on the developer console.
-- `TWITTER_ACCESS_SECRET`: Access secret for OAuth1 provided by Twitter on the developer console.
-
 ##### Amazon API
 
 To interact with the Amazon API

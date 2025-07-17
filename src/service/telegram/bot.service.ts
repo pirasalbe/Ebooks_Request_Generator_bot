@@ -8,8 +8,8 @@ import {
   InlineQueryResult,
   InlineQueryResultArticle,
   InputTextMessageContent,
-  Message as TelegramMessage,
   MessageEntity,
+  Message as TelegramMessage,
   Update,
   User,
   UserFromGetMe,
@@ -61,8 +61,6 @@ export class BotService {
 
     // init bot
     this.token = token;
-    this.telegram = new Telegram(this.token);
-    this.bot = new Telegraf(this.token);
 
     // start bot
     this.initializeBot();

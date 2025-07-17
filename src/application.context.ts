@@ -7,15 +7,14 @@ import { AmazonResolverService } from './service/resolver/amazon/amazon-resolver
 import { AmazonApiService } from './service/resolver/amazon/api/amazon-api.service';
 import { ArchiveResolverService } from './service/resolver/archive/archive-resolver.service';
 import { AudibleResolverService } from './service/resolver/audible/audible-resolver.service';
+import { EverandResolverService } from './service/resolver/everand/everand-resolver.service';
 import { OpenLibraryResolverService } from './service/resolver/openlibrary/open-library-resolver.service';
 import { Resolver } from './service/resolver/resolver';
 import { ResolverService } from './service/resolver/resolver.service';
-import { EverandResolverService } from './service/resolver/everand/everand-resolver.service';
 import { StorytelApiResolverService } from './service/resolver/storytel/api/storytel-api-resolver.service';
 import { StorytelConsumableResolverService } from './service/resolver/storytel/storytel-consumable-resolver.service';
 import { StatisticsService } from './service/statistics/statistic.service';
 import { BotService } from './service/telegram/bot.service';
-import { TwitterService } from './service/twitter/twitter.service';
 import { AuthorValidatorService } from './service/validator/author/author-validator.service';
 import { LanguageValidatorService } from './service/validator/language/language-validator.service';
 import { PublisherValidatorService } from './service/validator/publisher/publisher-validator.service';
@@ -90,33 +89,10 @@ export class ApplicationContext {
       this.log('Validators loaded');
     });
 
-    // twitter
-    const appKey: string | undefined = process.env.TWITTER_APP_KEY;
-    const appSecret: string | undefined = process.env.TWITTER_APP_SECRET;
-    const accessToken: string | undefined = process.env.TWITTER_ACCESS_TOKEN;
-    const accessSecret: string | undefined = process.env.TWITTER_ACCESS_SECRET;
-
-    let twitterService: TwitterService | null = null;
-    if (
-      appKey != undefined &&
-      appSecret != undefined &&
-      accessToken != undefined &&
-      accessSecret != undefined
-    ) {
-      twitterService = new TwitterService(
-        appKey,
-        appSecret,
-        accessToken,
-        accessSecret,
-        amazonApiService
-      );
-    }
-
     // messages
     const messageService: MessageService = new MessageService(
       resolverService,
-      validatorService,
-      twitterService
+      validatorService
     );
 
     // telegram
