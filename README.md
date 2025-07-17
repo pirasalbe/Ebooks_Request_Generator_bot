@@ -15,6 +15,11 @@ Telegram bot that creates a text message from the link address of an ebook or an
 - `/refresh`: reloads the information for the filters.
 - `/support`: shows an help message on how to support the developer.
 
+### Admin Commands
+
+- `/add_admin [admin id]`: adds admin
+- `/remove_admin [admin id]`: removes admin
+
 ## Message format
 
 ```
@@ -149,7 +154,13 @@ _Replace the token in the command, which is **invalid**, with your own._
 
 #### Required Variables
 
-- `BOT_TOKEN`: Create a bot using [@BotFather](https://telegram.dog/BotFather), and get the Telegram API token.
+- `BOT_TOKEN`: create a bot using [@BotFather](https://telegram.dog/BotFather), and get the Telegram API token.
+- `CONFIG_PATH`: path where to store the generated configurations, without `/` at the end
+- `ADMINS`: array of admin ids as a string
+
+```
+'[12345,67890]'
+```
 
 #### Optional Variables
 

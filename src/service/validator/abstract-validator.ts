@@ -1,12 +1,7 @@
-import * as http from 'http';
-import * as https from 'https';
-import { HTMLElement } from 'node-html-parser';
-
 import { Message } from '../../model/telegram/message';
 import { Validation } from '../../model/validator/validation';
-import { HttpUtil } from '../../util/http-util';
+import { FilesService, VALIDATOR_PATH } from '../files/filesService';
 import { DateUtil } from './../../util/date-util';
-import { HtmlUtil } from './../../util/html-util';
 import { Validator } from './validator';
 
 export abstract class AbstractValidator<T> implements Validator {
@@ -15,9 +10,13 @@ export abstract class AbstractValidator<T> implements Validator {
   private nextCheck: Date;
   protected elements: T[];
 
-  protected constructor() {
+  protected constructor(protected filesService: FilesService) {
     this.nextCheck = new Date();
     this.elements = [];
+  }
+
+  listElements(): T[] {
+    return [...this.elements];
   }
 
   validate(messages: Message[]): Validation {
@@ -75,94 +74,59 @@ export abstract class AbstractValidator<T> implements Validator {
    */
   private updateElements(): Promise<void> {
     return new Promise<void>((resolve) => {
-      https
-        .get(this.getElementsLink(), (response: http.IncomingMessage) => {
-          this.processResponse(response)
-            .then(() => resolve())
-            .catch((error) => {
-              console.error(
-                'There was an error resolving elements for validation',
-                error
-              );
-              resolve();
-            });
-        })
-        .on('timeout', () => {
-          console.error('Connection timed out');
-          resolve();
-        })
-        .on('error', (err: Error) => {
-          console.error('Error resolving elements', err.message);
-          resolve();
-        });
+      this.elements = this.filesService.readFile(this.getFilePath(), []);
+      console.log(
+        this.constructor.name,
+        `Fetched ${this.elements.length} elements`
+      );
+      resolve();
     });
   }
 
-  protected abstract getElementsLink():
-    | string
-    | https.RequestOptions
-    | import('url').URL;
+  protected abstract getFilePath(): VALIDATOR_PATH;
 
-  /**
-   * Process the response based on the status code
-   *
-   * @param response Call response
-   * @returns Promise
-   */
-  protected processResponse(response: http.IncomingMessage): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      if (response.statusCode == 200) {
-        // success
-        this.processSuccessfulResponse(response)
-          .then(() => resolve())
-          .catch((error) => reject(error));
-      } else {
-        // something went wrong
-        reject('Error: ' + response.statusCode);
-      }
-    });
-  }
+  protected abstract parse(text: string): T | undefined;
 
-  /**
-   * Process a response with status 200
-   *
-   * @param response Call response
-   * @returns Promise
-   */
-  protected processSuccessfulResponse(
-    response: http.IncomingMessage
-  ): Promise<void> {
-    return HttpUtil.processSuccessfulResponse(response, (data: string) => {
-      return new Promise<void>((resolve) => {
-        this.elements = this.parseElements(HtmlUtil.parseHTML(data));
-        resolve();
-        console.log(
-          this.constructor.name,
-          `Fetched ${this.elements.length} elements`
-        );
-      });
-    });
-  }
+  protected abstract equal(a: T, b: T): boolean;
 
-  protected abstract parseElements(html: HTMLElement): T[];
-
-  /**
-   * Detect if the list has beginned
-   *
-   * @param isList The previous value
-   * @param content Content to check
-   * @param beginPhrase The characters to find when the list begin
-   * @returns True if the list has beginned
-   */
-  protected isListBegin(
-    isList: boolean,
-    content: string,
-    beginPhrase: string
-  ): boolean {
-    if (!isList && content.includes(beginPhrase)) {
-      isList = true;
+  addElement(text: string): boolean {
+    if (text === undefined || text === '') {
+      return false;
     }
 
-    return isList;
+    const item = this.parse(text);
+
+    if (!item) {
+      return false;
+    }
+
+    if (!this.elements.find((element) => this.equal(element, item))) {
+      this.elements.push(item);
+      this.filesService.writeFile(this.getFilePath(), this.elements);
+    }
+
+    return true;
+  }
+
+  removeElement(text: string): boolean {
+    if (text === undefined || text === '') {
+      return false;
+    }
+
+    const item = this.parse(text);
+
+    if (!item) {
+      return false;
+    }
+
+    const index = this.elements.findIndex((element) =>
+      this.equal(element, item)
+    );
+    if (index > -1) {
+      this.elements.splice(index, 1);
+      this.filesService.writeFile(this.getFilePath(), this.elements);
+    }
+
+    return true;
   }
 }

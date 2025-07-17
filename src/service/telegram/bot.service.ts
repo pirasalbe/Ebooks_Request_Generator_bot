@@ -19,6 +19,7 @@ import { URL } from 'url';
 import { ResolverException } from '../../model/error/resolver-exception';
 import { Message } from '../../model/telegram/message';
 import { DocumentResponse } from '../../model/telegram/telegram-responses';
+import { AdminService } from '../admins/admin.service';
 import { MessageService } from '../message/message.service';
 import { ValidatorService } from '../validator/validator.service';
 import { AmazonApiService } from './../resolver/amazon/api/amazon-api.service';
@@ -41,6 +42,7 @@ export class BotService {
   private telegram: Telegram;
   private bot: Telegraf<Context<Update>>;
 
+  private adminService: AdminService;
   private messageService: MessageService;
   private validatorService: ValidatorService;
   private statisticsService: StatisticsService;
@@ -48,12 +50,14 @@ export class BotService {
   private amazonApiService: AmazonApiService;
 
   constructor(
+    adminService: AdminService,
     messageService: MessageService,
     validatorService: ValidatorService,
     statisticsService: StatisticsService,
     amazonApiService: AmazonApiService,
     token: string
   ) {
+    this.adminService = adminService;
     this.messageService = messageService;
     this.validatorService = validatorService;
     this.statisticsService = statisticsService;
@@ -63,22 +67,17 @@ export class BotService {
     this.token = token;
 
     // start bot
-    this.initializeBot();
-
-    // Enable graceful stop
-    process.once('SIGINT', () => this.bot.stop('SIGINT'));
-    process.once('SIGTERM', () => this.bot.stop('SIGTERM'));
-  }
-
-  private initializeBot(): void {
     this.telegram = new Telegram(this.token);
     this.bot = new Telegraf(this.token);
-
     // init handlers
     this.initializeHandlers();
 
     // start bot
     this.bot.launch();
+
+    // Enable graceful stop
+    process.once('SIGINT', () => this.bot.stop('SIGINT'));
+    process.once('SIGTERM', () => this.bot.stop('SIGTERM'));
   }
 
   /**
@@ -105,6 +104,8 @@ export class BotService {
         })
         .catch((error) => this.onError(error));
     });
+
+    // help
     this.bot.help((ctx) => {
       ctx
         .replyWithHTML(this.helpMessage())
@@ -118,6 +119,8 @@ export class BotService {
         )
         .catch((error) => this.onError(error));
     });
+
+    // support
     this.bot.command(BotService.SUPPORT_COMMAND, (ctx) => {
       this.safeHandling(() => {
         const url: string = this.extractUrl(
@@ -180,24 +183,34 @@ export class BotService {
         })
         .catch((error) => this.onError(error));
     });
-    this.bot.command('refresh', (ctx) => {
-      ctx
-        .reply('Refresh in progress')
-        .then((loading: TelegramMessage) =>
-          this.validatorService.refresh(true).then(() => {
-            ctx
-              .deleteMessage(loading.message_id)
-              .catch((error) => this.onError(error));
-            ctx
-              .reply('Refresh completed', {
-                reply_to_message_id: ctx.message.message_id,
-              })
-              .catch((error) => this.onError(error));
-          })
-        )
-        .catch((error) => this.onError(error));
+
+    // admin commands
+    this.bot.command('add_admin', (ctx) => {
+      if (this.adminService.isSuperAdmin(ctx.chat.type, ctx.chat.id)) {
+        const adminId = Number(ctx.message.text.split(' ')[1]);
+        if (Number.isNaN(adminId)) {
+          ctx.reply('Send a correct numeric admin id');
+        } else {
+          this.adminService.addAdmin(adminId);
+          ctx.reply(adminId + ' added as an admin');
+        }
+      }
+    });
+    this.bot.command('remove_admin', (ctx) => {
+      if (this.adminService.isSuperAdmin(ctx.chat.type, ctx.chat.id)) {
+        const adminId = Number(ctx.message.text.split(' ')[1]);
+        if (Number.isNaN(adminId)) {
+          ctx.reply('Send a correct numeric admin id');
+        } else {
+          this.adminService.removeAdmin(adminId);
+          ctx.reply(adminId + ' removed as an admin');
+        }
+      }
     });
 
+    // TODO add commands and add them to the README
+
+    // generate request
     this.bot.on('inline_query', (ctx) => {
       this.safeHandling(() => {
         if (ctx.inlineQuery.query != '') {

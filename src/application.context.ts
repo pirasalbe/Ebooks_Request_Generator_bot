@@ -1,4 +1,6 @@
 import { SiteResolver } from './model/resolver/site-resolver.enum';
+import { AdminService } from './service/admins/admin.service';
+import { FilesService } from './service/files/filesService';
 import { MessageService } from './service/message/message.service';
 import { AmazonErrorResolverService } from './service/resolver/amazon/amazon-error-resolver.service';
 import { AmazonFormatResolverService } from './service/resolver/amazon/amazon-format-resolver.service';
@@ -76,12 +78,15 @@ export class ApplicationContext {
       statisticsService
     );
 
+    // files
+    const filesService = new FilesService(process.env.CONFIG_PATH as string);
+
     // validators
     const validators: Validator[] = [
       new LanguageValidatorService(),
-      new AuthorValidatorService(),
-      new TitleValidatorService(),
-      new PublisherValidatorService(),
+      new AuthorValidatorService(filesService),
+      new TitleValidatorService(filesService),
+      new PublisherValidatorService(filesService),
     ];
     const validatorService: ValidatorService = new ValidatorService(validators);
 
@@ -95,9 +100,16 @@ export class ApplicationContext {
       validatorService
     );
 
+    // admins
+    const adminService = new AdminService(
+      filesService,
+      JSON.parse(process.env.ADMINS as string)
+    );
+
     // telegram
     const token: string = process.env.BOT_TOKEN as string;
     const botService: BotService = new BotService(
+      adminService,
       messageService,
       validatorService,
       statisticsService,
