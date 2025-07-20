@@ -1,26 +1,22 @@
-import { RequestOptions } from 'https';
-import { HTMLElement } from 'node-html-parser';
-import { URL } from 'url';
-
 import { Message } from '../../../model/telegram/message';
 import { Publisher } from '../../../model/validator/publisher';
 import { Validation } from '../../../model/validator/validation';
-import { HtmlUtil } from '../../../util/html-util';
+import { FilesService, VALIDATOR_PATH } from '../../files/filesService';
 import { AbstractValidator } from '../abstract-validator';
 
 export class PublisherValidatorService extends AbstractValidator<Publisher> {
-  private static readonly PUBLISHERS: string =
-    'https://telegra.ph/DMCA-Publishers-List-05-30';
-  private static readonly BEGIN_LIST: string = '𝙼𝚎𝚖𝚋𝚎𝚛𝚜 𝚙𝚕𝚎𝚊𝚜𝚎 𝚝𝚊𝚔𝚎 𝚗𝚘𝚝𝚎';
-  private static readonly LIST_ELEMENT_START: string[] = ['▫︎ ', '▫️ '];
   private static readonly IMPRINT_SPACE: string = '- Imprint';
   private static readonly IMPRINT: string = '-Imprint';
   private static readonly MASK_PARAM: string = 'Publisher';
 
   public static readonly CHARS_PATTERN: RegExp = new RegExp('[a-z]');
 
-  constructor() {
-    super();
+  constructor(filesService: FilesService) {
+    super(filesService);
+  }
+
+  protected getFilePath(): VALIDATOR_PATH {
+    return 'publishers';
   }
 
   protected validateMessage(message: Message): Validation {
@@ -40,7 +36,7 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
         lowerCasePublisher.includes('university') &&
         lowerCasePublisher.includes('press')
       ) {
-        result = Validation.invalid(this.getError(publisher, null));
+        result = Validation.invalid(this.getError(publisher));
       }
     }
 
@@ -50,22 +46,23 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
   private isAcademic(publisher: Publisher, messagePublisher: string): boolean {
     let result = false;
 
-    if (publisher.name == messagePublisher) {
+    const publisherName = publisher.name.toLowerCase();
+    if (publisherName == messagePublisher) {
       result = true;
-    } else if (messagePublisher.startsWith(publisher.name)) {
-      const nextChar: string = messagePublisher.charAt(publisher.name.length);
+    } else if (messagePublisher.startsWith(publisherName)) {
+      const nextChar: string = messagePublisher.charAt(publisherName.length);
       result = !PublisherValidatorService.CHARS_PATTERN.test(nextChar);
     }
 
     return result;
   }
 
-  private getError(publisher: string, imprint: string | null): string {
+  private getError(publisher: string, imprint?: string): string {
     let error: string =
       'The publisher of your #request, ' +
       this.mask(publisher, PublisherValidatorService.MASK_PARAM);
 
-    if (imprint != null) {
+    if (imprint) {
       error +=
         ' (imprint ' +
         this.mask(imprint, PublisherValidatorService.MASK_PARAM) +
@@ -77,47 +74,15 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
     return error;
   }
 
-  protected getElementsLink(): string | RequestOptions | URL {
-    return PublisherValidatorService.PUBLISHERS;
+  expectedFormats(): string[] {
+    return [
+      `Publisher`,
+      `Publisher ${PublisherValidatorService.IMPRINT_SPACE} Imprint`,
+    ];
   }
 
-  protected parseElements(html: HTMLElement): Publisher[] {
-    const elements: Publisher[] = [];
-    const htmlElements: HTMLElement[] = html.querySelectorAll('p');
-
-    let isList = false;
-    for (const htmlElement of htmlElements) {
-      const content: string = HtmlUtil.getTextContent(htmlElement).trim();
-
-      if (
-        isList &&
-        PublisherValidatorService.LIST_ELEMENT_START.some((start) =>
-          content.startsWith(start)
-        )
-      ) {
-        elements.push(this.getPublisher(content));
-      }
-
-      // the following elements are in the list
-      isList = this.isListBegin(
-        isList,
-        content,
-        PublisherValidatorService.BEGIN_LIST
-      );
-    }
-
-    return elements;
-  }
-
-  private getPublisher(content: string): Publisher {
-    // remove list element and other special chars
-    const listBullet =
-      PublisherValidatorService.LIST_ELEMENT_START.find((start) =>
-        content.startsWith(start)
-      ) ?? PublisherValidatorService.LIST_ELEMENT_START[0];
-
-    const sanitizedString: string = content
-      .substring(listBullet.length)
+  parse(text: string): Publisher | undefined {
+    const sanitizedString: string = text
       .replace('\\U0026', '&')
       .replace(
         PublisherValidatorService.IMPRINT_SPACE,
@@ -132,7 +97,7 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
       publisherName = sanitizedString.substring(0, hashTagIndex);
     }
 
-    let imprint: string | null = null;
+    let imprint: string | undefined = undefined;
 
     // split imprint and publisher
     const publisherParts: string[] = publisherName.split(
@@ -145,6 +110,23 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
       imprint = publisherParts[1].trim();
     }
 
-    return { name: publisherName.toLowerCase(), imprint: imprint };
+    return { name: publisherName, imprint };
+  }
+
+  format(element: Publisher): string {
+    const imprint = element.imprint
+      ? ` ${PublisherValidatorService.IMPRINT_SPACE} ${element.imprint}`
+      : '';
+    return element.name + imprint;
+  }
+
+  protected equal(a: Publisher, b: Publisher): boolean {
+    return (
+      a.name.toLowerCase() === b.name.toLowerCase() && a.imprint === b.imprint
+    );
+  }
+
+  protected compare(a: Publisher, b: Publisher): number {
+    return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
   }
 }

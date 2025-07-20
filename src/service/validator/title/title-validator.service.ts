@@ -1,22 +1,12 @@
-import { RequestOptions } from 'https';
-import { HTMLElement } from 'node-html-parser';
-import { URL } from 'url';
-
 import { Message } from '../../../model/telegram/message';
 import { Title } from '../../../model/validator/title';
 import { Validation } from '../../../model/validator/validation';
-import { HtmlUtil } from '../../../util/html-util';
+import { FilesService, VALIDATOR_PATH } from '../../files/filesService';
 import { AbstractValidator } from '../abstract-validator';
 
 export class TitleValidatorService extends AbstractValidator<Title> {
-  private static readonly TITLES =
-    'https://telegra.ph/D%E1%B4%8D%E1%B4%84%E1%B4%80-T%C9%AA%E1%B4%9B%CA%9F%E1%B4%87s-05-31';
-  private static readonly BEGIN_LIST = '𝙼𝚎𝚖𝚋𝚎𝚛𝚜 𝚙𝚕𝚎𝚊𝚜𝚎 𝚝𝚊𝚔𝚎 𝚗𝚘𝚝𝚎';
-  private static readonly LIST_ELEMENT_START: string[] = ['▫︎ ', '▫️ '];
-  private static readonly BY = 'By';
-
-  constructor() {
-    super();
+  constructor(filesService: FilesService) {
+    super(filesService);
   }
 
   protected validateMessage(message: Message): Validation {
@@ -47,64 +37,33 @@ export class TitleValidatorService extends AbstractValidator<Title> {
     return result;
   }
 
-  protected getElementsLink(): string | RequestOptions | URL {
-    return TitleValidatorService.TITLES;
+  protected getFilePath(): VALIDATOR_PATH {
+    return 'titles';
   }
 
-  protected parseElements(html: HTMLElement): Title[] {
-    const elements: Title[] = [];
-    const htmlElements: HTMLElement[] = html.querySelectorAll('p');
+  expectedFormats(): string[] {
+    return ['Book title\nAuthor'];
+  }
 
-    let isList = false;
-    let title: string | null = null;
-    for (const htmlElement of htmlElements) {
-      const content: string = HtmlUtil.getTextContent(htmlElement).trim();
-      if (
-        isList &&
-        TitleValidatorService.LIST_ELEMENT_START.some((start) =>
-          content.startsWith(start)
-        ) &&
-        content.includes(TitleValidatorService.BY)
-      ) {
-        // title by author
-        const parts: string[] = content
-          .substring(TitleValidatorService.LIST_ELEMENT_START.length)
-          .split(TitleValidatorService.BY);
-
-        if (parts.length == 2) {
-          elements.push({
-            title: parts[0].trim(),
-            author: parts[1].trim(),
-          });
+  parse(text: string): Title | undefined {
+    const parts = text.split('\n');
+    return parts.length == 2
+      ? {
+          title: parts[0].trim(),
+          author: parts[1].trim(),
         }
-      } else if (
-        isList &&
-        TitleValidatorService.LIST_ELEMENT_START.some((start) =>
-          content.startsWith(start)
-        )
-      ) {
-        // title
-        title = content.substring(
-          TitleValidatorService.LIST_ELEMENT_START.length
-        );
-      } else if (isList && title != null && content.length > 0) {
-        // author
-        const author: string = content
-          .replace(TitleValidatorService.BY, '')
-          .trim();
+      : undefined;
+  }
 
-        elements.push({ title: title, author: author });
-        title = null;
-      }
+  format(element: Title): string {
+    return element.title + '\n' + element.author;
+  }
 
-      // the following elements are in the list
-      isList = this.isListBegin(
-        isList,
-        content,
-        TitleValidatorService.BEGIN_LIST
-      );
-    }
+  protected equal(a: Title, b: Title): boolean {
+    return a.author === b.author && a.title === b.title;
+  }
 
-    return elements;
+  protected compare(a: Title, b: Title): number {
+    return a.title.localeCompare(b.title);
   }
 }

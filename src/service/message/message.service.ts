@@ -4,21 +4,17 @@ import { Message } from '../../model/telegram/message';
 import { Validation } from '../../model/validator/validation';
 import { ResolverService } from '../resolver/resolver.service';
 import { ValidatorService } from '../validator/validator.service';
-import { TwitterService } from './../twitter/twitter.service';
 
 export class MessageService {
   private resolverService: ResolverService;
   private validatorService: ValidatorService;
-  private twitterService: TwitterService | null;
 
   constructor(
     resolverService: ResolverService,
-    validatorService: ValidatorService,
-    twitterService: TwitterService | null
+    validatorService: ValidatorService
   ) {
     this.resolverService = resolverService;
     this.validatorService = validatorService;
-    this.twitterService = twitterService;
   }
 
   /**
@@ -37,7 +33,6 @@ export class MessageService {
           .then((messages: Message[]) => {
             const validation: Validation = this.areMessagesValid(messages);
             if (validation.isValid()) {
-              this.tweet(messages);
               resolve(messages);
             } else {
               console.error('Invalid messages', validation.getError());
@@ -89,11 +84,5 @@ export class MessageService {
     }
 
     return result;
-  }
-
-  private tweet(messages: Message[]): void {
-    if (this.twitterService != null) {
-      this.twitterService.tweet(messages);
-    }
   }
 }

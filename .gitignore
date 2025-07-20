@@ -109,3 +109,4 @@ dist
 # TernJS port file
 .tern-port
 .vscode/
+test_config/

@@ -1,20 +1,11 @@
-import { RequestOptions } from 'https';
-import { HTMLElement } from 'node-html-parser';
-import { URL } from 'url';
-
 import { Message } from '../../../model/telegram/message';
 import { Validation } from '../../../model/validator/validation';
+import { FilesService, VALIDATOR_PATH } from '../../files/filesService';
 import { AbstractValidator } from '../abstract-validator';
-import { HtmlUtil } from './../../../util/html-util';
 
 export class AuthorValidatorService extends AbstractValidator<string> {
-  private static readonly AUTHORS =
-    'https://telegra.ph/DMCA-Authors-List-05-31';
-  private static readonly BEGIN_LIST = '𝙼𝚎𝚖𝚋𝚎𝚛𝚜 𝚙𝚕𝚎𝚊𝚜𝚎 𝚝𝚊𝚔𝚎 𝚗𝚘𝚝𝚎';
-  private static readonly LIST_ELEMENT_START: string[] = ['▫︎ ', '▫️ '];
-
-  constructor() {
-    super();
+  constructor(filesService: FilesService) {
+    super(filesService);
   }
 
   protected validateMessage(message: Message): Validation {
@@ -40,38 +31,27 @@ export class AuthorValidatorService extends AbstractValidator<string> {
     return result;
   }
 
-  protected getElementsLink(): string | RequestOptions | URL {
-    return AuthorValidatorService.AUTHORS;
+  protected getFilePath(): VALIDATOR_PATH {
+    return 'authors';
   }
 
-  protected parseElements(html: HTMLElement): string[] {
-    const elements: string[] = [];
-    const htmlElements: HTMLElement[] = html.querySelectorAll('p');
+  expectedFormats(): string[] {
+    return ['Author'];
+  }
 
-    let isList = false;
-    for (const htmlElement of htmlElements) {
-      const content: string = HtmlUtil.getTextContent(htmlElement).trim();
-      if (
-        isList &&
-        AuthorValidatorService.LIST_ELEMENT_START.some((start) =>
-          content.startsWith(start)
-        )
-      ) {
-        elements.push(
-          content
-            .substring(AuthorValidatorService.LIST_ELEMENT_START.length)
-            .toLowerCase()
-        );
-      }
+  parse(text: string): string | undefined {
+    return text;
+  }
 
-      // the following elements are in the list
-      isList = this.isListBegin(
-        isList,
-        content,
-        AuthorValidatorService.BEGIN_LIST
-      );
-    }
+  format(element: string): string {
+    return element;
+  }
 
-    return elements;
+  protected equal(a: string, b: string): boolean {
+    return a === b;
+  }
+
+  protected compare(a: string, b: string): number {
+    return a.localeCompare(b);
   }
 }
