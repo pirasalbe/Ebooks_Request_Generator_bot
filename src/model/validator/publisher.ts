@@ -1,4 +1,4 @@
 export type Publisher = {
   name: string;
-  imprint: string | null;
+  imprint?: string;
 };

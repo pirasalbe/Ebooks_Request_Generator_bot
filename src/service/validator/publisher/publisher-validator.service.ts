@@ -57,12 +57,12 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
     return result;
   }
 
-  private getError(publisher: string, imprint: string | null): string {
+  private getError(publisher: string, imprint?: string): string {
     let error: string =
       'The publisher of your #request, ' +
       this.mask(publisher, PublisherValidatorService.MASK_PARAM);
 
-    if (imprint != null) {
+    if (imprint) {
       error +=
         ' (imprint ' +
         this.mask(imprint, PublisherValidatorService.MASK_PARAM) +
@@ -97,7 +97,7 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
       publisherName = sanitizedString.substring(0, hashTagIndex);
     }
 
-    let imprint: string | null = null;
+    let imprint: string | undefined = undefined;
 
     // split imprint and publisher
     const publisherParts: string[] = publisherName.split(
