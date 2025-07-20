@@ -118,6 +118,7 @@ export class ApplicationContext {
     const botService: BotService = new BotService(
       adminService,
       messageService,
+      validatorService,
       validatorMap,
       statisticsService,
       amazonApiService,

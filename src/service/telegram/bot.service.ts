@@ -23,6 +23,7 @@ import { ValidatorType } from '../../model/validator/validatorType';
 import { AdminService } from '../admins/admin.service';
 import { MessageService } from '../message/message.service';
 import { AbstractValidator } from '../validator/abstract-validator';
+import { ValidatorService } from '../validator/validator.service';
 import { AmazonApiService } from './../resolver/amazon/api/amazon-api.service';
 import { StatisticsService } from './../statistics/statistic.service';
 
@@ -45,6 +46,7 @@ export class BotService {
 
   private adminService: AdminService;
   private messageService: MessageService;
+  private validatorService: ValidatorService;
   private validators: Record<ValidatorType, AbstractValidator<unknown>>;
   private statisticsService: StatisticsService;
 
@@ -53,6 +55,7 @@ export class BotService {
   constructor(
     adminService: AdminService,
     messageService: MessageService,
+    validatorService: ValidatorService,
     validators: Record<ValidatorType, AbstractValidator<unknown>>,
     statisticsService: StatisticsService,
     amazonApiService: AmazonApiService,
@@ -60,6 +63,7 @@ export class BotService {
   ) {
     this.adminService = adminService;
     this.messageService = messageService;
+    this.validatorService = validatorService;
     this.validators = validators;
     this.statisticsService = statisticsService;
     this.amazonApiService = amazonApiService;
@@ -237,6 +241,25 @@ export class BotService {
     this.validatorCommands(this.validators.publisher, {
       plural: 'publishers',
       singular: 'publisher',
+    });
+    this.bot.command('refresh', (ctx) => {
+      if (this.adminService.isAdmin(ctx.chat.type, ctx.chat.id)) {
+        ctx
+          .reply('Refresh in progress')
+          .then((loading: TelegramMessage) =>
+            this.validatorService.refresh(true).then(() => {
+              ctx
+                .deleteMessage(loading.message_id)
+                .catch((error) => this.onError(error));
+              ctx
+                .reply('Refresh completed', {
+                  reply_to_message_id: ctx.message.message_id,
+                })
+                .catch((error) => this.onError(error));
+            })
+          )
+          .catch((error) => this.onError(error));
+      }
     });
 
     // generate request
