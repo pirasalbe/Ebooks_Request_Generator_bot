@@ -93,6 +93,8 @@ export abstract class AbstractValidator<T> implements Validator {
 
   protected abstract equal(a: T, b: T): boolean;
 
+  protected abstract compare(a: T, b: T): number;
+
   addElement(text: string): T | undefined {
     if (text === undefined || text === '') {
       return undefined;
@@ -106,6 +108,7 @@ export abstract class AbstractValidator<T> implements Validator {
 
     if (!this.elements.find((element) => this.equal(element, item))) {
       this.elements.push(item);
+      this.elements.sort(this.compare);
       this.filesService.writeFile(this.getFilePath(), this.elements);
     }
 

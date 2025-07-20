@@ -186,6 +186,22 @@ export class BotService {
     });
 
     // admin commands
+    this.bot.command('list_admins', (ctx) => {
+      if (this.adminService.isSuperAdmin(ctx.chat.type, ctx.chat.id)) {
+        const elements = this.adminService.listAdmin().map(({ id }) => id);
+        if (elements.length > 0) {
+          ctx.replyWithDocument(
+            {
+              source: Buffer.from(elements.join('\n'), 'utf-8'),
+              filename: `admins.txt`,
+            },
+            { caption: `${elements.length} items` }
+          );
+        } else {
+          ctx.reply('No item found');
+        }
+      }
+    });
     this.bot.command('add_admin', (ctx) => {
       if (this.adminService.isSuperAdmin(ctx.chat.type, ctx.chat.id)) {
         const adminId = Number(ctx.message.text.split(' ')[1]);

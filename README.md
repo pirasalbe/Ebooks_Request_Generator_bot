@@ -17,6 +17,7 @@ Telegram bot that creates a text message from the link address of an ebook or an
 
 ### Admin Commands
 
+- `/list_admins`: shows the list of admins
 - `/add_admin [admin id]`: adds admin
 - `/remove_admin [admin id]`: removes admin
 

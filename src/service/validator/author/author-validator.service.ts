@@ -50,4 +50,8 @@ export class AuthorValidatorService extends AbstractValidator<string> {
   protected equal(a: string, b: string): boolean {
     return a === b;
   }
+
+  protected compare(a: string, b: string): number {
+    return a.localeCompare(b);
+  }
 }

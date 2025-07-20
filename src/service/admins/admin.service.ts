@@ -28,6 +28,10 @@ export class AdminService {
     );
   }
 
+  listAdmin(): Admin[] {
+    return this.filesService.readFile('admins', []);
+  }
+
   addAdmin(adminId: number): void {
     const admins: Admin[] = this.filesService.readFile('admins', []);
 

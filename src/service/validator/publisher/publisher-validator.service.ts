@@ -36,7 +36,7 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
         lowerCasePublisher.includes('university') &&
         lowerCasePublisher.includes('press')
       ) {
-        result = Validation.invalid(this.getError(publisher, null));
+        result = Validation.invalid(this.getError(publisher));
       }
     }
 
@@ -124,5 +124,9 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
     return (
       a.name.toLowerCase() === b.name.toLowerCase() && a.imprint === b.imprint
     );
+  }
+
+  protected compare(a: Publisher, b: Publisher): number {
+    return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
   }
 }

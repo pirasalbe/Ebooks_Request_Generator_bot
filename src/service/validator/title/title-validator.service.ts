@@ -62,4 +62,8 @@ export class TitleValidatorService extends AbstractValidator<Title> {
   protected equal(a: Title, b: Title): boolean {
     return a.author === b.author && a.title === b.title;
   }
+
+  protected compare(a: Title, b: Title): number {
+    return a.title.localeCompare(b.title);
+  }
 }
