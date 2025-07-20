@@ -4,9 +4,6 @@ import { FilesService, VALIDATOR_PATH } from '../../files/filesService';
 import { AbstractValidator } from '../abstract-validator';
 
 export class AuthorValidatorService extends AbstractValidator<string> {
-  private static readonly BEGIN_LIST = '𝙼𝚎𝚖𝚋𝚎𝚛𝚜 𝚙𝚕𝚎𝚊𝚜𝚎 𝚝𝚊𝚔𝚎 𝚗𝚘𝚝𝚎';
-  private static readonly LIST_ELEMENT_START: string[] = ['▫︎ ', '▫️ '];
-
   constructor(filesService: FilesService) {
     super(filesService);
   }
@@ -38,7 +35,19 @@ export class AuthorValidatorService extends AbstractValidator<string> {
     return 'authors';
   }
 
-  protected parse(text: string): string | undefined {
+  expectedFormats(): string[] {
+    return ['Author'];
+  }
+
+  parse(text: string): string | undefined {
     return text;
+  }
+
+  format(element: string): string {
+    return element;
+  }
+
+  protected equal(a: string, b: string): boolean {
+    return a === b;
   }
 }

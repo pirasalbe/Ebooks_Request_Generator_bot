@@ -1,4 +1,5 @@
 import { SiteResolver } from './model/resolver/site-resolver.enum';
+import { ValidatorType } from './model/validator/validatorType';
 import { AdminService } from './service/admins/admin.service';
 import { FilesService } from './service/files/filesService';
 import { MessageService } from './service/message/message.service';
@@ -17,6 +18,7 @@ import { StorytelApiResolverService } from './service/resolver/storytel/api/stor
 import { StorytelConsumableResolverService } from './service/resolver/storytel/storytel-consumable-resolver.service';
 import { StatisticsService } from './service/statistics/statistic.service';
 import { BotService } from './service/telegram/bot.service';
+import { AbstractValidator } from './service/validator/abstract-validator';
 import { AuthorValidatorService } from './service/validator/author/author-validator.service';
 import { LanguageValidatorService } from './service/validator/language/language-validator.service';
 import { PublisherValidatorService } from './service/validator/publisher/publisher-validator.service';
@@ -82,11 +84,16 @@ export class ApplicationContext {
     const filesService = new FilesService(process.env.CONFIG_PATH as string);
 
     // validators
+    const validatorMap: Record<ValidatorType, AbstractValidator<unknown>> = {
+      title: new TitleValidatorService(filesService),
+      author: new AuthorValidatorService(filesService),
+      publisher: new PublisherValidatorService(filesService),
+    };
     const validators: Validator[] = [
       new LanguageValidatorService(),
-      new AuthorValidatorService(filesService),
-      new TitleValidatorService(filesService),
-      new PublisherValidatorService(filesService),
+      validatorMap.author,
+      validatorMap.title,
+      validatorMap.publisher,
     ];
     const validatorService: ValidatorService = new ValidatorService(validators);
 
@@ -111,7 +118,7 @@ export class ApplicationContext {
     const botService: BotService = new BotService(
       adminService,
       messageService,
-      validatorService,
+      validatorMap,
       statisticsService,
       amazonApiService,
       token

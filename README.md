@@ -20,6 +20,18 @@ Telegram bot that creates a text message from the link address of an ebook or an
 - `/add_admin [admin id]`: adds admin
 - `/remove_admin [admin id]`: removes admin
 
+### Contributors Commands
+
+- `/list_titles`: shows the list of DMCA titles
+- `/add_title`: adds a title to the list of DMCA titles
+- `/remove_title`: removes a title from the list of DMCA titles
+- `/list_authors`: shows the list of DMCA authors
+- `/add_author`: adds a author to the list of DMCA authors
+- `/remove_author`: removes a author from the list of DMCA authors
+- `/list_publishers`: shows the list of DMCA publishers
+- `/add_publisher`: adds a publisher to the list of DMCA publishers
+- `/remove_publisher`: removes a publisher from the list of DMCA publishers
+
 ## Message format
 
 ```

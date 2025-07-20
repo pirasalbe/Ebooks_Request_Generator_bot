@@ -5,10 +5,6 @@ import { FilesService, VALIDATOR_PATH } from '../../files/filesService';
 import { AbstractValidator } from '../abstract-validator';
 
 export class TitleValidatorService extends AbstractValidator<Title> {
-  private static readonly BEGIN_LIST = '𝙼𝚎𝚖𝚋𝚎𝚛𝚜 𝚙𝚕𝚎𝚊𝚜𝚎 𝚝𝚊𝚔𝚎 𝚗𝚘𝚝𝚎';
-  private static readonly LIST_ELEMENT_START: string[] = ['▫︎ ', '▫️ '];
-  private static readonly BY = 'By';
-
   constructor(filesService: FilesService) {
     super(filesService);
   }
@@ -45,7 +41,11 @@ export class TitleValidatorService extends AbstractValidator<Title> {
     return 'titles';
   }
 
-  protected parse(text: string): Title | undefined {
+  expectedFormats(): string[] {
+    return ['Book title\nAuthor'];
+  }
+
+  parse(text: string): Title | undefined {
     const parts = text.split('\n');
     return parts.length == 2
       ? {
@@ -53,5 +53,13 @@ export class TitleValidatorService extends AbstractValidator<Title> {
           author: parts[1].trim(),
         }
       : undefined;
+  }
+
+  format(element: Title): string {
+    return element.title + '\n' + element.author;
+  }
+
+  protected equal(a: Title, b: Title): boolean {
+    return a.author === b.author && a.title === b.title;
   }
 }

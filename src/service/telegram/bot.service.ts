@@ -19,9 +19,10 @@ import { URL } from 'url';
 import { ResolverException } from '../../model/error/resolver-exception';
 import { Message } from '../../model/telegram/message';
 import { DocumentResponse } from '../../model/telegram/telegram-responses';
+import { ValidatorType } from '../../model/validator/validatorType';
 import { AdminService } from '../admins/admin.service';
 import { MessageService } from '../message/message.service';
-import { ValidatorService } from '../validator/validator.service';
+import { AbstractValidator } from '../validator/abstract-validator';
 import { AmazonApiService } from './../resolver/amazon/api/amazon-api.service';
 import { StatisticsService } from './../statistics/statistic.service';
 
@@ -44,7 +45,7 @@ export class BotService {
 
   private adminService: AdminService;
   private messageService: MessageService;
-  private validatorService: ValidatorService;
+  private validators: Record<ValidatorType, AbstractValidator<unknown>>;
   private statisticsService: StatisticsService;
 
   private amazonApiService: AmazonApiService;
@@ -52,14 +53,14 @@ export class BotService {
   constructor(
     adminService: AdminService,
     messageService: MessageService,
-    validatorService: ValidatorService,
+    validators: Record<ValidatorType, AbstractValidator<unknown>>,
     statisticsService: StatisticsService,
     amazonApiService: AmazonApiService,
     token: string
   ) {
     this.adminService = adminService;
     this.messageService = messageService;
-    this.validatorService = validatorService;
+    this.validators = validators;
     this.statisticsService = statisticsService;
     this.amazonApiService = amazonApiService;
 
@@ -208,7 +209,19 @@ export class BotService {
       }
     });
 
-    // TODO add commands and add them to the README
+    // contributors
+    this.validatorCommands(this.validators.title, {
+      plural: 'titles',
+      singular: 'title',
+    });
+    this.validatorCommands(this.validators.author, {
+      plural: 'authors',
+      singular: 'author',
+    });
+    this.validatorCommands(this.validators.publisher, {
+      plural: 'publishers',
+      singular: 'publisher',
+    });
 
     // generate request
     this.bot.on('inline_query', (ctx) => {
@@ -351,6 +364,77 @@ export class BotService {
             });
         }
       });
+    });
+  }
+
+  private validatorCommands<T>(
+    validator: AbstractValidator<T>,
+    { plural, singular }: { plural: string; singular: string }
+  ): void {
+    const listCommand = `list_${plural}`;
+    const addCommand = `add_${singular}`;
+    const removeCommand = `remove_${singular}`;
+
+    this.bot.command(listCommand, (ctx) => {
+      if (this.adminService.isAdmin(ctx.chat.type, ctx.chat.id)) {
+        const elements = validator
+          .listElements()
+          .map((element) => validator.format(element));
+        if (elements.length > 0) {
+          ctx.replyWithDocument({
+            source: Buffer.from(elements.join('\n\n'), 'utf-8'),
+            filename: `${plural}.txt`,
+          });
+        } else {
+          ctx.reply('No item found');
+        }
+      }
+    });
+    this.bot.command(addCommand, (ctx) => {
+      if (this.adminService.isAdmin(ctx.chat.type, ctx.chat.id)) {
+        const value = ctx.message.text.substring(1 + addCommand.length).trim();
+        const item = validator.addElement(value);
+        if (item) {
+          ctx.replyWithHTML(
+            `Element added successfully:\n<code>${validator.format(
+              item
+            )}</code>`
+          );
+        } else {
+          const formats = validator
+            .expectedFormats()
+            .map((format) => `<code>${format}</code>`);
+          ctx.replyWithHTML(
+            `Item could not be added:\n<code>${value}</code>\nSend the item as follows:\n${formats.join(
+              '\nOr\n'
+            )}`
+          );
+        }
+      }
+    });
+    this.bot.command(removeCommand, (ctx) => {
+      if (this.adminService.isAdmin(ctx.chat.type, ctx.chat.id)) {
+        const value = ctx.message.text
+          .substring(1 + removeCommand.length)
+          .trim();
+        const item = validator.removeElement(value);
+        if (item) {
+          ctx.replyWithHTML(
+            `Element removed successfully:\n<code>${validator.format(
+              item
+            )}</code>`
+          );
+        } else {
+          const formats = validator
+            .expectedFormats()
+            .map((format) => `<code>${format}</code>`);
+          ctx.replyWithHTML(
+            `Item could not be removed:\n<code>${value}</code>\nSend the item as follows:\n${formats.join(
+              '\nOr\n'
+            )}`
+          );
+        }
+      }
     });
   }
 

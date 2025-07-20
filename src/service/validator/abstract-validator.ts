@@ -85,19 +85,23 @@ export abstract class AbstractValidator<T> implements Validator {
 
   protected abstract getFilePath(): VALIDATOR_PATH;
 
-  protected abstract parse(text: string): T | undefined;
+  abstract expectedFormats(): string[];
+
+  abstract parse(text: string): T | undefined;
+
+  abstract format(element: T): string;
 
   protected abstract equal(a: T, b: T): boolean;
 
-  addElement(text: string): boolean {
+  addElement(text: string): T | undefined {
     if (text === undefined || text === '') {
-      return false;
+      return undefined;
     }
 
     const item = this.parse(text);
 
     if (!item) {
-      return false;
+      return undefined;
     }
 
     if (!this.elements.find((element) => this.equal(element, item))) {
@@ -105,18 +109,18 @@ export abstract class AbstractValidator<T> implements Validator {
       this.filesService.writeFile(this.getFilePath(), this.elements);
     }
 
-    return true;
+    return item;
   }
 
-  removeElement(text: string): boolean {
+  removeElement(text: string): T | undefined {
     if (text === undefined || text === '') {
-      return false;
+      return undefined;
     }
 
     const item = this.parse(text);
 
     if (!item) {
-      return false;
+      return undefined;
     }
 
     const index = this.elements.findIndex((element) =>
@@ -127,6 +131,6 @@ export abstract class AbstractValidator<T> implements Validator {
       this.filesService.writeFile(this.getFilePath(), this.elements);
     }
 
-    return true;
+    return item;
   }
 }

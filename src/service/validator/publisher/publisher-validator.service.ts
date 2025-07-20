@@ -73,7 +73,14 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
     return error;
   }
 
-  protected parse(text: string): Publisher | undefined {
+  expectedFormats(): string[] {
+    return [
+      `Publisher`,
+      `Publisher ${PublisherValidatorService.IMPRINT_SPACE} Imprint`,
+    ];
+  }
+
+  parse(text: string): Publisher | undefined {
     const sanitizedString: string = text
       .replace('\\U0026', '&')
       .replace(
@@ -103,5 +110,16 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
     }
 
     return { name: publisherName.toLowerCase(), imprint };
+  }
+
+  format(element: Publisher): string {
+    const imprint = element.imprint
+      ? ` ${PublisherValidatorService.IMPRINT_SPACE} ${element.imprint}`
+      : '';
+    return element.name + imprint;
+  }
+
+  protected equal(a: Publisher, b: Publisher): boolean {
+    return a.name === b.name && a.imprint === b.imprint;
   }
 }
