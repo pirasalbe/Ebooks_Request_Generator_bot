@@ -381,10 +381,13 @@ export class BotService {
           .listElements()
           .map((element) => validator.format(element));
         if (elements.length > 0) {
-          ctx.replyWithDocument({
-            source: Buffer.from(elements.join('\n\n'), 'utf-8'),
-            filename: `${plural}.txt`,
-          });
+          ctx.replyWithDocument(
+            {
+              source: Buffer.from(elements.join('\n\n'), 'utf-8'),
+              filename: `${plural}.txt`,
+            },
+            { caption: `${elements.length} items` }
+          );
         } else {
           ctx.reply('No item found');
         }

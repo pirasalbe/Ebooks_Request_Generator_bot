@@ -46,10 +46,11 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
   private isAcademic(publisher: Publisher, messagePublisher: string): boolean {
     let result = false;
 
-    if (publisher.name == messagePublisher) {
+    const publisherName = publisher.name.toLowerCase();
+    if (publisherName == messagePublisher) {
       result = true;
-    } else if (messagePublisher.startsWith(publisher.name)) {
-      const nextChar: string = messagePublisher.charAt(publisher.name.length);
+    } else if (messagePublisher.startsWith(publisherName)) {
+      const nextChar: string = messagePublisher.charAt(publisherName.length);
       result = !PublisherValidatorService.CHARS_PATTERN.test(nextChar);
     }
 
@@ -109,7 +110,7 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
       imprint = publisherParts[1].trim();
     }
 
-    return { name: publisherName.toLowerCase(), imprint };
+    return { name: publisherName, imprint };
   }
 
   format(element: Publisher): string {
@@ -120,6 +121,8 @@ export class PublisherValidatorService extends AbstractValidator<Publisher> {
   }
 
   protected equal(a: Publisher, b: Publisher): boolean {
-    return a.name === b.name && a.imprint === b.imprint;
+    return (
+      a.name.toLowerCase() === b.name.toLowerCase() && a.imprint === b.imprint
+    );
   }
 }
