@@ -15,11 +15,14 @@ import {
   UserFromGetMe,
 } from 'typegram';
 import { URL } from 'url';
+import { BotUtil } from './../../util/bot-util';
 
 import { ResolverException } from '../../model/error/resolver-exception';
 import { Message } from '../../model/telegram/message';
 import { DocumentResponse } from '../../model/telegram/telegram-responses';
-import { ValidatorType } from '../../model/validator/validatorType';
+import { VALIDATOR_TITLE } from '../../model/validator/validator-details';
+import { ValidatorType } from '../../model/validator/validator-type';
+import { DateUtil } from '../../util/date-util';
 import { AdminService } from '../admins/admin.service';
 import { MessageService } from '../message/message.service';
 import { AbstractValidator } from '../validator/abstract-validator';
@@ -180,13 +183,40 @@ export class BotService {
         }
       });
     });
-    this.bot.command('stats', (ctx) => {
-      ctx
-        .reply(this.statisticsService.toString(), {
-          parse_mode: 'HTML',
-          reply_to_message_id: ctx.message.message_id,
-        })
-        .catch((error) => this.onError(error));
+
+    // pm commands
+    this.bot.command('dmca', (ctx) => {
+      if (BotUtil.isPrivateChat(ctx.chat.type)) {
+        const document = Object.entries(this.validators).reduce(
+          (acc, [key, validator]) => {
+            const elements = validator
+              .listElements()
+              .map((element) => validator.format(element));
+
+            const list =
+              elements.length > 0 ? elements.join('\n\n') : 'No item found';
+
+            return (
+              acc +
+              `DMCA ${VALIDATOR_TITLE[key as ValidatorType]}\n\n` +
+              '='.repeat(20) +
+              '\n\n' +
+              list +
+              '\n\n' +
+              '='.repeat(50) +
+              '\n\n\n\n'
+            );
+          },
+          ''
+        );
+        ctx.replyWithDocument(
+          {
+            source: Buffer.from(document.trim(), 'utf-8'),
+            filename: `DMCA.txt`,
+          },
+          { caption: `DMCA items as of ${DateUtil.dateToString(new Date())}` }
+        );
+      }
     });
 
     // admin commands
@@ -230,18 +260,9 @@ export class BotService {
     });
 
     // contributors
-    this.validatorCommands(this.validators.title, {
-      plural: 'titles',
-      singular: 'title',
-    });
-    this.validatorCommands(this.validators.author, {
-      plural: 'authors',
-      singular: 'author',
-    });
-    this.validatorCommands(this.validators.publisher, {
-      plural: 'publishers',
-      singular: 'publisher',
-    });
+    this.validatorCommands('title');
+    this.validatorCommands('author');
+    this.validatorCommands('publisher');
     this.bot.command('refresh', (ctx) => {
       if (this.adminService.isAdmin(ctx.chat.type, ctx.chat.id)) {
         ctx
@@ -258,6 +279,16 @@ export class BotService {
                 .catch((error) => this.onError(error));
             })
           )
+          .catch((error) => this.onError(error));
+      }
+    });
+    this.bot.command('stats', (ctx) => {
+      if (this.adminService.isAdmin(ctx.chat.type, ctx.chat.id)) {
+        ctx
+          .reply(this.statisticsService.toString(), {
+            parse_mode: 'HTML',
+            reply_to_message_id: ctx.message.message_id,
+          })
           .catch((error) => this.onError(error));
       }
     });
@@ -406,10 +437,10 @@ export class BotService {
     });
   }
 
-  private validatorCommands<T>(
-    validator: AbstractValidator<T>,
-    { plural, singular }: { plural: string; singular: string }
-  ): void {
+  private validatorCommands(type: ValidatorType): void {
+    const validator = this.validators[type];
+    const { plural, singular } = VALIDATOR_TITLE[type];
+
     const listCommand = `list_${plural}`;
     const addCommand = `add_${singular}`;
     const removeCommand = `remove_${singular}`;
@@ -584,7 +615,9 @@ export class BotService {
       '\n\n' +
       'You can use me inline as well. Send /inline for more information.' +
       '\n\n' +
-      'Send /support to get information on how to support bot developer.'
+      'Send /support to get information on how to support bot developer.' +
+      '\n\n' +
+      'Send /dmca to get information on DMCA protected titles, authors, and publishers.'
     );
   }
 

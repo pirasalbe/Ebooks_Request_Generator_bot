@@ -1,5 +1,5 @@
 import { SiteResolver } from './model/resolver/site-resolver.enum';
-import { ValidatorType } from './model/validator/validatorType';
+import { ValidatorType } from './model/validator/validator-type';
 import { AdminService } from './service/admins/admin.service';
 import { FilesService } from './service/files/filesService';
 import { MessageService } from './service/message/message.service';
