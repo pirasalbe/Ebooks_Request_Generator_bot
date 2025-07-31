@@ -1,4 +1,5 @@
 import { Admin } from '../../model/admins/admin';
+import { BotUtil, ChatType } from '../../util/bot-util';
 import { FilesService } from '../files/filesService';
 
 export class AdminService {
@@ -8,16 +9,16 @@ export class AdminService {
     }
   }
 
-  isSuperAdmin(type: 'private' | 'group' | 'supergroup', id: number): boolean {
-    if (type !== 'private') {
+  isSuperAdmin(type: ChatType, id: number): boolean {
+    if (!BotUtil.isPrivateChat(type)) {
       return false;
     }
 
     return this.admins.includes(id);
   }
 
-  isAdmin(type: 'private' | 'group' | 'supergroup', id: number): boolean {
-    if (type !== 'private') {
+  isAdmin(type: ChatType, id: number): boolean {
+    if (!BotUtil.isPrivateChat(type)) {
       return false;
     }
 
