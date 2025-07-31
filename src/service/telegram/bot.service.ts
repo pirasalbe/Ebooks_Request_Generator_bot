@@ -437,7 +437,7 @@ export class BotService {
     });
   }
 
-  private validatorCommands<T>(type: ValidatorType): void {
+  private validatorCommands(type: ValidatorType): void {
     const validator = this.validators[type];
     const { plural, singular } = VALIDATOR_TITLE[type];
 
