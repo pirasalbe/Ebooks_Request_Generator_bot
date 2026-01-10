@@ -15,6 +15,24 @@ Telegram bot that creates a text message from the link address of an ebook or an
 - `/refresh`: reloads the information for the filters.
 - `/support`: shows an help message on how to support the developer.
 
+### Admin Commands
+
+- `/list_admins`: shows the list of admins
+- `/add_admin [admin id]`: adds admin
+- `/remove_admin [admin id]`: removes admin
+
+### Contributors Commands
+
+- `/list_titles`: shows the list of DMCA titles
+- `/add_title`: adds a title to the list of DMCA titles
+- `/remove_title`: removes a title from the list of DMCA titles
+- `/list_authors`: shows the list of DMCA authors
+- `/add_author`: adds a author to the list of DMCA authors
+- `/remove_author`: removes a author from the list of DMCA authors
+- `/list_publishers`: shows the list of DMCA publishers
+- `/add_publisher`: adds a publisher to the list of DMCA publishers
+- `/remove_publisher`: removes a publisher from the list of DMCA publishers
+
 ## Message format
 
 ```
@@ -149,7 +167,13 @@ _Replace the token in the command, which is **invalid**, with your own._
 
 #### Required Variables
 
-- `BOT_TOKEN`: Create a bot using [@BotFather](https://telegram.dog/BotFather), and get the Telegram API token.
+- `BOT_TOKEN`: create a bot using [@BotFather](https://telegram.dog/BotFather), and get the Telegram API token.
+- `CONFIG_PATH`: path where to store the generated configurations, without `/` at the end
+- `ADMINS`: array of admin ids as a string
+
+```
+'[12345,67890]'
+```
 
 #### Optional Variables
 
@@ -172,15 +196,6 @@ BOT_TOKEN="110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw" STORYTEL_AUTHS="[{'user
 ```
 
 The authentication is required to get books and audiobooks information. The bot **may not** work as expected, if not provided.
-
-##### Twitter service
-
-The bot can send a tweet for each request.
-
-- `TWITTER_APP_KEY`: APP key provided by Twitter on the developer console.
-- `TWITTER_APP_SECRET`: APP secret provided by Twitter on the developer console.
-- `TWITTER_ACCESS_TOKEN`: Access token for OAuth1 provided by Twitter on the developer console.
-- `TWITTER_ACCESS_SECRET`: Access secret for OAuth1 provided by Twitter on the developer console.
 
 ##### Amazon API
 

@@ -1,4 +1,7 @@
 import { SiteResolver } from './model/resolver/site-resolver.enum';
+import { ValidatorType } from './model/validator/validator-type';
+import { AdminService } from './service/admins/admin.service';
+import { FilesService } from './service/files/filesService';
 import { MessageService } from './service/message/message.service';
 import { AmazonErrorResolverService } from './service/resolver/amazon/amazon-error-resolver.service';
 import { AmazonFormatResolverService } from './service/resolver/amazon/amazon-format-resolver.service';
@@ -7,14 +10,15 @@ import { AmazonResolverService } from './service/resolver/amazon/amazon-resolver
 import { AmazonApiService } from './service/resolver/amazon/api/amazon-api.service';
 import { ArchiveResolverService } from './service/resolver/archive/archive-resolver.service';
 import { AudibleResolverService } from './service/resolver/audible/audible-resolver.service';
+import { EverandResolverService } from './service/resolver/everand/everand-resolver.service';
 import { OpenLibraryResolverService } from './service/resolver/openlibrary/open-library-resolver.service';
 import { Resolver } from './service/resolver/resolver';
 import { ResolverService } from './service/resolver/resolver.service';
-import { EverandResolverService } from './service/resolver/everand/everand-resolver.service';
 import { StorytelApiResolverService } from './service/resolver/storytel/api/storytel-api-resolver.service';
 import { StorytelConsumableResolverService } from './service/resolver/storytel/storytel-consumable-resolver.service';
 import { StatisticsService } from './service/statistics/statistic.service';
 import { BotService } from './service/telegram/bot.service';
+import { AbstractValidator } from './service/validator/abstract-validator';
 import { AuthorValidatorService } from './service/validator/author/author-validator.service';
 import { LanguageValidatorService } from './service/validator/language/language-validator.service';
 import { PublisherValidatorService } from './service/validator/publisher/publisher-validator.service';
@@ -76,12 +80,20 @@ export class ApplicationContext {
       statisticsService
     );
 
+    // files
+    const filesService = new FilesService(process.env.CONFIG_PATH as string);
+
     // validators
+    const validatorMap: Record<ValidatorType, AbstractValidator<unknown>> = {
+      title: new TitleValidatorService(filesService),
+      author: new AuthorValidatorService(filesService),
+      publisher: new PublisherValidatorService(filesService),
+    };
     const validators: Validator[] = [
       new LanguageValidatorService(),
-      new AuthorValidatorService(),
-      new TitleValidatorService(),
-      new PublisherValidatorService(),
+      validatorMap.author,
+      validatorMap.title,
+      validatorMap.publisher,
     ];
     const validatorService: ValidatorService = new ValidatorService(validators);
 
@@ -95,11 +107,19 @@ export class ApplicationContext {
       validatorService
     );
 
+    // admins
+    const adminService = new AdminService(
+      filesService,
+      JSON.parse(process.env.ADMINS as string)
+    );
+
     // telegram
     const token: string = process.env.BOT_TOKEN as string;
     const botService: BotService = new BotService(
+      adminService,
       messageService,
       validatorService,
+      validatorMap,
       statisticsService,
       amazonApiService,
       token

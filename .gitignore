@@ -113,3 +113,4 @@ dist
 .tern-port
 .vscode/
 bkcrushreqbot.service
+test_config/
