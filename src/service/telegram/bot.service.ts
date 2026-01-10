@@ -13,7 +13,6 @@ import {
   User,
   UserFromGetMe,
 } from 'typegram';
-import { URL } from 'url';
 import { BotUtil } from './../../util/bot-util';
 
 import { ResolverException } from '../../model/error/resolver-exception';
@@ -32,7 +31,6 @@ import { StatisticsService } from './../statistics/statistic.service';
 export class BotService {
   private static readonly REPORT: string = '/report';
   private static readonly INLINE_COMMAND: string = 'inline';
-  private static readonly SUPPORT_COMMAND: string = 'support';
 
   private static readonly SUCCESSFULL_THUMB_URL =
     'https://graph.org/file/06d1f7c944004bb0dcef1.jpg';
@@ -120,62 +118,6 @@ export class BotService {
           }
         )
         .catch((error) => this.onError(error));
-    });
-
-    // support
-    this.bot.command(BotService.SUPPORT_COMMAND, (ctx) => {
-      this.safeHandling(() => {
-        const url: string = this.extractUrl(
-          ctx.message.text,
-          ctx.message.entities
-        );
-
-        // no url found, reply with help
-        if (url.startsWith('/' + BotService.SUPPORT_COMMAND)) {
-          ctx
-            .replyWithHTML(this.supportHelp())
-            .catch((error) => this.onError(error));
-        } else {
-          const extra: ExtraReplyMessage = {
-            reply_to_message_id: ctx.message.message_id,
-          };
-
-          // placeholder
-          ctx
-            .reply('Preparing link...', extra)
-            .then((loader: TelegramMessage.TextMessage) => {
-              // obtain url
-              this.amazonApiService
-                .siteStripe(new URL(url))
-                .then((supportLink: string) => {
-                  // remove placeholder
-                  ctx
-                    .deleteMessage(loader.message_id)
-                    .catch((error) => this.onError(error));
-
-                  // reply with support link
-                  ctx
-                    .replyWithHTML(
-                      'Here is your link:\n' +
-                        supportLink +
-                        '\n\n<b>Thanks for your support!</b>',
-                      {
-                        reply_to_message_id: ctx.message.message_id,
-                        disable_web_page_preview: true,
-                      }
-                    )
-                    .catch((error) => this.onError(error));
-                });
-            })
-            .catch((error: string) => {
-              console.error('Cannot start processing link.', error);
-              ctx.reply(
-                'Cannot start processing link. Try again in a few seconds.',
-                extra
-              );
-            });
-        }
-      });
     });
 
     // pm commands
