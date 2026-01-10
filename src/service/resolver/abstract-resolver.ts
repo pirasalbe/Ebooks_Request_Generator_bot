@@ -1,8 +1,8 @@
 import * as http from 'http';
-import * as https from 'https';
 import { HTMLElement } from 'node-html-parser';
 import { URL } from 'url';
 
+import { ImpitResponse } from 'impit';
 import { NullableHtmlElement } from '../../model/html/nullable-html-element';
 import { Cookies } from '../../model/http/cookies';
 import { Message } from '../../model/telegram/message';
@@ -29,44 +29,34 @@ export abstract class AbstractResolver implements Resolver {
 
   resolve(url: URL): Promise<Message[]> {
     return new Promise<Message[]>((resolve, reject) => {
-      https
-        .get(
-          this.prepareUrl(url),
-          {
-            headers: {
-              'User-Agent': HttpUtil.USER_AGENT,
-              Accept: HttpUtil.ACCEPT,
-              'Accept-Encoding': HttpUtil.ACCEPT_ENCODING,
-              'Accept-Language': 'en-US,en;q=0.5',
-              Host: url.host,
-              DNT: 1,
-              Connection: HttpUtil.CONNECTION,
-              'Upgrade-Insecure-Requests': 1,
-              'Sec-Fetch-Dest': 'document',
-              'Sec-Fetch-Mode': 'navigate',
-              'Sec-Fetch-Site': 'none',
-              'Sec-Fetch-User': '?1',
-              Cookie: this.getCookies(this.getCookiesKey(url)),
-            },
-          },
-          (response: http.IncomingMessage) => {
-            this.updateCookies(this.getCookiesKey(url), response.headers);
-            this.processResponse(url, response)
-              .then((messages: Message[]) => resolve(messages))
-              .catch((error) => {
-                this.statisticsService
-                  .getStats()
-                  .increaseHostErrorCount(url.host);
-                reject(error);
-              });
-          }
-        )
-        .on('timeout', () => {
-          reject('Connection timed out');
+      HttpUtil.fetch(this.prepareUrl(url), {
+        method: 'GET',
+        headers: {
+          'User-Agent': HttpUtil.USER_AGENT,
+          Accept: HttpUtil.ACCEPT,
+          'Accept-Encoding': HttpUtil.ACCEPT_ENCODING,
+          'Accept-Language': HttpUtil.ACCEPT_LANGUAGE,
+          Host: url.host,
+          Referer: 'https://www.google.com/', // Mimic coming from a search engine
+          Connection: HttpUtil.CONNECTION,
+          Cookie: this.getCookies(this.getCookiesKey(url)),
+          ...HttpUtil.SEC_FETCH_HEADERS,
+        },
+      })
+        .then((response) => {
+          this.updateCookies(this.getCookiesKey(url), response.headers);
+          this.processResponse(url, response)
+            .then((messages: Message[]) => resolve(messages))
+            .catch((error) => {
+              this.statisticsService
+                .getStats()
+                .increaseHostErrorCount(url.host);
+              reject(error);
+            });
         })
-        .on('error', (err: Error) => {
-          console.error('Error connecting to ', url.toString(), err.message);
-          reject('Connection error: ' + err.message);
+        .catch((err) => {
+          console.error('Error connecting to ', url.toString(), err);
+          reject('Connection error: ' + err);
         });
     });
   }
@@ -125,18 +115,18 @@ export abstract class AbstractResolver implements Resolver {
    */
   protected processResponse(
     url: URL,
-    response: http.IncomingMessage
+    response: ImpitResponse
   ): Promise<Message[]> {
     return new Promise<Message[]>((resolve, reject) => {
-      if (response.statusCode == 200) {
+      if (response.status == 200) {
         // success
         this.processSuccessfulResponse(url, response)
           .then((messages: Message[]) => resolve(messages))
           .catch((error) => reject(error));
       } else if (
-        response.statusCode == 301 ||
-        response.statusCode == 302 ||
-        response.statusCode == 308
+        response.status == 301 ||
+        response.status == 302 ||
+        response.status == 308
       ) {
         // redirect
         this.resolve(
@@ -146,8 +136,8 @@ export abstract class AbstractResolver implements Resolver {
           .catch((error) => reject(error));
       } else {
         // something went wrong
-        console.error(response.statusCode, response.headers);
-        reject(this.getErrorResponse(url, response.statusCode));
+        console.error(response.status, response.headers);
+        reject(this.getErrorResponse(url, response.status));
       }
     });
   }
@@ -185,17 +175,14 @@ export abstract class AbstractResolver implements Resolver {
    */
   protected processSuccessfulResponse(
     url: URL,
-    response: http.IncomingMessage
+    response: ImpitResponse
   ): Promise<Message[]> {
     return HttpUtil.processSuccessfulResponse(response, (data: string) => {
       return new Promise<Message[]>((resolve, reject) =>
         this.processPage(url, data)
           .then((messages: Message[]) => resolve(messages))
           .catch((error) => {
-            const exception: ResolverException = {
-              message: error,
-              html: data,
-            };
+            const exception: ResolverException = { message: error, html: data };
             reject(exception);
           })
       );

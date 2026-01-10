@@ -1,7 +1,7 @@
-import * as http from 'http';
 import { HTMLElement } from 'node-html-parser';
 import { URL } from 'url';
 
+import { ImpitResponse } from 'impit';
 import { Entry } from '../../../model/entry';
 import { NullableHtmlElement } from '../../../model/html/nullable-html-element';
 import { LanguageStrings } from '../../../model/i18n/language-strings';
@@ -45,6 +45,8 @@ export class AmazonResolverService extends AbstractResolver {
   private static readonly TEXTBOOK = 'textbook';
 
   private static readonly URL_PREFIX = '/dp/';
+
+  private static readonly TRY_AGAIN_MESSAGE = 'You might want to try again.';
 
   private amazonApiService: AmazonApiService;
 
@@ -97,7 +99,7 @@ export class AmazonResolverService extends AbstractResolver {
    */
   protected processSuccessfulResponse(
     url: URL,
-    response: http.IncomingMessage
+    response: ImpitResponse
   ): Promise<Message[]> {
     return new Promise<Message[]>((resolve, reject) =>
       super
@@ -131,7 +133,7 @@ export class AmazonResolverService extends AbstractResolver {
    */
   protected processResponse(
     url: URL,
-    response: http.IncomingMessage
+    response: ImpitResponse
   ): Promise<Message[]> {
     return new Promise<Message[]>((resolve, reject) =>
       super
@@ -204,8 +206,14 @@ export class AmazonResolverService extends AbstractResolver {
         AmazonResolverService.DETAILS_LIST_ID
       );
 
-      this.checkRequiredElements([title, nullableDetailsList]);
-      this.checkRequiredElements(authors, 'Missing required author.');
+      this.checkRequiredElements(
+        [title, nullableDetailsList],
+        `Missing required elements. ${AmazonResolverService.TRY_AGAIN_MESSAGE}`
+      );
+      this.checkRequiredElements(
+        authors,
+        `Missing required author. ${AmazonResolverService.TRY_AGAIN_MESSAGE}`
+      );
 
       // details
       const detailsList: NullableHtmlElement =
