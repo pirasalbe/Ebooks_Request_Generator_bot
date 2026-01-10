@@ -46,7 +46,7 @@ export class AmazonResolverService extends AbstractResolver {
 
   private static readonly URL_PREFIX = '/dp/';
 
-  private static readonly TRY_AGAIN = 'You might want to try again.';
+  private static readonly TRY_AGAIN_MESSAGE = 'You might want to try again.';
 
   private amazonApiService: AmazonApiService;
 
@@ -208,11 +208,11 @@ export class AmazonResolverService extends AbstractResolver {
 
       this.checkRequiredElements(
         [title, nullableDetailsList],
-        `Missing required elements. ${AmazonResolverService.TRY_AGAIN}`
+        `Missing required elements. ${AmazonResolverService.TRY_AGAIN_MESSAGE}`
       );
       this.checkRequiredElements(
         authors,
-        `Missing required author. ${AmazonResolverService.TRY_AGAIN}`
+        `Missing required author. ${AmazonResolverService.TRY_AGAIN_MESSAGE}`
       );
 
       // details

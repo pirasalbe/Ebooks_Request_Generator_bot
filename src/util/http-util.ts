@@ -59,6 +59,13 @@ export class HttpUtil {
     });
   }
 
+  /**
+   * Standardize logic to execute fetch calls
+   *
+   * @param resource URL or string
+   * @param init Optional request definition
+   * @returns Response
+   */
   static fetch(
     resource: unknown,
     init?: RequestInit | undefined
