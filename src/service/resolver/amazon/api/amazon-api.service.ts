@@ -1,9 +1,7 @@
-import { AmazonSiteStripeResponse } from './../../../../model/resolver/amazon/amazon-api';
-import * as http from 'http';
 import { OutgoingHttpHeaders } from 'http';
-import * as https from 'https';
 import { URL } from 'url';
 import { HttpUtil } from '../../../../util/http-util';
+import { AmazonSiteStripeResponse } from './../../../../model/resolver/amazon/amazon-api';
 
 export class AmazonApiService {
   private static readonly SITESTRIPE_URL: string =
@@ -53,47 +51,40 @@ export class AmazonApiService {
       );
 
       promise = new Promise<string>((resolve) => {
-        https
-          .get(
-            requestUrl,
-            {
-              headers: this.getRequestHeader(this.sitestripeCookies as string),
-            },
-            (response: http.IncomingMessage) => {
-              if (response.statusCode == 200) {
-                HttpUtil.processSuccessfulResponse(response, (data: string) => {
-                  const info: AmazonSiteStripeResponse = JSON.parse(
-                    data
-                  ) as AmazonSiteStripeResponse;
-                  return Promise.resolve(info);
-                })
-                  .then((data: AmazonSiteStripeResponse) => {
-                    if (data.isOk && data.shortUrl != null) {
-                      resolve(data.shortUrl);
-                    } else {
-                      console.error(
-                        requestUrl.toString(),
-                        JSON.stringify(data)
-                      );
-                      resolve(longUrlString);
-                    }
-                  })
-                  .catch((error) => {
-                    console.error('Error', error);
+        HttpUtil.fetch(requestUrl, {
+          headers: this.getRequestHeader(this.sitestripeCookies as string),
+        })
+          .then((response) => {
+            if (response.status == 200) {
+              HttpUtil.processSuccessfulResponse(response, (data: string) => {
+                const info: AmazonSiteStripeResponse = JSON.parse(
+                  data
+                ) as AmazonSiteStripeResponse;
+                return Promise.resolve(info);
+              })
+                .then((data: AmazonSiteStripeResponse) => {
+                  if (data.isOk && data.shortUrl != null) {
+                    resolve(data.shortUrl);
+                  } else {
+                    console.error(requestUrl.toString(), JSON.stringify(data));
                     resolve(longUrlString);
-                  });
-              } else {
-                console.error('Error ' + response.statusCode);
-                resolve(longUrlString);
-              }
+                  }
+                })
+                .catch((error) => {
+                  console.error('Error', error);
+                  resolve(longUrlString);
+                });
+            } else {
+              console.error('Error ' + response.status);
+              resolve(longUrlString);
             }
-          )
-          .on('timeout', () => {
-            console.error('Connection timed out');
-            resolve(longUrlString);
           })
-          .on('error', (err: Error) => {
-            console.error('Error connecting to the API', err.message);
+          .catch((err) => {
+            console.error(
+              'Error connecting to the API',
+              requestUrl.toString(),
+              err
+            );
             resolve(longUrlString);
           });
       });

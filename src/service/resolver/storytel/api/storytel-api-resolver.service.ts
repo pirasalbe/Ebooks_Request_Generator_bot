@@ -1,6 +1,4 @@
-import * as http from 'http';
 import { OutgoingHttpHeaders } from 'http';
-import * as https from 'https';
 import { URL } from 'url';
 import { StorytelAuth } from '../../../../model/resolver/storytel/storytel-auth';
 
@@ -69,22 +67,13 @@ export class StorytelApiResolverService {
   private getRequestHeader(cookies: string): OutgoingHttpHeaders {
     return {
       'User-Agent': HttpUtil.USER_AGENT,
-      'Content-Type': 'application/json',
-      Accept:
-        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+      Accept: HttpUtil.ACCEPT,
       'Accept-Encoding': HttpUtil.ACCEPT_ENCODING,
-      'Accept-Language': 'en-US,en;q=0.5',
-      Cookies: cookies,
-      Connection: 'keep-alive',
+      'Accept-Language': HttpUtil.ACCEPT_LANGUAGE,
+      Cookie: cookies,
+      Connection: HttpUtil.CONNECTION,
       Host: 'www.storytel.com',
-      DNT: 1,
-      'Upgrade-Insecure-Requests': '1',
-      'Sec-Fetch-Dest': 'document',
-      'Sec-Fetch-Mode': 'navigate',
-      'Sec-Fetch-Site': 'none',
-      'Sec-Fetch-User': '?1',
-      'Cache-Control': 'max-age=0',
-      'x-requested-with': 'XMLHttpRequest',
+      ...HttpUtil.SEC_FETCH_HEADERS,
     };
   }
 
@@ -105,44 +94,39 @@ export class StorytelApiResolverService {
     );
 
     return new Promise<StorytelItemInformation>((resolve, reject) => {
-      https
-        .get(
-          requestUrl,
-          {
-            headers: this.getRequestHeader(cookies),
-          },
-          (response: http.IncomingMessage) => {
-            if (response.statusCode == 200) {
-              HttpUtil.processSuccessfulResponse(response, (data: string) => {
-                const info: StorytelItemInformation = JSON.parse(
-                  data
-                ) as StorytelItemInformation;
-                return Promise.resolve(info);
+      HttpUtil.fetch(requestUrl, { headers: this.getRequestHeader(cookies) })
+        .then((response) => {
+          if (response.status == 200) {
+            HttpUtil.processSuccessfulResponse(response, (data: string) => {
+              const info: StorytelItemInformation = JSON.parse(
+                data
+              ) as StorytelItemInformation;
+              return Promise.resolve(info);
+            })
+              .then((data: StorytelItemInformation) => {
+                if (data.result == 'success') {
+                  resolve(data);
+                } else {
+                  console.error(
+                    requestUrl.toString(),
+                    JSON.stringify(data),
+                    cookies
+                  );
+                  reject('Error retrieving information.');
+                }
               })
-                .then((data: StorytelItemInformation) => {
-                  if (data.result == 'success') {
-                    resolve(data);
-                  } else {
-                    console.error(
-                      requestUrl.toString(),
-                      JSON.stringify(data),
-                      cookies
-                    );
-                    reject('Error retrieving information.');
-                  }
-                })
-                .catch((error) => reject(error));
-            } else {
-              reject('Error ' + response.statusCode);
-            }
+              .catch((error) => reject(error));
+          } else {
+            reject('Error ' + response.status);
           }
-        )
-        .on('timeout', () => {
-          reject('Connection timed out');
         })
-        .on('error', (err: Error) => {
-          console.error('Error connecting to the API', err.message);
-          reject('Connection error: ' + err.message);
+        .catch((err) => {
+          console.error(
+            'Error connecting to the API',
+            requestUrl.toString(),
+            err
+          );
+          reject('Connection error: ' + err);
         });
     });
   }
@@ -174,44 +158,39 @@ export class StorytelApiResolverService {
     }
 
     return new Promise<StorytelItemInformation>((resolve, reject) => {
-      https
-        .get(
-          requestUrl,
-          {
-            headers: this.getRequestHeader(cookies),
-          },
-          (response: http.IncomingMessage) => {
-            if (response.statusCode == 200) {
-              HttpUtil.processSuccessfulResponse(response, (data: string) => {
-                const info: StorytelItemInformation = JSON.parse(
-                  data
-                ) as StorytelItemInformation;
-                return Promise.resolve(info);
+      HttpUtil.fetch(requestUrl, { headers: this.getRequestHeader(cookies) })
+        .then((response) => {
+          if (response.status == 200) {
+            HttpUtil.processSuccessfulResponse(response, (data: string) => {
+              const info: StorytelItemInformation = JSON.parse(
+                data
+              ) as StorytelItemInformation;
+              return Promise.resolve(info);
+            })
+              .then((data: StorytelItemInformation) => {
+                if (data.result == 'success') {
+                  resolve(data);
+                } else {
+                  console.error(
+                    requestUrl.toString(),
+                    JSON.stringify(data),
+                    cookies
+                  );
+                  reject('Error retrieving information.');
+                }
               })
-                .then((data: StorytelItemInformation) => {
-                  if (data.result == 'success') {
-                    resolve(data);
-                  } else {
-                    console.error(
-                      requestUrl.toString(),
-                      JSON.stringify(data),
-                      cookies
-                    );
-                    reject('Error retrieving information.');
-                  }
-                })
-                .catch((error) => reject(error));
-            } else {
-              reject('Error ' + response.statusCode);
-            }
+              .catch((error) => reject(error));
+          } else {
+            reject('Error ' + response.status);
           }
-        )
-        .on('timeout', () => {
-          reject('Connection timed out');
         })
-        .on('error', (err: Error) => {
-          console.error('Error connecting to the API', err.message);
-          reject('Connection error: ' + err.message);
+        .catch((err) => {
+          console.error(
+            'Error connecting to the API',
+            requestUrl.toString(),
+            err
+          );
+          reject('Connection error: ' + err);
         });
     });
   }

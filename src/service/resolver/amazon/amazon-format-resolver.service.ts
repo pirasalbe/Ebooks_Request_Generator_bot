@@ -1,5 +1,3 @@
-import * as http from 'http';
-import * as https from 'https';
 import { HTMLElement } from 'node-html-parser';
 import { URL } from 'url';
 
@@ -161,48 +159,34 @@ export class AmazonFormatResolverService {
     requestUrl.search = '';
 
     return new Promise<HTMLElement>((resolve, reject) => {
-      const request: http.ClientRequest = https
-        .request(
-          requestUrl,
-          {
-            method: 'POST',
-            headers: {
-              'User-Agent': HttpUtil.USER_AGENT,
-              'Content-Type': 'application/json',
-              Accept: '*/*',
-              'Accept-Encoding': HttpUtil.ACCEPT_ENCODING,
-              'x-amz-acp-params': acpParams,
-            },
-          },
-          (response: http.IncomingMessage) => {
-            if (response.statusCode == 200) {
-              HttpUtil.processSuccessfulResponse(response, (data: string) => {
-                return new Promise<HTMLElement>((resolve) =>
-                  resolve(HtmlUtil.parseHTML(data))
-                );
-              })
-                .then((html: HTMLElement) => resolve(html))
-                .catch((error) => reject(error));
-            } else {
-              reject('Error ' + response.statusCode);
-            }
+      HttpUtil.fetch(requestUrl, {
+        method: 'POST',
+        headers: {
+          'User-Agent': HttpUtil.USER_AGENT,
+          'Content-Type': 'application/json',
+          Accept: '*/*',
+          'Accept-Encoding': HttpUtil.ACCEPT_ENCODING,
+          'x-amz-acp-params': acpParams,
+        },
+        body: JSON.stringify({ asin: asin }),
+      })
+        .then((response) => {
+          if (response.status == 200) {
+            HttpUtil.processSuccessfulResponse(response, (data: string) => {
+              return new Promise<HTMLElement>((resolve) =>
+                resolve(HtmlUtil.parseHTML(data))
+              );
+            })
+              .then((html: HTMLElement) => resolve(html))
+              .catch((error) => reject(error));
+          } else {
+            reject('Error ' + response.status);
           }
-        )
-        .on('timeout', () => {
-          reject('Connection timed out');
         })
-        .on('error', (err: Error) => {
-          console.error('Error connecting to ', url.toString(), err.message);
-          reject('Connection error: ' + err.message);
+        .catch((err) => {
+          console.error('Error resolving formats ', requestUrl.toString(), err);
+          reject('Connection error: ' + err);
         });
-
-      // add body and send request
-      request.write(
-        JSON.stringify({
-          asin: asin,
-        })
-      );
-      request.end();
     });
   }
 
