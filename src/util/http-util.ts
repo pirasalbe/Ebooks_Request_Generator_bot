@@ -1,5 +1,11 @@
+import { createCuimpHttp, CuimpRequestConfig, CuimpResponse } from 'cuimp';
 import * as fs from 'fs';
-import { Impit, ImpitResponse, RequestInit } from 'impit';
+import { URL } from 'url';
+
+/**
+ * Response type for http requests
+ */
+export type HttpResponse<T = any> = CuimpResponse<T>;
 
 export class HttpUtil {
   static readonly USER_AGENT =
@@ -43,18 +49,13 @@ export class HttpUtil {
    * @param callback Function to call with the body
    * @returns Promise
    */
-  static processSuccessfulResponse<T>(
-    response: ImpitResponse,
-    callback: (data: string) => Promise<T>
-  ): Promise<T> {
-    return new Promise<T>((resolve, reject) => {
-      response
-        .text()
-        .then((data) =>
-          callback(data)
-            .then((result: T) => resolve(result))
-            .catch((error) => reject(error))
-        )
+  static processSuccessfulResponse<T, R>(
+    response: HttpResponse<T>,
+    callback: (data: T) => Promise<R>
+  ): Promise<R> {
+    return new Promise<R>((resolve, reject) => {
+      callback(response.data)
+        .then((result: R) => resolve(result))
         .catch((error) => reject(error));
     });
   }
@@ -63,14 +64,17 @@ export class HttpUtil {
    * Standardize logic to execute fetch calls
    *
    * @param resource URL or string
-   * @param init Optional request definition
+   * @param config Request definition
    * @returns Response
    */
-  static fetch(
-    resource: unknown,
-    init?: RequestInit | undefined
-  ): Promise<ImpitResponse> {
-    const impit = new Impit({ browser: 'chrome' });
-    return impit.fetch(resource, init);
+  static fetch<T = any>(
+    resource: string | URL,
+    config: Omit<CuimpRequestConfig, 'url'>
+  ): Promise<HttpResponse<T>> {
+    const client = createCuimpHttp({ descriptor: { browser: 'chrome' } });
+    return client.request<T>({
+      url: typeof resource === 'string' ? resource : resource.toString(),
+      ...config,
+    });
   }
 }

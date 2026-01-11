@@ -159,7 +159,7 @@ export class AmazonFormatResolverService {
     requestUrl.search = '';
 
     return new Promise<HTMLElement>((resolve, reject) => {
-      HttpUtil.fetch(requestUrl, {
+      HttpUtil.fetch<string>(requestUrl, {
         method: 'POST',
         headers: {
           'User-Agent': HttpUtil.USER_AGENT,
@@ -168,7 +168,7 @@ export class AmazonFormatResolverService {
           'Accept-Encoding': HttpUtil.ACCEPT_ENCODING,
           'x-amz-acp-params': acpParams,
         },
-        body: JSON.stringify({ asin: asin }),
+        data: JSON.stringify({ asin: asin }),
       })
         .then((response) => {
           if (response.status == 200) {

@@ -2,12 +2,11 @@ import * as http from 'http';
 import { HTMLElement } from 'node-html-parser';
 import { URL } from 'url';
 
-import { ImpitResponse } from 'impit';
 import { NullableHtmlElement } from '../../model/html/nullable-html-element';
 import { Cookies } from '../../model/http/cookies';
 import { Message } from '../../model/telegram/message';
 import { HtmlUtil } from '../../util/html-util';
-import { HttpUtil } from '../../util/http-util';
+import { HttpResponse, HttpUtil } from '../../util/http-util';
 import { I18nUtil } from '../../util/i18n-util';
 import { ResolverException } from './../../model/error/resolver-exception';
 import { StatisticsService } from './../statistics/statistic.service';
@@ -115,7 +114,7 @@ export abstract class AbstractResolver implements Resolver {
    */
   protected processResponse(
     url: URL,
-    response: ImpitResponse
+    response: HttpResponse
   ): Promise<Message[]> {
     return new Promise<Message[]>((resolve, reject) => {
       if (response.status == 200) {
@@ -175,7 +174,7 @@ export abstract class AbstractResolver implements Resolver {
    */
   protected processSuccessfulResponse(
     url: URL,
-    response: ImpitResponse
+    response: HttpResponse
   ): Promise<Message[]> {
     return HttpUtil.processSuccessfulResponse(response, (data: string) => {
       return new Promise<Message[]>((resolve, reject) =>

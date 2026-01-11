@@ -1,7 +1,6 @@
 import { HTMLElement } from 'node-html-parser';
 import { URL } from 'url';
 
-import { ImpitResponse } from 'impit';
 import { Entry } from '../../../model/entry';
 import { NullableHtmlElement } from '../../../model/html/nullable-html-element';
 import { LanguageStrings } from '../../../model/i18n/language-strings';
@@ -10,6 +9,7 @@ import { AmazonReroute } from '../../../model/resolver/amazon/amazon-reroute';
 import { SiteResolver } from '../../../model/resolver/site-resolver.enum';
 import { Message } from '../../../model/telegram/message';
 import { HtmlUtil } from '../../../util/html-util';
+import { HttpResponse } from '../../../util/http-util';
 import { I18nUtil } from '../../../util/i18n-util';
 import { AbstractResolver } from '../abstract-resolver';
 import { ResolverException } from './../../../model/error/resolver-exception';
@@ -99,7 +99,7 @@ export class AmazonResolverService extends AbstractResolver {
    */
   protected processSuccessfulResponse(
     url: URL,
-    response: ImpitResponse
+    response: HttpResponse
   ): Promise<Message[]> {
     return new Promise<Message[]>((resolve, reject) =>
       super
@@ -133,7 +133,7 @@ export class AmazonResolverService extends AbstractResolver {
    */
   protected processResponse(
     url: URL,
-    response: ImpitResponse
+    response: HttpResponse
   ): Promise<Message[]> {
     return new Promise<Message[]>((resolve, reject) =>
       super
@@ -543,9 +543,7 @@ export class AmazonResolverService extends AbstractResolver {
       } else {
         console.error(
           'Error parsing page. Cannot read product detail information from list.',
-          spans.length,
-          parentSpan.childNodes,
-          spans
+          spans.length
         );
       }
     } else {
