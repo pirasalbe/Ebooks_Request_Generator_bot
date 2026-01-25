@@ -30,7 +30,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "cuimp": "^1.8.0",
+    "cuimp": "^1.9.0",
     "node-html-parser": "^5.0.0",
     "telegraf": "^4.4.2",
     "twitter-api-v2": "^1.7.0"
