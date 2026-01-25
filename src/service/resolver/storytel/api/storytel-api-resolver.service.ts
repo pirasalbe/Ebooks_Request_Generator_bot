@@ -1,9 +1,8 @@
-import { OutgoingHttpHeaders } from 'http';
 import { URL } from 'url';
 import { StorytelAuth } from '../../../../model/resolver/storytel/storytel-auth';
 
 import { StorytelItemInformation } from '../../../../model/resolver/storytel/storytel-item-information';
-import { HttpUtil } from '../../../../util/http-util';
+import { HttpResponse, HttpUtil } from '../../../../util/http-util';
 
 export class StorytelApiResolverService {
   private static readonly INFO_URL =
@@ -64,7 +63,7 @@ export class StorytelApiResolverService {
     return localeParts.join('/');
   }
 
-  private getRequestHeader(cookies: string): OutgoingHttpHeaders {
+  private getRequestHeader(cookies: string): Record<string, string> {
     return {
       'User-Agent': HttpUtil.USER_AGENT,
       Accept: HttpUtil.ACCEPT,
@@ -94,13 +93,15 @@ export class StorytelApiResolverService {
     );
 
     return new Promise<StorytelItemInformation>((resolve, reject) => {
-      HttpUtil.fetch(requestUrl, { headers: this.getRequestHeader(cookies) })
+      HttpUtil.fetch(requestUrl, {
+        headers: this.getRequestHeader(cookies),
+      })
         .then((response) => {
           if (response.status == 200) {
-            HttpUtil.processSuccessfulResponse(response, (data: string) => {
-              const info: StorytelItemInformation = JSON.parse(
-                data
-              ) as StorytelItemInformation;
+            HttpUtil.processSuccessfulResponse(response, (data) => {
+              const raw = typeof data === 'string' ? JSON.parse(data) : data;
+              const info: StorytelItemInformation =
+                raw as StorytelItemInformation;
               return Promise.resolve(info);
             })
               .then((data: StorytelItemInformation) => {
@@ -158,13 +159,15 @@ export class StorytelApiResolverService {
     }
 
     return new Promise<StorytelItemInformation>((resolve, reject) => {
-      HttpUtil.fetch(requestUrl, { headers: this.getRequestHeader(cookies) })
-        .then((response) => {
+      HttpUtil.fetch(requestUrl, {
+        headers: this.getRequestHeader(cookies),
+      })
+        .then((response: HttpResponse) => {
           if (response.status == 200) {
-            HttpUtil.processSuccessfulResponse(response, (data: string) => {
-              const info: StorytelItemInformation = JSON.parse(
-                data
-              ) as StorytelItemInformation;
+            HttpUtil.processSuccessfulResponse(response, (data) => {
+              const raw = typeof data === 'string' ? JSON.parse(data) : data;
+              const info: StorytelItemInformation =
+                raw as StorytelItemInformation;
               return Promise.resolve(info);
             })
               .then((data: StorytelItemInformation) => {

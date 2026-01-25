@@ -1,4 +1,3 @@
-import { OutgoingHttpHeaders } from 'http';
 import { URL } from 'url';
 import { HttpUtil } from '../../../../util/http-util';
 import { AmazonSiteStripeResponse } from './../../../../model/resolver/amazon/amazon-api';
@@ -51,7 +50,7 @@ export class AmazonApiService {
       );
 
       promise = new Promise<string>((resolve) => {
-        HttpUtil.fetch(requestUrl, {
+        HttpUtil.fetch<string>(requestUrl, {
           headers: this.getRequestHeader(this.sitestripeCookies as string),
         })
           .then((response) => {
@@ -95,12 +94,11 @@ export class AmazonApiService {
     return promise;
   }
 
-  private getRequestHeader(cookies: string): OutgoingHttpHeaders {
+  private getRequestHeader(cookies: string): Record<string, string> {
     return {
       'User-Agent': HttpUtil.USER_AGENT,
       'Content-Type': 'application/json',
-      Accept:
-        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+      Accept: HttpUtil.ACCEPT,
       'Accept-Encoding': HttpUtil.ACCEPT_ENCODING,
       Cookie: cookies,
     };
