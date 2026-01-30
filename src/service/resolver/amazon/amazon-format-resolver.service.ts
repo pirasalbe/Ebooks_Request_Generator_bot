@@ -100,10 +100,11 @@ export class AmazonFormatResolverService {
   ): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       if (
-        formatResourceIndex >
+        formatResourceIndex >=
         AmazonFormatResolverService.FORMAT_RESOURCES.length
       ) {
         reject('Error while resolving format');
+        return;
       }
 
       this.getFormats(
@@ -141,7 +142,7 @@ export class AmazonFormatResolverService {
               resolve(kindleUnlimited);
             })
             .catch((nextIndexError) => {
-              reject([error, nextIndexError].join(' ,'));
+              reject([`${formatResourceIndex}: ${error}`, nextIndexError].join(', '));
             });
         });
     });
