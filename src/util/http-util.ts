@@ -75,6 +75,7 @@ export class HttpUtil {
     return client.request<T>({
       url: typeof resource === 'string' ? resource : resource.toString(),
       ...config,
+      maxRedirects: 0
     });
   }
 }
