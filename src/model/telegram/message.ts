@@ -100,7 +100,7 @@ export class Message {
   }
 
   setPublisher(publisher: string | null | undefined): void {
-    if (publisher != null && publisher != undefined) {
+    if (publisher != null && publisher != undefined && publisher != 'undefined') {
       this.publisher = publisher;
     }
   }
