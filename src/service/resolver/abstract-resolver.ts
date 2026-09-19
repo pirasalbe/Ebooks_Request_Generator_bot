@@ -142,7 +142,8 @@ export abstract class AbstractResolver implements Resolver {
   }
 
   protected getRedirectURL(originalUrl: URL, newLocation: string): URL {
-    return new URL(newLocation as string);
+    const base = originalUrl.protocol + '//' + originalUrl.host;
+    return new URL(newLocation, newLocation.startsWith(base) ? undefined : base);
   }
 
   private getErrorResponse(url: URL, statusCode: number | undefined): string {

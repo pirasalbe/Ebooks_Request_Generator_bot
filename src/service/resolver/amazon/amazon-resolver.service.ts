@@ -48,6 +48,8 @@ export class AmazonResolverService extends AbstractResolver {
 
   private static readonly TRY_AGAIN_MESSAGE = 'You might want to try again.';
 
+  private static readonly REQUIRED_SEARCH_PARAMS = ['lv', 'channelId', 'plpRedirect'];
+
   private amazonApiService: AmazonApiService;
 
   private amazonFormatResolverService: AmazonFormatResolverService;
@@ -167,7 +169,17 @@ export class AmazonResolverService extends AbstractResolver {
       );
     }
 
-    return super.prepareUrl(url);
+    // remove unnecessary search params
+    let search = '';
+    url.searchParams.forEach((value, key) => {
+      if (AmazonResolverService.REQUIRED_SEARCH_PARAMS.includes(key)) {
+        search += (search.length > 0 ? '&' : '') + key + '=' + value;
+      }
+    });
+
+    url.search = search;
+
+    return url;
   }
 
   extractMessages(url: URL, html: HTMLElement): Promise<Message[]> {
